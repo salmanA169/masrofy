@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">masrofy</string>
+    <string name="expense">Expense</string>
+    <string name="income">Income</string>
+</resources>
