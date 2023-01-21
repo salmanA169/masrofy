@@ -1,9 +1,7 @@
 package com.masrofy.repository
 
 import com.masrofy.data.database.MasrofyDatabase
-import com.masrofy.data.entity.AccountEntity
 import com.masrofy.data.entity.TransactionEntity
-import com.masrofy.data.relation.AccountWithTransactions
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -24,4 +22,7 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDao.deleteTransaction(transactionEntity)
     }
 
+    override suspend fun updateTransaction(transactionEntity: TransactionEntity) {
+        TODO("Not yet implemented")
+    }
 }

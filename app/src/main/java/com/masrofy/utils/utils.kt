@@ -18,8 +18,10 @@ fun Int.getShapeByIndex(isLastIndex:Boolean = false):Shape{
     }
 }
 
-fun <T>LazyListScope.itemShapes(lists:List<T>,content:@Composable (item:T,shape:Shape,shouldShowDivider:Boolean)->Unit){
-    itemsIndexed(lists){i,item->
+fun <T>LazyListScope.itemShapes(lists:List<T>,key:(T)->Any,content:@Composable (item:T,shape:Shape,shouldShowDivider:Boolean)->Unit){
+    itemsIndexed(lists, key = {index,item->
+        key(item)
+    }){i,item->
         val isLastIndex = lists.lastIndex == i
         val getShape = i.getShapeByIndex(isLastIndex)
         content(item,getShape,!isLastIndex)

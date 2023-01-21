@@ -1,14 +1,10 @@
 package com.masrofy
 
-import com.google.common.truth.Truth
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
-import java.time.Instant
+import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
-import java.time.temporal.ChronoField
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -30,5 +26,18 @@ class ExampleUnitTest {
             ZoneOffset.UTC)
         println(parseDate)
         println(parseDate1)
+    }
+
+    @Test
+    fun formatNumber(){
+        val number = BigDecimal(5860).setScale(2) / getAmountMultiplier(2)
+        println(number.toString())
+        println(number.toFloat())
+        println(number)
+
+
+    }
+    private fun getAmountMultiplier(scale: Int): BigDecimal {
+        return "10".toBigDecimal().pow(scale)
     }
 }

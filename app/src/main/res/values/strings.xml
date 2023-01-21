@@ -2,4 +2,11 @@
     <string name="app_name">masrofy</string>
     <string name="expense">Expense</string>
     <string name="income">Income</string>
+    <string name="transaction_category">Category</string>
+    <string name="transaction">transaction</string>
+    <string name="date">Date</string>
+    <string name="amount">amount</string>
+    <string name="comment">comment</string>
+    <string name="save">save</string>
+    <string name="account">account</string>
 </resources>

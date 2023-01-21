@@ -1,15 +1,10 @@
 package com.masrofy.data.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
+import androidx.room.*
 import androidx.room.OnConflictStrategy.REPLACE
-import androidx.room.Query
-import androidx.room.Transaction
 import com.masrofy.data.entity.AccountEntity
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.data.relation.AccountWithTransactions
-import com.masrofy.model.Account
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,6 +15,8 @@ interface TransactionDao {
 
     @Insert(onConflict = REPLACE)
     suspend fun insertTransaction(transactionEntity: TransactionEntity)
+    @Update
+    suspend fun updateTransaction(transactionEntity: TransactionEntity)
 
     @Transaction
     @Query("SELECT * FROM accountentity")

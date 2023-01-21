@@ -2,15 +2,9 @@ package com.masrofy.screens.mainScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
@@ -18,18 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterEnd
-import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.Alignment.Companion.End
-import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,9 +27,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.masrofy.R
 import com.masrofy.Screens
+import com.masrofy.component.mirror
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.TransactionGroup
@@ -49,14 +37,12 @@ import com.masrofy.model.TransactionType
 import com.masrofy.ui.theme.ColorTotalExpense
 import com.masrofy.ui.theme.ColorTotalIncome
 import com.masrofy.ui.theme.MasrofyTheme
-import com.masrofy.ui.theme.surface2Light
-import com.masrofy.utils.getShapeByIndex
 import com.masrofy.utils.itemShapes
-import java.math.BigDecimal
 
 fun NavGraphBuilder.mainScreenNavigation(navController: NavController) {
     composable(Screens.MainScreen.route) {
         MainScreen(navController = navController)
+
     }
 }
 
@@ -65,7 +51,7 @@ fun NavGraphBuilder.mainScreenNavigation(navController: NavController) {
 @Composable
 fun MainScreenPreview() {
     MasrofyTheme() {
-        MainScreen(navController = rememberNavController())
+        TopBarDetails(currentMonth = "sal,am")
     }
 }
 
@@ -75,6 +61,10 @@ fun MainScreen(
     navController: NavController
 ) {
     val mainScreenState by viewModel.transactionGroup.collectAsState()
+    // TODO: Use Surface to change color status bar 
+    Surface() {
+        
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         TopBarDetails(currentMonth = mainScreenState.currentDate.toString())
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
@@ -85,6 +75,7 @@ fun MainScreen(
             navController = navController
         )
     }
+
 }
 
 @Composable
@@ -150,7 +141,9 @@ fun TransactionGroupList(
                 )
             }
 
-            itemShapes(transaction.transactions) { item, shape, shouldShowDivider ->
+            itemShapes(transaction.transactions, key = {
+                it.transactionId
+            }) { item, shape, shouldShowDivider ->
                 TransactionItems(transaction = item, navController = navController, shape)
                 if (shouldShowDivider) {
                     Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
@@ -260,13 +253,14 @@ fun TopBarDetails(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
             .shadow(1.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(MaterialTheme.colorScheme.surfaceVariant).statusBarsPadding(),
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(onNextMonth, modifier = Modifier.weight(1f)) {
-            Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "next month")
+        IconButton(onNextMonth, modifier = Modifier
+            .weight(1f)
+            .mirror()) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "next month")
         }
         Text(
             text = currentMonth,
@@ -278,8 +272,10 @@ fun TopBarDetails(
             fontWeight = FontWeight.Bold
         )
 
-        IconButton(onClick = onPreviousMonth, modifier = Modifier.weight(1f)) {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "previous month")
+        IconButton(onClick = onPreviousMonth, modifier = Modifier
+            .weight(1f)
+            .mirror()) {
+            Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "previous month")
         }
 
     }
