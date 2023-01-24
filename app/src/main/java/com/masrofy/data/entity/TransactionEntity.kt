@@ -19,7 +19,7 @@ data class TransactionEntity(
     val accountTransactionId: Int,
     val transactionType: TransactionType,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val amount: Float,
+    val amount: Long,
     val comment: String? = null,
     val category: TransactionCategory
 ) {
@@ -28,11 +28,23 @@ data class TransactionEntity(
             accountId: Int,
             transactionType: TransactionType,
             createdAt: LocalDateTime = LocalDateTime.now(),
-            amount: Float,
+            amount: Long,
             comment: String?,
             category: TransactionCategory
         ) = TransactionEntity(
             0,
+            accountId,
+            transactionType, createdAt, amount, comment, category
+        )
+        fun createTransactionWithId(transactionId: Int,
+            accountId: Int,
+            transactionType: TransactionType,
+            createdAt: LocalDateTime = LocalDateTime.now(),
+            amount: Long,
+            comment: String?,
+            category: TransactionCategory
+        ) = TransactionEntity(
+            transactionId,
             accountId,
             transactionType, createdAt, amount, comment, category
         )
@@ -60,10 +72,12 @@ fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
         }
         transactionGroup.add(
             TransactionGroup(
-                subLists,
+                subLists.sortedWith(compareByDescending{
+                    it.createdAt
+                }),
                 it,
-                income,
-                expenve
+                income.toBigDecimal(),
+                expenve.toBigDecimal()
             )
         )
     }

@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -64,23 +63,13 @@ fun SetNavigationScreen() {
         bottomBar = {
             AnimatedVisibility(visible = showBottom, enter = fadeIn(), exit = fadeOut()) {
                 BottomAppBar(actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Settings, contentDescription = "add")
-                    }
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Settings, contentDescription = "add")
 
-                    }
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Settings, contentDescription = "add")
-
-                    }
                 }, floatingActionButton = {
                     FloatingActionButton(
                         elevation = FloatingActionButtonDefaults.elevation(
                             defaultElevation = 0.dp
                         ),
-                        onClick = { navController.navigate(Screens.TransactionScreen.route) },
+                        onClick = { navController.navigate(Screens.TransactionScreen.route+"/-1") },
 
                         ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "")
@@ -92,7 +81,7 @@ fun SetNavigationScreen() {
 
 
     ) {
-        it
+
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
@@ -100,7 +89,7 @@ fun SetNavigationScreen() {
             navController = navController,
             startDestination = Screens.MainScreen.route
         ) {
-            mainScreenNavigation(navController)
+            mainScreenNavigation(navController,it)
             transactionScreenNavigation(navController)
         }
     }

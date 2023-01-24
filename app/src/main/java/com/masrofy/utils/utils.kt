@@ -1,29 +1,71 @@
 package com.masrofy.utils
 
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.*
 
 
-fun Int.getShapeByIndex(isLastIndex:Boolean = false):Shape{
-    return if (this == 0){
+fun Int.getShapeByIndex(isLastIndex: Boolean = false): Shape {
+    return if (this == 0) {
         RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-    }else if (isLastIndex){
+    } else if (isLastIndex) {
         RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-    }else{
+    } else {
         RoundedCornerShape(0.dp)
     }
 }
 
-fun <T>LazyListScope.itemShapes(lists:List<T>,key:(T)->Any,content:@Composable (item:T,shape:Shape,shouldShowDivider:Boolean)->Unit){
-    itemsIndexed(lists, key = {index,item->
+inline fun <T> LazyListScope.itemShapes(
+    lists: List<T>,
+    crossinline key: (T) -> Any,
+    crossinline content: @Composable LazyItemScope.(item: T, shape: Shape, shouldShowDivider: Boolean) -> Unit
+) {
+    itemsIndexed(lists, key = { index, item ->
         key(item)
-    }){i,item->
+    }) { i, item ->
         val isLastIndex = lists.lastIndex == i
-        val getShape = i.getShapeByIndex(isLastIndex)
-        content(item,getShape,!isLastIndex)
+        val getShape =
+            if (lists.size == 1) MaterialTheme.shapes.medium else i.getShapeByIndex(isLastIndex)
+        content(item, getShape, !isLastIndex)
     }
+}
+
+fun formatAsDisplayNormalize(
+    amount: BigDecimal,
+    withSymbol: Boolean = false
+): String {
+
+    val amountNormalize = amount.setScale(2) / getAmountMultiplier(2)
+    return formatAsDisplay(amountNormalize, withSymbol)
+}
+
+
+private fun formatAsDisplay(
+    amount: BigDecimal,
+    withSymbol: Boolean = false
+): String {
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("En", "sa"))
+
+    runCatching {
+        val decimalFormatSymbols = (currencyFormat as DecimalFormat).decimalFormatSymbols
+
+        decimalFormatSymbols.currencySymbol =
+            if (withSymbol) currencyFormat.currency?.symbol else ""
+        currencyFormat.minimumFractionDigits = amount.scale()
+        currencyFormat.decimalFormatSymbols = decimalFormatSymbols
+    }
+    return currencyFormat.format(amount)
+}
+
+fun getAmountMultiplier(scale: Int): BigDecimal {
+    return "10".toBigDecimal().pow(scale)
 }

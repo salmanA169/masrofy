@@ -1,6 +1,7 @@
 package com.masrofy.screens.transactionScreen
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -45,8 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.marosseleng.compose.material3.datetimepickers.date.ui.dialog.DatePickerDialog
 import com.masrofy.R
 import com.masrofy.Screens
@@ -54,13 +57,18 @@ import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 fun NavGraphBuilder.transactionScreenNavigation(
     navController: NavController,
 ) {
-    composable(Screens.TransactionScreen.route) {
+    composable(Screens.TransactionScreen.route + "/{transactionId}", arguments = listOf(
+        navArgument("transactionId") {
+            type = NavType.IntType
+            defaultValue = -1
+        }
+    )) {
         TransactionScreen(navController = navController)
     }
 }
@@ -84,24 +92,32 @@ fun TransactionScreen(
     navController: NavController,
     viewModel: TransactionDetailsViewModel = hiltViewModel()
 ) {
-    var currentCategory by remember {
-        mutableStateOf(TransactionCategory.CAR)
-    }
 
-    val changeValue: ((TransactionCategory) -> Unit) = remember {
-        { transaction: TransactionCategory ->
-            currentCategory = transaction
-        }
-    }
+    val transactionDetailsState by viewModel.transactionDetailState.collectAsState()
     val requestFocus = remember {
         FocusRequester()
     }
 
     val focusManager = LocalFocusManager.current
 
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
-        requestFocus.requestFocus()
+        if (!transactionDetailsState.isEdit){
+            requestFocus.requestFocus()
+        }
+        viewModel.effect.collect {
+            when (it) {
+                TransactionDetailEffect.ClosePage -> {
+                    navController.popBackStack()
+                }
+                TransactionDetailEffect.Noting -> {}
+
+                is TransactionDetailEffect.ErrorMessage -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -115,7 +131,9 @@ fun TransactionScreen(
                 Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Arrow Back")
             }
         }, actions = {
-            TextButton(onClick = { /*TODO*/ }) {
+            TextButton(onClick = {
+                    viewModel.onEvent(TransactionDetailEvent.Save)
+            }) {
                 Text(text = stringResource(id = R.string.save))
             }
         })
@@ -134,19 +152,23 @@ fun TransactionScreen(
                     )
                 }
         ) {
-            TransactionType(
-                transactionType = TransactionType.values().toList(),
-                onTransactionTypeChange = {
 
-                },
-                selectedType = TransactionType.INCOME,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-            )
+            if (transactionDetailsState.isEdit.not()){
+                TransactionType(
+                    transactionType = TransactionType.values().toList(),
+                    onTransactionTypeChange = {
+                        viewModel.onEvent(TransactionDetailEvent.TransactionTypeChange(it))
+                    },
+                    selectedType = transactionDetailsState.transactionType,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                )
+            }
 
-            OutlinedTextField(value = TextFieldValue(), onValueChange = {
 
+            OutlinedTextField(value = transactionDetailsState.totalAmount, onValueChange = {
+                viewModel.onEvent(TransactionDetailEvent.AmountChange(it))
             }, modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
@@ -162,31 +184,26 @@ fun TransactionScreen(
                 ),
                 visualTransformation = CurrencyAmountInputVisualTransformation(), label = {
                     Text(text = stringResource(id = R.string.amount))
-                }
-            )
-
-            AccountSection(
-                onAccountChange = {
-
-                }, currentAccount = Account(
-                    1, "Cash", CategoryAccount.CASH, 120, LocalDateTime.now(),
-                    listOf()
-                ), accountAvailable = listOf(
-                    Account(
-                        1, "Cash", CategoryAccount.CASH, 120, LocalDateTime.now(),
-                        listOf()
-                    ), Account(
-                        1, "salman", CategoryAccount.CASH, 120, LocalDateTime.now(),
-                        listOf()
-                    ), Account(
-                        1, "saleh", CategoryAccount.CASH, 120, LocalDateTime.now(),
-                        listOf()
-                    )
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = transactionDetailsState.transactionType.getColor()
                 )
             )
+
+            transactionDetailsState.selectedAccount?.let { it1 ->
+                AccountSection(
+                    onAccountChange = {
+                        viewModel.onEvent(TransactionDetailEvent.AccountSelected(it))
+                    }, currentAccount = it1,
+                    accountAvailable = transactionDetailsState.accounts
+                )
+            }
+
             CategorySection(
-                onSelected = changeValue,
-                categorySelected = currentCategory,
+                onSelected = {
+                    viewModel.onEvent(TransactionDetailEvent.CategorySelected(it))
+                },
+                categorySelected = transactionDetailsState.transactionCategory,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
@@ -198,21 +215,33 @@ fun TransactionScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp), onDateChanged = {
-
-                }, date = "2002/02/20"
+                    viewModel.onEvent(TransactionDetailEvent.DateChanged(it))
+                }, date = transactionDetailsState.date.format(DateTimeFormatter.ISO_DATE)
             )
             Spacer(modifier = Modifier.height(6.dp))
 
-            OutlinedTextField(value = TextFieldValue(), onValueChange = {
+            OutlinedTextField(value = transactionDetailsState.comment ?: TextFieldValue(),
+                onValueChange = {
 
-            }, modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-                .imePadding(),
+                    viewModel.onEvent(TransactionDetailEvent.CommentChange(it))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .imePadding(),
                 label = {
                     Text(text = stringResource(id = R.string.comment))
                 }
             )
+
+            if (transactionDetailsState.isEdit){
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedButton(modifier = Modifier.fillMaxWidth(),onClick = {
+                    viewModel.onEvent(TransactionDetailEvent.Delete)
+                }) {
+                    Text(text = stringResource(id = R.string.delete))
+                }
+            }
         }
 
 
@@ -241,6 +270,7 @@ fun AccountSection(
     AnimatedVisibility(visible = shouldExpand) {
         AccountSelectionItem(accountAvailable = accountAvailable) {
             shouldExpand = false
+            onAccountChange(it)
         }
     }
 
@@ -271,7 +301,7 @@ fun DateSection(
     onDateChanged: (LocalDate) -> Unit,
     date: String
 ) {
-    var isDialogShown by rememberSaveable() {
+    var isDialogShown by remember {
         mutableStateOf(false)
     }
     if (isDialogShown) {
@@ -328,7 +358,10 @@ fun CategorySection(
                 contentPadding = PaddingValues(4.dp)
             ) {
                 items(TransactionCategory.values()) { transactionCategory ->
-                    val selectedAnimated by animateFloatAsState(targetValue = if (categorySelected == transactionCategory) 360f else 0f, animationSpec = spring(2f))
+                    val selectedAnimated by animateFloatAsState(
+                        targetValue = if (categorySelected == transactionCategory) 360f else 0f,
+                        animationSpec = spring(2f)
+                    )
                     val color = MaterialTheme.colorScheme.primary
 
                     Card(
@@ -351,7 +384,13 @@ fun CategorySection(
                                 .fillMaxSize()
                                 .align(CenterHorizontally)
                                 .drawBehind {
-                                    drawArc(color, 0f, selectedAnimated, false, style = Stroke(8f),)
+                                    drawArc(
+                                        color,
+                                        270f,
+                                        selectedAnimated,
+                                        false,
+                                        style = Stroke(8f),
+                                    )
                                 },
                         ) {
                             Icon(

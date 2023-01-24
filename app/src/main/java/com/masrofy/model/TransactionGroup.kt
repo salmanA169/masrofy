@@ -1,18 +1,17 @@
 package com.masrofy.model
 
 import com.masrofy.data.entity.TransactionEntity
-import com.masrofy.utils.formatDate
+import com.masrofy.utils.formatDateIsToday
+import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 data class TransactionGroup(
     val transactions: List<TransactionEntity>,
     val date: LocalDate,
-    val totalIncome: Float,
-    val totalExpense: Float
+    val totalIncome: BigDecimal,
+    val totalExpense: BigDecimal
 ) {
-    val dateString = date.formatDate()
+    val dateString = date.formatDateIsToday()
 }
 
 

@@ -15,6 +15,8 @@ interface TransactionDao {
 
     @Insert(onConflict = REPLACE)
     suspend fun insertTransaction(transactionEntity: TransactionEntity)
+    @Query("SELECT * FROM transactionentity WHERE transactionId = :id")
+    suspend fun getTransactionById(id:Int):TransactionEntity
     @Update
     suspend fun updateTransaction(transactionEntity: TransactionEntity)
 
@@ -22,8 +24,12 @@ interface TransactionDao {
     @Query("SELECT * FROM accountentity")
     fun getAccountWithTransaction():Flow<List<AccountWithTransactions>>
 
+
     @Query("SELECT * FROM accountentity")
     fun getAccounts():Flow<List<AccountEntity>>
+
+    @Query("SELECT * FROM accountentity WHERE accountId= :id")
+    suspend fun getAccountById(id: Int):AccountEntity
 
     @Insert
     suspend fun addAccount(account: AccountEntity)

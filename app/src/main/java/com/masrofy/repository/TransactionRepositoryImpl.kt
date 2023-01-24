@@ -23,6 +23,10 @@ class TransactionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateTransaction(transactionEntity: TransactionEntity) {
-        TODO("Not yet implemented")
+        transactionDao.updateTransaction(transactionEntity)
+    }
+
+    override suspend fun getTransactionById(id: Int): TransactionEntity {
+        return transactionDao.getTransactionById(id)
     }
 }

@@ -4,10 +4,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import com.masrofy.utils.formatAsDisplayNormalize
 import java.math.BigDecimal
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.*
 import kotlin.math.max
 
 class CurrencyAmountInputVisualTransformation(
@@ -17,51 +15,29 @@ class CurrencyAmountInputVisualTransformation(
         return try {
             ifBlank { "0" }
                 .replace("\\D".toRegex(), "")
+
                 .toBigDecimal()
         } catch (e: Exception) {
             BigDecimal.ZERO
         }
     }
-    private fun formatAsDisplayNormalize(
-        amount: BigDecimal,
-        withSymbol: Boolean = false
-    ): String {
-
-        val amountNormalize = amount.setScale(2) / getAmountMultiplier(2)
-        return formatAsDisplay(amountNormalize, withSymbol)
-    }
-    private fun getAmountMultiplier(scale: Int): BigDecimal {
-        return "10".toBigDecimal().pow(scale)
-    }
 
 
-    private fun formatAsDisplay(
-        amount: BigDecimal,
-        withSymbol: Boolean = false
-    ): String {
-        val currencyFormat = NumberFormat.getCurrencyInstance(Locale("ar","sa"))
 
-        runCatching {
-            val decimalFormatSymbols = (currencyFormat as DecimalFormat).decimalFormatSymbols
 
-            decimalFormatSymbols.currencySymbol = if (withSymbol) currencyFormat.currency?.symbol else ""
-            currencyFormat.minimumFractionDigits = amount.scale()
-            currencyFormat.decimalFormatSymbols = decimalFormatSymbols
-        }
-        return currencyFormat.format(amount)
-    }
+
     override fun filter(text: AnnotatedString): TransformedText {
         val formattedText = text.text.formattedAmount()
+
         val newText = AnnotatedString(
             text = formatAsDisplayNormalize(formattedText,true),
             spanStyles = text.spanStyles,
             paragraphStyles = text.paragraphStyles
         )
         val offsetMapping =
-            MovableCursorOffsetMapping(
-                text.text,
-                newText.text,
-                2
+            FixedCursorOffsetMapping(
+                text.text.length,
+                newText.text.length,
             )
         return TransformedText(newText, offsetMapping)
     }
@@ -70,7 +46,7 @@ class CurrencyAmountInputVisualTransformation(
         private val contentLength: Int,
         private val formattedContentLength: Int,
     ) : OffsetMapping {
-        override fun originalToTransformed(offset: Int): Int = 2
+        override fun originalToTransformed(offset: Int): Int = formattedContentLength
         override fun transformedToOriginal(offset: Int): Int = contentLength
     }
 

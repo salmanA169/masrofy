@@ -1,7 +1,6 @@
 package com.masrofy.model
 
 import com.masrofy.data.entity.TransactionEntity
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class Account(
@@ -12,3 +11,5 @@ data class Account(
     val createdAt:LocalDateTime,
     val transactions:List<TransactionEntity>
 )
+
+fun List<Account>.getDefaultAccount() = find { it.name == "Cash" }
