@@ -30,6 +30,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
         }
+        debug {
+            applicationIdSuffix '.debug'
+        }
+        benchmark {
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ['release']
+            initWith buildTypes.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'benchmark-rules.pro'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -66,6 +75,7 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
+    implementation "androidx.profileinstaller:profileinstaller:1.2.2"
     def room_version = "2.4.3"
 
     implementation "androidx.room:room-runtime:$room_version"
@@ -91,8 +101,10 @@ dependencies {
     def nav_version = "2.5.3"
 
     implementation "androidx.navigation:navigation-compose:$nav_version"
-    \
     // date picker
     implementation("com.marosseleng.android:compose-material3-datetime-pickers:0.4.0")
 
+    implementation "com.github.PhilJay:MPAndroidChart:v3.1.0"
+
+    testImplementation "com.google.truth:truth:1.1.3"
 }

@@ -68,7 +68,7 @@ fun MainScreen(
         }, onPreviousMonth = {
             viewModel.updateDate(1,DateEvent.MIN)
         })
-        Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
+//        Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
         Balance(mainScreenState.balance)
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
         TransactionGroupList(
@@ -87,7 +87,7 @@ fun Balance(
     Row(
         horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
             .padding(2.dp)
     ) {
         BalanceItem(
@@ -222,10 +222,7 @@ fun TransactionItems(
                   navController.navigate(Screens.TransactionScreen.route+"/${transaction.transactionId}")
         },
         modifier = modifier,
-        shape = shape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+        shape = shape
     ) {
         Row(
             modifier = Modifier
@@ -274,7 +271,7 @@ fun TopBarDetails(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(1.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
             .statusBarsPadding(),
         horizontalArrangement = Arrangement.Center
     ) {

@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -37,6 +39,23 @@ inline fun <T> LazyListScope.itemShapes(
             if (lists.size == 1) MaterialTheme.shapes.medium else i.getShapeByIndex(isLastIndex)
         content(item, getShape, !isLastIndex)
     }
+}
+
+fun LocalDate.isBetweenDates(startDate:LocalDate,endDate:LocalDate):Boolean{
+
+    //    ////////E----+-----S////////
+    return !(isBefore(startDate) && isAfter(endDate) //    -----+----S//////////E------
+            || isBefore(endDate) && isBefore(startDate) && startDate.isBefore(endDate) //    ---------S//////////E---+---
+            || isAfter(endDate) && isAfter(startDate) && startDate.isBefore(endDate))
+}
+fun LocalDateTime.isEqualCurrentMonth(localDateTime: LocalDateTime = LocalDateTime.now()): Boolean =
+    monthValue == localDateTime.monthValue
+
+fun LocalDate.isEqualCurrentMonth(localDateTime: LocalDate = LocalDate.now()): Boolean =
+    monthValue == localDateTime.monthValue
+
+fun Long.formatAsDisplayNormalize(): String {
+    return formatAsDisplayNormalize(BigDecimal(this))
 }
 
 fun formatAsDisplayNormalize(

@@ -4,8 +4,8 @@ import com.masrofy.data.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
-    fun getTransactions():Flow<List<TransactionEntity>>
-
+    fun getTransactionsFlow():Flow<List<TransactionEntity>>
+   suspend fun getTransactions():List<TransactionEntity>
     suspend fun insertTransaction(transactionEntity: TransactionEntity)
     suspend fun updateTransaction(transactionEntity: TransactionEntity)
     suspend fun deleteTransaction(transactionEntity: TransactionEntity)

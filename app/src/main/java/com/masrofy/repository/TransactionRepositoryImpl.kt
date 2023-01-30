@@ -10,8 +10,12 @@ class TransactionRepositoryImpl @Inject constructor(
 ) : TransactionRepository {
     private val transactionDao = database.transactionDao
 
-    override fun getTransactions(): Flow<List<TransactionEntity>> {
+    override suspend fun getTransactions(): List<TransactionEntity> {
         return transactionDao.getTransactions()
+    }
+
+    override fun getTransactionsFlow(): Flow<List<TransactionEntity>> {
+        return transactionDao.getTransactionsFlow()
     }
 
     override suspend fun insertTransaction(transactionEntity: TransactionEntity) {

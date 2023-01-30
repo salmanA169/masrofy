@@ -10,4 +10,5 @@
     <string name="save">save</string>
     <string name="account">account</string>
     <string name="delete">delete</string>
+    <string name="statistic">statistic</string>
 </resources>

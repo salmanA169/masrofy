@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.Flow
 interface TransactionDao {
 
     @Query("SELECT * FROM transactionentity")
-    fun getTransactions():Flow<List<TransactionEntity>>
+    fun getTransactionsFlow():Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactionentity")
+    suspend fun getTransactions():List<TransactionEntity>
     @Insert(onConflict = REPLACE)
     suspend fun insertTransaction(transactionEntity: TransactionEntity)
     @Query("SELECT * FROM transactionentity WHERE transactionId = :id")
