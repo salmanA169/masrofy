@@ -1,26 +1,16 @@
 package com.masrofy.screens.statisticsScreen
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,7 +24,6 @@ import com.masrofy.component.TransactionEntry
 import com.masrofy.component.mirror
 import com.masrofy.filterDate.MonthlyDateFilter
 import com.masrofy.filterDate.TransactionDateFilter
-import com.masrofy.model.PieChartData
 import com.masrofy.model.TransactionType
 import com.masrofy.screens.mainScreen.DateEvent
 import com.masrofy.utils.formatAsDisplayNormalize
@@ -67,12 +56,18 @@ fun StatisticScreen(
 //                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
 //            }
             DateSection(
-                onNextDate = { /*TODO*/ },
-                onPreviousDate = { /*TODO*/ },
-                dateType = MonthlyDateFilter(emptyList())
+                onNextDate = {
+                    viewModel.changeDateValue(DateEvent.PLUS)
+                },
+                onPreviousDate = {
+                    viewModel.changeDateValue(DateEvent.MIN)
+                },
+                formatDate = statisticState.formatDate
             )
         }, actions = {
-            DateTypeSection(onDateTypeChange = {}, dateType = DateType.MONTHLY)
+            DateTypeSection(onDateTypeChange = {
+                viewModel.onEvent(StatisticEvent.DateTypeEvent(it))
+            }, dateType = statisticState.dateType)
         })
     }) {
         Column(
@@ -90,7 +85,7 @@ fun StatisticScreen(
                         Text(text = "${item.getTransactionType()}(${if (item.getTransactionType() == TransactionType.INCOME) statisticState.totalIncome else statisticState.totalExpense})")
                     }, selected = selectedIndex == index, onClick = {
                         selectedIndex = index
-                        viewModel.changeTransactionType(item)
+                        viewModel.onEvent(StatisticEvent.StatisticTypeChangeEvent(item))
                     })
                 }
             }
@@ -152,7 +147,7 @@ fun DateSection(
     modifier: Modifier = Modifier,
     onNextDate: () -> Unit,
     onPreviousDate: () -> Unit,
-    dateType: TransactionDateFilter
+    formatDate: String
 ) {
     Row(
         modifier = modifier,
@@ -162,16 +157,16 @@ fun DateSection(
         IconButton(modifier = Modifier
             .size(36.dp)
             .mirror(), onClick = {
-            onNextDate()
+            onPreviousDate()
         }) {
             Icon(painterResource(id = R.drawable.arrow_left), contentDescription = "")
         }
 
-        Text(text = dateType.getDateFilterText())
+        Text(text = formatDate,modifier = Modifier.padding(12.dp))
         IconButton(modifier = Modifier
             .size(36.dp)
             .mirror(), onClick = {
-            onPreviousDate()
+            onNextDate()
         }) {
             Icon(painterResource(id = R.drawable.arrow_right_48px), contentDescription = "")
         }
@@ -190,7 +185,11 @@ fun DateTypeSection(
     OutlinedCard(onClick = {
         expended = !expended
     }) {
-        Text(text = dateType.toString(),modifier = Modifier.padding(8.dp),style = MaterialTheme.typography.labelSmall)
+        Text(
+            text = dateType.toString(),
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.labelSmall
+        )
     }
     DropdownMenu(expanded = expended, onDismissRequest = {
         expended = false

@@ -9,12 +9,13 @@ data class StatisticState(
     val dataEntry:List<PieChartData> = emptyList(),
     val statisticType: StatisticType = StatisticType.STATISTIC_EXPENSE,
     val dateType :DateType = DateType.MONTHLY,
+    val formatDate:String = "",
     val totalIncome:String = "",
     val totalExpense:String = ""
 )
 
 enum class DateType{
-    MONTHLY
+    MONTHLY,WEEKLY
 }
 enum class StatisticType{
     STATISTIC_EXPENSE,STATISTIC_INCOME

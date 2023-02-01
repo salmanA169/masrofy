@@ -21,13 +21,12 @@ class WeeklyDateFilter(private var transactionList: List<TransactionEntity>) :
     override fun getTransactions(): List<TransactionEntity> {
         return transactionList.filter {
             it.createdAt.toLocalDate()
-                .isBetweenDates(getCurrentDate(), endDate) && it.createdAt.toLocalDate()
-                .isEqualCurrentMonth(getCurrentDate())
+                .isBetweenDates(getCurrentDate(), endDate)
         }
     }
 
     override fun getDateFilterText(): String {
-        return "${getCurrentDate().dayOfMonth} / ${getCurrentDate().monthValue} - ${endDate.dayOfMonth} / ${endDate.monthValue}"
+        return "${getCurrentDate().dayOfMonth}/${getCurrentDate().monthValue} - ${endDate.dayOfMonth}/${endDate.monthValue}"
     }
 
 
@@ -35,11 +34,9 @@ class WeeklyDateFilter(private var transactionList: List<TransactionEntity>) :
         when(dateEvent){
             DateEvent.PLUS -> {
                 updateDate(getCurrentDate().plusWeeks(value.toLong()))
-                endDate = getCurrentDate().plusWeeks(value.toLong())
             }
             DateEvent.MIN ->{
                 updateDate(getCurrentDate().minusWeeks(value.toLong()))
-                endDate = getCurrentDate().minusWeeks(value.toLong())
             }
         }
     }

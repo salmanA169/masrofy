@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import java.math.BigDecimal
@@ -37,7 +38,10 @@ inline fun <T> LazyListScope.itemShapes(
         val isLastIndex = lists.lastIndex == i
         val getShape =
             if (lists.size == 1) MaterialTheme.shapes.medium else i.getShapeByIndex(isLastIndex)
-        content(item, getShape, !isLastIndex)
+        val rememberShape = remember{
+            getShape
+        }
+        content(item, rememberShape, !isLastIndex)
     }
 }
 

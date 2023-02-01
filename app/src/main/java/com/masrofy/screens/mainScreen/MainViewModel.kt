@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,8 +57,6 @@ class MainViewModel @Inject constructor(
                     val filter = accountWithTransaction.toTransactions().filter {
                         it.createdAt.monthValue == _transactionGroup.value.currentDate.monthValue
                     }
-                    Log.d("MainViewModel", "loadData: called collect")
-                    Log.d("MainViewModel", "${_transactionGroup.value.currentDate.monthValue}")
                     _transactionGroup.update {
                         it.copy(
                             balance = filter.transactionsToBalance(),

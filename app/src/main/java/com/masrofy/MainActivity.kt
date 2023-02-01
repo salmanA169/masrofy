@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -75,8 +76,12 @@ fun SetNavigationScreen() {
                 BottomAppBar(actions = {
                     IconButton(onClick = {
                         navController.navigate(Screens.StatisticsScreen.route)
-                    }){
-                        Icon(imageVector = Icons.Default.Settings, contentDescription = "")
+                    }) {
+                        Icon(
+                            painterResource(id = R.drawable.statistic_icon),
+                            contentDescription = "",
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
                 }, floatingActionButton = {
                     FloatingActionButton(

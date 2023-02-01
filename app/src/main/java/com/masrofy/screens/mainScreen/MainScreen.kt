@@ -1,7 +1,9 @@
 package com.masrofy.screens.mainScreen
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -38,7 +40,10 @@ import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.itemShapes
 
-fun NavGraphBuilder.mainScreenNavigation(navController: NavController,paddingValues: PaddingValues) {
+fun NavGraphBuilder.mainScreenNavigation(
+    navController: NavController,
+    paddingValues: PaddingValues
+) {
     composable(Screens.MainScreen.route) {
         MainScreen(navController = navController, paddingValues = paddingValues)
 
@@ -62,11 +67,12 @@ fun MainScreen(
 ) {
     val mainScreenState by viewModel.transactionGroup.collectAsState()
 
+    Log.d("MainScreen", "MainScreen: called")
     Column(modifier = Modifier.fillMaxSize()) {
         TopBarDetails(currentMonth = mainScreenState.currentDate.month.name, onNextMonth = {
-            viewModel.updateDate(1,DateEvent.PLUS)
+            viewModel.updateDate(1, DateEvent.PLUS)
         }, onPreviousMonth = {
-            viewModel.updateDate(1,DateEvent.MIN)
+            viewModel.updateDate(1, DateEvent.MIN)
         })
 //        Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
         Balance(mainScreenState.balance)
@@ -135,9 +141,12 @@ fun TransactionGroupList(
     paddingValues: PaddingValues
 ) {
 
-    LazyColumn(modifier = Modifier
-        .fillMaxSize()
-        .padding(bottom = paddingValues.calculateBottomPadding()), contentPadding = PaddingValues(6.dp)) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = paddingValues.calculateBottomPadding()),
+        contentPadding = PaddingValues(6.dp)
+    ) {
         transactionGroup.forEach { transaction ->
             item {
                 InfoTransactionItem(
@@ -150,7 +159,12 @@ fun TransactionGroupList(
             itemShapes(transaction.transactions, key = {
                 it.transactionId
             }) { item, shape, shouldShowDivider ->
-                TransactionItems(transaction = item, navController = navController, shape,modifier = Modifier.animateItemPlacement())
+                TransactionItems(
+                    transaction = item,
+                    navController = navController,
+                    shape,
+                    modifier = Modifier
+                )
                 if (shouldShowDivider) {
                     Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
                 }
@@ -173,7 +187,11 @@ fun InfoTransactionItem(
             .fillMaxWidth()
             .padding(6.dp)
     ) {
-        Text(text = date, modifier = Modifier.weight(3f),style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = date,
+            modifier = Modifier.weight(3f),
+            style = MaterialTheme.typography.titleMedium
+        )
         Row(modifier = Modifier.wrapContentSize()) {
             Text(
                 text = totalIncome.toString(),
@@ -215,14 +233,10 @@ fun TransactionItems(
     transaction: TransactionEntity,
     navController: NavController,
     shape: Shape,
-    modifier :Modifier
+    modifier: Modifier
 ) {
     Card(
-        onClick = {
-                  navController.navigate(Screens.TransactionScreen.route+"/${transaction.transactionId}")
-        },
-        modifier = modifier,
-        shape = shape
+
     ) {
         Row(
             modifier = Modifier
@@ -249,7 +263,8 @@ fun TransactionItems(
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()), modifier = Modifier.align(CenterVertically),
+                text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()),
+                modifier = Modifier.align(CenterVertically),
                 color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
                 fontSize = 15.sp,
                 maxLines = 1,
@@ -275,9 +290,11 @@ fun TopBarDetails(
             .statusBarsPadding(),
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(onNextMonth, modifier = Modifier
-            .weight(1f)
-            .mirror()) {
+        IconButton(
+            onNextMonth, modifier = Modifier
+                .weight(1f)
+                .mirror()
+        ) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "next month")
         }
         Text(
@@ -290,9 +307,11 @@ fun TopBarDetails(
             fontWeight = FontWeight.Bold
         )
 
-        IconButton(onClick = onPreviousMonth, modifier = Modifier
-            .weight(1f)
-            .mirror()) {
+        IconButton(
+            onClick = onPreviousMonth, modifier = Modifier
+                .weight(1f)
+                .mirror()
+        ) {
             Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "previous month")
         }
 

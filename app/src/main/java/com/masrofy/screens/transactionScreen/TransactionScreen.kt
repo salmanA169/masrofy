@@ -2,6 +2,7 @@ package com.masrofy.screens.transactionScreen
 
 import android.app.DatePickerDialog
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -99,6 +100,7 @@ fun TransactionScreen(
         FocusRequester()
     }
 
+    Log.d("TransactionScreen","Called")
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current

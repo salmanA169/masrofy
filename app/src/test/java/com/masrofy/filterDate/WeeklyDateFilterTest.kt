@@ -19,12 +19,12 @@ internal class WeeklyDateFilterTest {
     @Before
     fun setUp() {
         val transactionList = buildList<TransactionEntity> {
-            repeat(30){
+            repeat(15){
                 add(
                     TransactionEntity.createTransaction(
                         1,
                         TransactionType.EXPENSE,
-                        LocalDateTime.of(LocalDate.of(2023,1,it+1), LocalTime.now()),
+                        LocalDateTime.of(LocalDate.of(2023,2,it+1), LocalTime.now()),
                         1450,
                         "$it",
                         TransactionCategory.CAR
@@ -68,6 +68,11 @@ internal class WeeklyDateFilterTest {
 
 
     @Test
+    fun rangeFromJunToFebWeekly(){
+
+    }
+
+    @Test
     fun junToMars_Correct(){
         val data = transactionDateFilterMonthly.getTransactions()
         val junExpectedData = transactionDateFilterMonthly.getTransactions().filter {
@@ -88,6 +93,13 @@ internal class WeeklyDateFilterTest {
         }
         Truth.assertThat(transactionDateFilterMonthly.getTransactions()).containsExactlyElementsIn(expectedMar)
 
+    }
+
+
+    @Test
+    fun rangeDateFrom12To19_correct(){
+        transactionDateFilter.updateDate(2023,1,12)
+        Truth.assertThat(transactionDateFilter.getTransactions()).hasSize(4)
     }
     @Test
     fun RangeDateFrom14To21_Correct(){
