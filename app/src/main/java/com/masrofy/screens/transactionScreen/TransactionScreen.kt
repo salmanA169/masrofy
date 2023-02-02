@@ -100,7 +100,6 @@ fun TransactionScreen(
         FocusRequester()
     }
 
-    Log.d("TransactionScreen","Called")
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current

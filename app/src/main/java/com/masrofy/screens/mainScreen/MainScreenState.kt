@@ -11,7 +11,7 @@ import java.time.LocalDate
 @Immutable
 data class MainScreenState(
     val balance:BalanceManager = BalanceManager(),
-    val transactions : List<TransactionGroupUI> = listOf(),
+    val transactions : List<TransactionGroup> = listOf(),
     val currentDate :LocalDate = LocalDate.now()
 )
 

@@ -56,13 +56,14 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             getAccountWithTransactions
                 .collect { accountWithTransaction ->
+                    // FIXME: cancel this later
                     val filter = accountWithTransaction.toTransactions().filter {
                         it.createdAt.monthValue == _transactionGroup.value.currentDate.monthValue
                     }
                     _transactionGroup.update {
                         it.copy(
                             balance = filter.transactionsToBalance(),
-                            transactions = filter.toTransactionGroupUI()
+                            transactions = filter.toTransactionGroup()
                         )
                     }
                 }

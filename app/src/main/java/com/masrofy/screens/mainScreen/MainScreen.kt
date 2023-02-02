@@ -151,16 +151,11 @@ fun BalanceItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionGroupList(
-    transactionGroup: List<TransactionGroupUI>,
+    transactionGroup: List<TransactionGroup>,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
 
-    val rememberClick = remember<(Int)->Unit>{
-        {
-            navController.navigate(Screens.TransactionScreen.route+"/${it}")
-        }
-    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -177,15 +172,13 @@ fun TransactionGroupList(
             }
 
             itemShapes(transaction.transactions, key = {
-                it.id
+                it.transactionId
             }) { item, shape, shouldShowDivider ->
                 TransactionItems(
                     transaction = item,
                     shape,
-                    modifier = Modifier,
-                ){
-                    rememberClick(item.id)
-                }
+                    navController
+                )
                 if (shouldShowDivider) {
                     Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
                 }
@@ -257,53 +250,44 @@ fun IncomeAndExpenseSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItems(
-    transaction: TransactionItemState,
+    transaction: TransactionEntity,
     shape: Shape,
-    modifier: Modifier,
-    onClickTransaction :()->Unit
+    navController: NavController
 ) {
-    Card(
-        onClick = onClickTransaction,
-        modifier = modifier,
+    val rememberClick = remember {
+        {
+            navController.navigate(Screens.TransactionScreen.route+"/${transaction.transactionId}")
+        }
+    }
+    Card(onClick = rememberClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = shape
     ) {
-        Row(
+
+        Text(text = transaction.category.toString(), fontSize = 29.sp)
+        Text(text = transaction.transactionType.toString(), fontSize = 29.sp)
+        Text(text = transaction.transactionId.toString(), fontSize = 29.sp)
+        Text(
+            text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()),
+            color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
+            fontSize = 15.sp,
+            maxLines = 1,
+        )
+        Icon(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .padding(end = 12.dp, start = 12.dp),
-        ) {
-            Icon(
-                modifier = Modifier
-                    .size(30.dp)
-                    .align(Alignment.CenterVertically),
-                painter = painterResource(id = transaction.category),
-                contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                Text(text = transaction.categoryString.toLowerCase(), fontSize = 14.sp)
-                if (transaction.comment != null) {
-                    Text(
-                        text = transaction.comment,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()),
-                modifier = Modifier.align(
-                    Alignment.CenterVertically
-                ),
-                color = if (transaction.type == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
-                fontSize = 15.sp,
-                maxLines = 1,
-            )
-        }
+                .size(30.dp),
+            painter = painterResource(id = transaction.category.icon),
+            contentDescription = ""
+        )
     }
 }
 
+@Composable
+fun TransactionItemDetails(
+
+) {
+
+}
 
 @Composable
 fun TopBarDetails(
@@ -344,6 +328,5 @@ fun TopBarDetails(
         ) {
             Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "previous month")
         }
-
     }
 }
