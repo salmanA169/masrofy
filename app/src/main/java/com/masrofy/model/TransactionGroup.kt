@@ -7,7 +7,6 @@ import com.masrofy.utils.formatDateIsToday
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@Immutable
 data class TransactionGroup(
     val transactions: List<TransactionEntity>,
     val date: LocalDate,

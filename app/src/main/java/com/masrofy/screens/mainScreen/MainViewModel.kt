@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.data.entity.toTransactionGroup
+import com.masrofy.data.entity.toTransactionGroupUI
 import com.masrofy.data.relation.toTransactions
 import com.masrofy.data.relation.transactionsToBalance
 import com.masrofy.model.TransactionCategory
@@ -28,8 +29,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _transactionGroup = MutableStateFlow<MainScreenState>(MainScreenState())
     val transactionGroup = _transactionGroup.asStateFlow()
@@ -39,37 +39,18 @@ class MainViewModel @Inject constructor(
     }
 
     fun updateDate(month: Long, dateEvent: DateEvent) {
-//        _transactionGroup.update {
-//            val currentDate = when (dateEvent) {
-//                DateEvent.PLUS -> it.currentDate.plusMonths(month)
-//                DateEvent.MIN -> it.currentDate.minusMonths(month)
-//            }
-//            it.copy(
-//                currentDate = currentDate
-//            )
-//        }
-//        loadData()
-        viewModelScope.launch(Dispatchers.IO) {
-            val listJobs = mutableListOf<Job>()
-            repeat(50){
-                val job = this.launch(Dispatchers.IO){
-                    transactionRepository.insertTransaction(
-                        TransactionEntity.createTransaction(
-                            1,
-                            TransactionType.INCOME,
-                            LocalDateTime.of(LocalDate.of(2023,2,i), LocalTime.now()),
-                            15000,
-                            "",
-                            TransactionCategory.CAR
-                        )
-                    )
-                }
-                listJobs.add(job)
+        _transactionGroup.update {
+            val currentDate = when (dateEvent) {
+                DateEvent.PLUS -> it.currentDate.plusMonths(month)
+                DateEvent.MIN -> it.currentDate.minusMonths(month)
             }
-            i++
+            it.copy(
+                currentDate = currentDate
+            )
         }
+        loadData()
+
     }
-var i = 1
     private fun loadData() {
         val getAccountWithTransactions = accountRepository.getAccountsWithTransactions()
         viewModelScope.launch(Dispatchers.IO) {
@@ -81,7 +62,7 @@ var i = 1
                     _transactionGroup.update {
                         it.copy(
                             balance = filter.transactionsToBalance(),
-                            transactions = filter.toTransactionGroup()
+                            transactions = filter.toTransactionGroupUI()
                         )
                     }
                 }

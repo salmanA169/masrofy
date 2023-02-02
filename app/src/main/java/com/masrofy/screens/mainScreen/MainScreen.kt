@@ -29,6 +29,7 @@ import com.masrofy.Screens
 import com.masrofy.component.mirror
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
+import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
 import com.masrofy.ui.theme.ColorTotalExpense
@@ -76,6 +77,11 @@ fun MainScreen(
 
         }
     }
+    val rememberClick = remember<(Int)->Unit>{
+        {
+
+        }
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         TopBarDetails(
             currentMonth = mainScreenState.currentDate.month.name,
@@ -85,6 +91,7 @@ fun MainScreen(
 //        Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
         Balance(mainScreenState.balance)
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
+
         TransactionGroupList(
             transactionGroup = mainScreenState.transactions,
             navController = navController,
@@ -144,11 +151,16 @@ fun BalanceItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionGroupList(
-    transactionGroup: List<TransactionGroup>,
+    transactionGroup: List<TransactionGroupUI>,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
 
+    val rememberClick = remember<(Int)->Unit>{
+        {
+            navController.navigate(Screens.TransactionScreen.route+"/${it}")
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -164,16 +176,16 @@ fun TransactionGroupList(
                 )
             }
 
-
             itemShapes(transaction.transactions, key = {
-                it.transactionId
+                it.id
             }) { item, shape, shouldShowDivider ->
                 TransactionItems(
                     transaction = item,
-                    navController = navController,
                     shape,
-                    modifier = Modifier
-                )
+                    modifier = Modifier,
+                ){
+                    rememberClick(item.id)
+                }
                 if (shouldShowDivider) {
                     Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
                 }
@@ -245,15 +257,13 @@ fun IncomeAndExpenseSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItems(
-    transaction: TransactionEntity,
-    navController: NavController,
+    transaction: TransactionItemState,
     shape: Shape,
-    modifier: Modifier
+    modifier: Modifier,
+    onClickTransaction :()->Unit
 ) {
     Card(
-//        onClick = {
-//                  navController.navigate(Screens.TransactionScreen.route+"/${transaction.id}")
-//        },
+        onClick = onClickTransaction,
         modifier = modifier,
         shape = shape
     ) {
@@ -267,12 +277,12 @@ fun TransactionItems(
                 modifier = Modifier
                     .size(30.dp)
                     .align(Alignment.CenterVertically),
-                painter = painterResource(id = transaction.category.icon),
+                painter = painterResource(id = transaction.category),
                 contentDescription = ""
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                Text(text = transaction.category.toString().toLowerCase(), fontSize = 14.sp)
+                Text(text = transaction.categoryString.toLowerCase(), fontSize = 14.sp)
                 if (transaction.comment != null) {
                     Text(
                         text = transaction.comment,
@@ -286,7 +296,7 @@ fun TransactionItems(
                 modifier = Modifier.align(
                     Alignment.CenterVertically
                 ),
-                color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
+                color = if (transaction.type == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
                 fontSize = 15.sp,
                 maxLines = 1,
             )
