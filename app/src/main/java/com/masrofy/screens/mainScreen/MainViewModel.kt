@@ -13,9 +13,11 @@ import com.masrofy.repository.AccountRepository
 import com.masrofy.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,18 +39,37 @@ class MainViewModel @Inject constructor(
     }
 
     fun updateDate(month: Long, dateEvent: DateEvent) {
-        _transactionGroup.update {
-            val currentDate = when (dateEvent) {
-                DateEvent.PLUS -> it.currentDate.plusMonths(month)
-                DateEvent.MIN -> it.currentDate.minusMonths(month)
+//        _transactionGroup.update {
+//            val currentDate = when (dateEvent) {
+//                DateEvent.PLUS -> it.currentDate.plusMonths(month)
+//                DateEvent.MIN -> it.currentDate.minusMonths(month)
+//            }
+//            it.copy(
+//                currentDate = currentDate
+//            )
+//        }
+//        loadData()
+        viewModelScope.launch(Dispatchers.IO) {
+            val listJobs = mutableListOf<Job>()
+            repeat(50){
+                val job = this.launch(Dispatchers.IO){
+                    transactionRepository.insertTransaction(
+                        TransactionEntity.createTransaction(
+                            1,
+                            TransactionType.INCOME,
+                            LocalDateTime.of(LocalDate.of(2023,2,i), LocalTime.now()),
+                            15000,
+                            "",
+                            TransactionCategory.CAR
+                        )
+                    )
+                }
+                listJobs.add(job)
             }
-            it.copy(
-                currentDate = currentDate
-            )
+            i++
         }
-        loadData()
     }
-
+var i = 1
     private fun loadData() {
         val getAccountWithTransactions = accountRepository.getAccountsWithTransactions()
         viewModelScope.launch(Dispatchers.IO) {

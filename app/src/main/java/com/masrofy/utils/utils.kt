@@ -38,10 +38,7 @@ inline fun <T> LazyListScope.itemShapes(
         val isLastIndex = lists.lastIndex == i
         val getShape =
             if (lists.size == 1) MaterialTheme.shapes.medium else i.getShapeByIndex(isLastIndex)
-        val rememberShape = remember{
-            getShape
-        }
-        content(item, rememberShape, !isLastIndex)
+        content(item, getShape, !isLastIndex)
     }
 }
 

@@ -6,9 +6,11 @@ import androidx.room.PrimaryKey
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
+import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.toMillis
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import kotlin.random.Random
 
 @Entity
 data class TransactionEntity(
@@ -76,8 +78,8 @@ fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
                     it.createdAt
                 }),
                 it,
-                income.toBigDecimal(),
-                expenve.toBigDecimal()
+                formatAsDisplayNormalize(income.toBigDecimal()),
+                formatAsDisplayNormalize(expenve.toBigDecimal())
             )
         )
     }

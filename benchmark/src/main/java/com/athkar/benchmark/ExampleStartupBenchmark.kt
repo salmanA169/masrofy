@@ -38,7 +38,6 @@ class ExampleStartupBenchmark {
     ) {
         pressHome()
         startActivityAndWait()
-        device.findObject(By.desc("add transaction")).click()
 
     }
 }
