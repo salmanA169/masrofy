@@ -30,7 +30,6 @@ import com.masrofy.Screens
 import com.masrofy.component.mirror
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
-import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
 import com.masrofy.ui.theme.ColorTotalExpense
@@ -45,7 +44,6 @@ fun NavGraphBuilder.mainScreenNavigation(
 ) {
     composable(Screens.MainScreen.route) {
         MainScreen(navController = navController, paddingValues = paddingValues)
-
     }
 }
 
@@ -264,14 +262,16 @@ fun TransactionItems(
         shape = shape,
         modifier = Modifier
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxWidth().height(50.dp)) {
+        ConstraintLayout(modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)) {
             val (icon, category, comment, amount) = createRefs()
             Icon(
                 modifier = Modifier
                     .constrainAs(icon) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start,4.dp)
+                        start.linkTo(parent.start, 6.dp)
                     },
                 painter = painterResource(id = transaction.category.icon),
                 contentDescription = "",
@@ -280,21 +280,18 @@ fun TransactionItems(
                 text = transaction.category.toString(),
                 fontSize = 14.sp,
                 modifier = Modifier.constrainAs(category) {
-                    top.linkTo(parent.top,8.dp)
-                    start.linkTo(icon.end,8.dp)
-                    centerVerticallyTo(icon)
-
+                    start.linkTo(icon.end, 8.dp)
+                    centerVerticallyTo(parent,0.3f)
                 }
             )
             if (transaction.comment != null) {
                 Text(
                     text = transaction.comment,
                     fontSize = 12.sp,
-                    modifier = Modifier.constrainAs(comment){
-                        top.linkTo(category.bottom,4.dp)
-                        start.linkTo(category.start)
+                    modifier = Modifier.constrainAs(comment) {
+                        top.linkTo(category.bottom)
+                        linkTo(category.start,category.end, bias = 0f)
                         bottom.linkTo(parent.bottom)
-                        end.linkTo(category.end)
                     }
                 )
             }
@@ -303,9 +300,9 @@ fun TransactionItems(
                 color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
                 fontSize = 15.sp,
                 maxLines = 1,
-                modifier = Modifier.constrainAs(amount){
-                    linkTo(parent.top,parent.bottom)
-
+                modifier = Modifier.constrainAs(amount) {
+                    centerVerticallyTo(parent)
+                    end.linkTo(parent.end,6.dp)
                 }
             )
         }
