@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -77,7 +78,7 @@ fun MainScreen(
 
         }
     }
-    val rememberClick = remember<(Int)->Unit>{
+    val rememberClick = remember<(Int) -> Unit> {
         {
 
         }
@@ -185,7 +186,6 @@ fun TransactionGroupList(
             }
 
         }
-
     }
 }
 
@@ -256,38 +256,63 @@ fun TransactionItems(
 ) {
     val rememberClick = remember {
         {
-            navController.navigate(Screens.TransactionScreen.route+"/${transaction.transactionId}")
+            navController.navigate(Screens.TransactionScreen.route + "/${transaction.transactionId}")
         }
     }
-    Card(onClick = rememberClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = shape
+    Card(
+        onClick = rememberClick,
+        shape = shape,
+        modifier = Modifier
     ) {
+        ConstraintLayout(modifier = Modifier.fillMaxWidth().height(50.dp)) {
+            val (icon, category, comment, amount) = createRefs()
+            Icon(
+                modifier = Modifier
+                    .constrainAs(icon) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start,4.dp)
+                    },
+                painter = painterResource(id = transaction.category.icon),
+                contentDescription = "",
+            )
+            Text(
+                text = transaction.category.toString(),
+                fontSize = 14.sp,
+                modifier = Modifier.constrainAs(category) {
+                    top.linkTo(parent.top,8.dp)
+                    start.linkTo(icon.end,8.dp)
+                    centerVerticallyTo(icon)
 
-        Text(text = transaction.category.toString(), fontSize = 29.sp)
-        Text(text = transaction.transactionType.toString(), fontSize = 29.sp)
-        Text(text = transaction.transactionId.toString(), fontSize = 29.sp)
-        Text(
-            text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()),
-            color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
-            fontSize = 15.sp,
-            maxLines = 1,
-        )
-        Icon(
-            modifier = Modifier
-                .size(30.dp),
-            painter = painterResource(id = transaction.category.icon),
-            contentDescription = ""
-        )
+                }
+            )
+            if (transaction.comment != null) {
+                Text(
+                    text = transaction.comment,
+                    fontSize = 12.sp,
+                    modifier = Modifier.constrainAs(comment){
+                        top.linkTo(category.bottom,4.dp)
+                        start.linkTo(category.start)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(category.end)
+                    }
+                )
+            }
+            Text(
+                text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()),
+                color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
+                fontSize = 15.sp,
+                maxLines = 1,
+                modifier = Modifier.constrainAs(amount){
+                    linkTo(parent.top,parent.bottom)
+
+                }
+            )
+        }
+
     }
 }
 
-@Composable
-fun TransactionItemDetails(
-
-) {
-
-}
 
 @Composable
 fun TopBarDetails(
