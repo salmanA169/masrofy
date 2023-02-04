@@ -16,6 +16,7 @@
   - Hilt
   - MPAndroidChart
   - Material3
-  - Romm database
+  - Room database
   - navigation compose
   - Constraint layout compose
+  - Themed icon Android 13
