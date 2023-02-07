@@ -5,7 +5,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.masrofy.utils.formatAsDisplayNormalize
 import java.math.BigDecimal
 
-class ScaleAmountFormatter(val scale:Int = 2):ValueFormatter() {
+class ScaleAmountFormatter():ValueFormatter() {
 
     override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
         val bigDecimal = BigDecimal(value.toLong())

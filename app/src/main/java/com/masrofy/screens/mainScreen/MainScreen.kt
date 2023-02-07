@@ -62,7 +62,7 @@ fun MainScreen(
     navController: NavController,
     paddingValues: PaddingValues
 ) {
-    val mainScreenState by viewModel.transactionGroup.collectAsState()
+    val mainScreenState by viewModel.transactionGroup.collectAsState(MainScreenState())
 
     val rememberOnNext = remember<() -> Unit> {
         {
