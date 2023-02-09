@@ -15,6 +15,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -30,8 +33,10 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -96,18 +101,12 @@ fun TransactionScreen(
 ) {
 
     val transactionDetailsState by viewModel.transactionDetailState.collectAsState()
-    val requestFocus = remember {
-        FocusRequester()
-    }
 
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
-        if (!transactionDetailsState.isEdit){
-            requestFocus.requestFocus()
-        }
         viewModel.effect.collect {
             when (it) {
                 TransactionDetailEffect.ClosePage -> {
@@ -134,7 +133,7 @@ fun TransactionScreen(
             }
         }, actions = {
             TextButton(onClick = {
-                    viewModel.onEvent(TransactionDetailEvent.Save)
+                viewModel.onEvent(TransactionDetailEvent.Save)
             }) {
                 Text(text = stringResource(id = R.string.save))
             }
@@ -154,91 +153,92 @@ fun TransactionScreen(
                     )
                 }
         ) {
-
-            if (transactionDetailsState.isEdit.not()){
+            val selectRemember = remember {
+                { transactionType: TransactionType ->
+                    viewModel.onEvent(TransactionDetailEvent.TransactionTypeChange(transactionType))
+                }
+            }
+            if (transactionDetailsState.isEdit.not()) {
                 TransactionType(
-                    transactionType = TransactionType.values().toList(),
-                    onTransactionTypeChange = {
-                        viewModel.onEvent(TransactionDetailEvent.TransactionTypeChange(it))
+                    transactionType = {
+                        TransactionType.values().toList()
                     },
+                    onTransactionTypeChange = selectRemember,
                     selectedType = transactionDetailsState.transactionType,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(4.dp)
                 )
             }
-
-
-            OutlinedTextField(value = transactionDetailsState.totalAmount, onValueChange = {
-                viewModel.onEvent(TransactionDetailEvent.AmountChange(it))
-            }, modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-                .focusRequester(requestFocus),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                    }
-                ),
-                visualTransformation = CurrencyAmountInputVisualTransformation(), label = {
-                    Text(text = stringResource(id = R.string.amount))
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = transactionDetailsState.transactionType.getColor()
-                )
+            val rememberTextChange = remember {
+                { text: TextFieldValue ->
+                    viewModel.onEvent(TransactionDetailEvent.AmountChange(text))
+                }
+            }
+            EditTextTransactionSection(
+                transactionDetailsState.totalAmount,
+                rememberTextChange,
+                transactionDetailsState.transactionType.getColor(),
+                transactionDetailsState.isEdit
             )
 
+            val rememberSelectedAccount = remember {
+                { account: Account ->
+                    viewModel.onEvent(TransactionDetailEvent.AccountSelected(account))
+                }
+            }
             transactionDetailsState.selectedAccount?.let { it1 ->
                 AccountSection(
-                    onAccountChange = {
-                        viewModel.onEvent(TransactionDetailEvent.AccountSelected(it))
-                    }, currentAccount = it1,
-                    accountAvailable = transactionDetailsState.accounts
+                    onAccountChange = rememberSelectedAccount, currentAccount = it1.name,
+                    accountAvailable = { transactionDetailsState.accounts }
                 )
             }
+            val transactionCategoryOnUpdate = remember {
+                { transactionCategory: TransactionCategory ->
+                    viewModel.onEvent(TransactionDetailEvent.CategorySelected(transactionCategory))
 
+                }
+            }
             CategorySection(
-                onSelected = {
-                    viewModel.onEvent(TransactionDetailEvent.CategorySelected(it))
-                },
-                categorySelected = transactionDetailsState.transactionCategory,
+                onSelected = transactionCategoryOnUpdate,
+                categorySelected = { transactionDetailsState.transactionCategory },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
             )
             Spacer(modifier = Modifier.height(6.dp))
-
-
+            val updateDateRemember = remember {
+                { localDate: LocalDate ->
+                    viewModel.onEvent(TransactionDetailEvent.DateChanged(localDate))
+                }
+            }
             DateSection(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp), onDateChanged = {
-                    viewModel.onEvent(TransactionDetailEvent.DateChanged(it))
-                }, date = transactionDetailsState.date.format(DateTimeFormatter.ISO_DATE)
+                    .padding(4.dp),
+                onDateChanged = updateDateRemember,
+                date = { transactionDetailsState.date.format(DateTimeFormatter.ISO_DATE) }
             )
             Spacer(modifier = Modifier.height(6.dp))
+            val rememberTextCommentChange = remember {
+                { text: TextFieldValue ->
+                    viewModel.onEvent(TransactionDetailEvent.CommentChange(text))
+                }
+            }
 
             OutlinedTextField(value = transactionDetailsState.comment ?: TextFieldValue(),
-                onValueChange = {
-
-                    viewModel.onEvent(TransactionDetailEvent.CommentChange(it))
-                },
+                onValueChange = rememberTextCommentChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp)
-                    .imePadding(),
+                    .padding(4.dp),
                 label = {
                     Text(text = stringResource(id = R.string.comment))
                 }
             )
 
-            if (transactionDetailsState.isEdit){
+            if (transactionDetailsState.isEdit) {
                 Spacer(modifier = Modifier.height(4.dp))
-                OutlinedButton(modifier = Modifier.fillMaxWidth(),onClick = {
+                OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = {
                     viewModel.onEvent(TransactionDetailEvent.Delete)
                 }) {
                     Text(text = stringResource(id = R.string.delete))
@@ -253,24 +253,67 @@ fun TransactionScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun EditTextTransactionSection(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    textColor: Color,
+    isEdit: Boolean
+) {
+    val focusRequester = remember {
+        FocusRequester()
+    }
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(key1 = isEdit) {
+        if (isEdit.not()) {
+            focusRequester.requestFocus()
+        }else{
+            focusManager.clearFocus()
+        }
+    }
+    OutlinedTextField(value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .focusRequester(focusRequester), shape = MaterialTheme.shapes.medium,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
+        visualTransformation = CurrencyAmountInputVisualTransformation(),
+        label = {
+            Text(text = stringResource(id = R.string.amount))
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = textColor
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun AccountSection(
     onAccountChange: (Account) -> Unit,
-    currentAccount: Account,
-    accountAvailable: List<Account>
+    currentAccount: String,
+    accountAvailable: () -> List<Account>
 ) {
     var shouldExpand by remember {
         mutableStateOf(false)
     }
-    Card(modifier = Modifier
+    ElevatedCard(modifier = Modifier
         .fillMaxWidth()
         .padding(4.dp), onClick = {
         shouldExpand = !shouldExpand
     }) {
-        Text(text = currentAccount.name, modifier = Modifier.padding(12.dp))
-
+        Text(text = currentAccount, modifier = Modifier.padding(12.dp))
     }
     AnimatedVisibility(visible = shouldExpand) {
-        AccountSelectionItem(accountAvailable = accountAvailable) {
+        AccountSelectionItem(accountAvailable = accountAvailable()) {
             shouldExpand = false
             onAccountChange(it)
         }
@@ -301,7 +344,7 @@ fun AccountSelectionItem(
 fun DateSection(
     modifier: Modifier = Modifier,
     onDateChanged: (LocalDate) -> Unit,
-    date: String
+    date: () -> String
 ) {
     var isDialogShown by remember {
         mutableStateOf(false)
@@ -324,7 +367,7 @@ fun DateSection(
         }) {
             Icon(imageVector = Icons.Filled.DateRange, contentDescription = "Date")
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = date)
+            Text(text = date())
         }
     }
 }
@@ -332,7 +375,7 @@ fun DateSection(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CategorySection(
-    categorySelected: TransactionCategory,
+    categorySelected: () -> TransactionCategory,
     onSelected: (TransactionCategory) -> Unit,
     modifier: Modifier = Modifier
 
@@ -361,14 +404,13 @@ fun CategorySection(
             ) {
                 items(TransactionCategory.values()) { transactionCategory ->
                     val selectedAnimated by animateFloatAsState(
-                        targetValue = if (categorySelected == transactionCategory) 360f else 0f,
+                        targetValue = if (categorySelected() == transactionCategory) 360f else 0f,
                         animationSpec = spring(2f)
                     )
                     val color = MaterialTheme.colorScheme.primary
 
                     Card(
                         shape = CircleShape,
-
                         onClick = {
                             onSelected(transactionCategory)
                         },
@@ -416,50 +458,52 @@ fun CategorySection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionType(
-    transactionType: List<TransactionType>,
+    transactionType: () -> List<TransactionType>,
     onTransactionTypeChange: (TransactionType) -> Unit,
     selectedType: TransactionType,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
 
+    val transactionTypeRemember = remember {
+        transactionType()
+    }
     Box(
         modifier = modifier
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .background(
+                .padding(horizontal = 1.dp, vertical = 4.dp)
+                .border(
+                    1.dp,
                     MaterialTheme.colorScheme.surfaceVariant,
                     MaterialTheme.shapes.extraLarge
                 ),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            transactionType.forEach {
-                val backGroundColor =
-                    if (selectedType == it) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                val contentColor =
-                    if (selectedType == it) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                SuggestionChip(onClick = {
-                    onTransactionTypeChange(it)
-                }, label = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(id = it.getTitle()),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = contentColor
-                        )
+
+            transactionTypeRemember.forEach {
+                FilterChip(selected = selectedType == it,
+                    onClick = {
+                        onTransactionTypeChange(it)
+                    }, label = {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(id = it.getTitle()),
+                                style = MaterialTheme.typography.titleMedium,
+
+                                )
+                        }
                     }
-                }, colors = SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = backGroundColor,
-                    labelColor = contentColor
-                ), border = null,
+//                    , colors = AssistChipDefaults.assistChipColors(
+//                    containerColor = if (selectedType() == it) selectedBackground else unSelectedBackground)
+                    , border = null,
                     shape = RoundedCornerShape(24.dp),
                     modifier = Modifier
-                        .padding(2.dp)
+                        .padding(horizontal = 4.dp, 2.dp)
                         .weight(1f)
                 )
             }

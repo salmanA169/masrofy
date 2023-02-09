@@ -6,6 +6,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\salma\\AndroidStudioProjects\\masrofy\\app\\release\\masrofyKey.jks')
+            storePassword 'alamode151412'
+            keyAlias 'salmanalamode15'
+            keyPassword 'Salmanalamode15'
+        }
+    }
     namespace 'com.masrofy'
     compileSdk 33
 
@@ -28,13 +36,13 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+
         }
         debug {
             applicationIdSuffix '.debug'
         }
         benchmark {
-            signingConfig signingConfigs.debug
             matchingFallbacks = ['release']
             initWith buildTypes.release
         }
