@@ -395,7 +395,7 @@ fun CategorySection(
                     .fillMaxWidth()
                     .height(180.dp)
                     .background(
-                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
                         MaterialTheme.shapes.medium
                     ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
