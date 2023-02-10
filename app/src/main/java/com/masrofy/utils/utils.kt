@@ -1,5 +1,8 @@
 package com.masrofy.utils
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -88,4 +91,16 @@ private fun formatAsDisplay(
 
 fun getAmountMultiplier(scale: Int): BigDecimal {
     return "10".toBigDecimal().pow(scale)
+}
+
+
+internal  fun  findOwner(context: Context): Activity? {
+    var innerContext = context
+    while (innerContext is ContextWrapper) {
+        if (innerContext is Activity) {
+            return innerContext
+        }
+        innerContext = innerContext.baseContext
+    }
+    return null
 }

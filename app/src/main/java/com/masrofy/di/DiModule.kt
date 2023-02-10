@@ -22,4 +22,5 @@ object DiModule {
         roomCallback: RoomCallback
     ) = Room.databaseBuilder(context, MasrofyDatabase::class.java, Constants.DATABASE_NAME)
         .addCallback(roomCallback).build()
+
 }

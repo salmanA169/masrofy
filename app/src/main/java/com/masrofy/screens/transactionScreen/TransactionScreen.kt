@@ -1,9 +1,11 @@
 package com.masrofy.screens.transactionScreen
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -63,6 +65,7 @@ import com.masrofy.Screens
 import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
+import com.masrofy.utils.findOwner
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -106,11 +109,14 @@ fun TransactionScreen(
 
     val context = LocalContext.current
 
+    val activity = findOwner(context = context)
     LaunchedEffect(key1 = true) {
         viewModel.effect.collect {
             when (it) {
                 TransactionDetailEffect.ClosePage -> {
-                    navController.popBackStack()
+                    if (navController.popBackStack()){
+                        viewModel.showAds(activity!!)
+                    }
                 }
                 TransactionDetailEffect.Noting -> {}
 

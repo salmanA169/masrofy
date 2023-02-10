@@ -63,7 +63,6 @@ fun MainScreen(
     paddingValues: PaddingValues
 ) {
     val mainScreenState by viewModel.transactionGroup.collectAsState(MainScreenState())
-
     val rememberOnNext = remember<() -> Unit> {
         {
             viewModel.updateDate(1, DateEvent.PLUS)

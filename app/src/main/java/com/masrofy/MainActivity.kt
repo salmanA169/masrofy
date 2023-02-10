@@ -131,6 +131,6 @@ fun SetNavigationScreen() {
 @Composable
 fun DefaultPreview() {
     MasrofyTheme {
-        SetNavigationScreen()
+//        SetNavigationScreen()
     }
 }

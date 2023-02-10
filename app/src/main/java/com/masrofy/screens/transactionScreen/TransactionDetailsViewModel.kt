@@ -1,9 +1,11 @@
 package com.masrofy.screens.transactionScreen
 
+import android.app.Activity
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.masrofy.AdsManager
 import com.masrofy.data.entity.toAccount
 import com.masrofy.model.Account
 import com.masrofy.model.TransactionCategory
@@ -24,6 +26,7 @@ import javax.inject.Inject
 class TransactionDetailsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
+    private val adsManager: AdsManager,
     savedStateHandle: SavedStateHandle
 ) :ViewModel(){
 
@@ -33,6 +36,10 @@ class TransactionDetailsViewModel @Inject constructor(
 
     private val _effect = MutableStateFlow<TransactionDetailEffect>(TransactionDetailEffect.Noting)
     val effect = _effect.asStateFlow()
+
+     fun showAds(activity:Activity){
+        adsManager.showAds(activity)
+    }
     init {
         viewModelScope.launch(Dispatchers.IO) {
 
