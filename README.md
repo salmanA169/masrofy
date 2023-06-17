@@ -4,11 +4,18 @@
     </kbd>
 </div>
     
+# New Update [ In Progress }
+<img src="https://github.com/salmanA169/masrofy/assets/40442174/b4d93590-25c5-44d0-93aa-4908d8c6f046" width="500"> 
+
+
+
+
 # Compose Masrofy - Track your expense , income and set budget
 - [x] Add transaction for income and expense 
 - [x] Add statistics screen
 - [ ] Add account screen
 - [ ] Add budget screen and implement functionality
+![New Project(1)]()
 
 # Download
  <a href="https://play.google.com/store/apps/details?id=com.masrofy"><img alt="Get it on GitHub" src="https://user-images.githubusercontent.com/40442174/219130143-35ee546b-7057-4c2d-9bbd-9729614d181b.png" width="250px"/></a>
