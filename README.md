@@ -5,7 +5,7 @@
 </div>
     
 # New Update [ In Progress }
-<img src="https://github.com/salmanA169/masrofy/assets/40442174/b4d93590-25c5-44d0-93aa-4908d8c6f046" width="260"> 
+<img src="https://github.com/salmanA169/masrofy/assets/40442174/b4d93590-25c5-44d0-93aa-4908d8c6f046" width="500"> 
 
 
 
