@@ -1,5 +1,6 @@
 package com.masrofy.screens.mainScreen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,11 +11,13 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +40,7 @@ import com.masrofy.ui.theme.ColorTotalIncome
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.itemShapes
+import java.time.format.TextStyle
 
 fun NavGraphBuilder.mainScreenNavigation(
     navController: NavController,
@@ -47,12 +51,84 @@ fun NavGraphBuilder.mainScreenNavigation(
     }
 }
 
+@Composable
+fun BalanceCard(
+    modifier: Modifier = Modifier,
+    month: String,
+    currentBalance: String,
+    currentIncome: String,
+    currentExpense: String
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .requiredHeight(120.dp),
+        shape = MaterialTheme.shapes.small,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer )
+    ) {
+        Text(
+            text = month,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .align(CenterHorizontally)
+                .padding(vertical = 6.dp),
+            fontSize = 24.sp
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BalanceItem(
+                nameLabel = stringResource(id = R.string.mybalance),
+                value = currentBalance,
+                MaterialTheme.colorScheme.onBackground
+            )
+            BalanceItem(
+                nameLabel = stringResource(id = R.string.income),
+                value = currentIncome,
+                MaterialTheme.colorScheme.tertiary
+            )
+            BalanceItem(
+                nameLabel = stringResource(id = R.string.expense),
+                value = currentExpense,
+                MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
 
-@Preview(showBackground = true)
+@Composable
+fun BalanceItem(
+    nameLabel: String,
+    value: String,
+    color: Color,
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium
+) {
+    Column(
+        modifier = Modifier.wrapContentSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = nameLabel, style = MaterialTheme.typography.titleLarge)
+        Text(text = value, style = MaterialTheme.typography.labelMedium, color = color)
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MainScreenPreview() {
-    MasrofyTheme() {
-        TopBarDetails(currentMonth = "sal,am")
+    MasrofyTheme(dynamicColor = false) {
+        BalanceCard(
+            month = "May",
+            currentBalance = "1500",
+            currentIncome = "700",
+            currentExpense = "500"
+        )
     }
 }
 
@@ -261,9 +337,11 @@ fun TransactionItems(
         shape = shape,
         modifier = Modifier
     ) {
-        ConstraintLayout(modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+        ) {
             val (icon, category, comment, amount) = createRefs()
             Icon(
                 modifier = Modifier
@@ -280,7 +358,7 @@ fun TransactionItems(
                 fontSize = 14.sp,
                 modifier = Modifier.constrainAs(category) {
                     start.linkTo(icon.end, 8.dp)
-                    centerVerticallyTo(parent,0.3f)
+                    centerVerticallyTo(parent, 0.3f)
                 }
             )
             if (transaction.comment != null) {
@@ -289,7 +367,7 @@ fun TransactionItems(
                     fontSize = 12.sp,
                     modifier = Modifier.constrainAs(comment) {
                         top.linkTo(category.bottom)
-                        linkTo(category.start,category.end, bias = 0f)
+                        linkTo(category.start, category.end, bias = 0f)
                         bottom.linkTo(parent.bottom)
                     }
                 )
@@ -301,7 +379,7 @@ fun TransactionItems(
                 maxLines = 1,
                 modifier = Modifier.constrainAs(amount) {
                     centerVerticallyTo(parent)
-                    end.linkTo(parent.end,6.dp)
+                    end.linkTo(parent.end, 6.dp)
                 }
             )
         }

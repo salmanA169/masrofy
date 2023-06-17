@@ -296,7 +296,7 @@ fun EditTextTransactionSection(
             Text(text = stringResource(id = R.string.amount))
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = textColor
+//            text = textColor
         )
     )
 }

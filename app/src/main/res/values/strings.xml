@@ -11,4 +11,5 @@
     <string name="account">account</string>
     <string name="delete">delete</string>
     <string name="statistic">statistic</string>
+    <string name="mybalance">My Balance</string>
 </resources>
