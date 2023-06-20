@@ -5,6 +5,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -33,6 +35,8 @@ import com.masrofy.Screens
 import com.masrofy.component.mirror
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
+import com.masrofy.model.Transaction
+import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
 import com.masrofy.ui.theme.ColorTotalExpense
@@ -66,7 +70,7 @@ fun BalanceCard(
         shape = MaterialTheme.shapes.small,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Text(
             text = month,
@@ -103,6 +107,46 @@ fun BalanceCard(
     }
 }
 
+@Preview
+@Composable
+fun PreviewTransactions() {
+    MasrofyTheme(dynamicColor = false) {
+        Transactions(
+            transactions = listOf(
+                Transaction(
+                    1,
+                    1,
+                    TransactionType.INCOME,
+                    amount = 50.toBigDecimal(),
+                    category = TransactionCategory.CAR
+                ),
+                Transaction(
+                    1,
+                    1,
+                    TransactionType.INCOME,
+                    amount = 50.toBigDecimal(),
+                    category = TransactionCategory.CAR
+                ),
+                Transaction(
+                    1,
+                    1,
+                    TransactionType.INCOME,
+                    amount = 50.toBigDecimal(),
+                    category = TransactionCategory.CAR,
+                    comment = "Gas"
+                ),
+                Transaction(
+                    1,
+                    1,
+                    TransactionType.INCOME,
+                    amount = 50.toBigDecimal(),
+                    category = TransactionCategory.CAR
+                )
+            )
+        )
+    }
+}
+
 @Composable
 fun BalanceItem(
     nameLabel: String,
@@ -119,7 +163,70 @@ fun BalanceItem(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun Transactions(
+    modifier: Modifier = Modifier,
+    transactions: List<Transaction>
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = stringResource(id = R.string.transactions),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = stringResource(id = R.string.show_more),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(6.dp))
+        ) {
+            items(transactions) {
+                TransactionItem(
+                    category = it.category.toString(),
+                    amount = it.amount.toString(),
+                    date = "",
+                    color = Color.Red,
+                    comment = it.comment
+                )
+                Divider()
+            }
+        }
+    }
+}
+
+@Composable
+fun TransactionItem(
+    category: String,
+    comment: String? = null,
+    amount: String,
+    date: String,
+    color: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = category, style = MaterialTheme.typography.labelSmall)
+        Text(text = comment ?: "", style = MaterialTheme.typography.labelSmall)
+
+        Text(text = category, style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+@Preview()
 @Composable
 fun MainScreenPreview() {
     MasrofyTheme(dynamicColor = false) {
@@ -139,7 +246,7 @@ fun MainScreen(
     paddingValues: PaddingValues
 ) {
     val mainScreenState by viewModel.transactionGroup.collectAsState(MainScreenState())
-    val rememberOnNext = remember<() -> Unit> {
+    val rememberOnNext = remember {
         {
             viewModel.updateDate(1, DateEvent.PLUS)
 
