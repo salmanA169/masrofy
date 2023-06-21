@@ -8,7 +8,7 @@ data class Transaction(
     val accountTransactionId: Int,
     val transactionType: TransactionType,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val amount: BigDecimal,
+    val amount: String,
     val comment: String? = null,
     val category: TransactionCategory
 )

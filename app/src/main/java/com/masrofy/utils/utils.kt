@@ -17,6 +17,8 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 
 
@@ -30,6 +32,7 @@ fun Int.getShapeByIndex(isLastIndex: Boolean = false): Shape {
     }
 }
 
+fun LocalDateTime.formatShortDate() = format(DateTimeFormatter.ofPattern("dd LLLL"))
 inline fun <T> LazyListScope.itemShapes(
     lists: List<T>,
     crossinline key: (T) -> Any,
