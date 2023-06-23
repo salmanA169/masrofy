@@ -1,5 +1,7 @@
 package com.masrofy.screens.mainScreen
 
+import android.content.res.Configuration
+import android.icu.util.Currency
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -17,6 +19,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.Start
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -39,6 +43,7 @@ import com.masrofy.Screens
 import com.masrofy.component.mirror
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
+import com.masrofy.model.ColorTransactions
 import com.masrofy.model.TopTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionCategory
@@ -51,6 +56,8 @@ import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.itemShapes
+import java.text.DecimalFormat
+import java.util.Locale
 
 fun NavGraphBuilder.mainScreenNavigation(
     navController: NavController,
@@ -73,26 +80,25 @@ fun BalanceCard(
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .requiredHeight(120.dp),
-        shape = MaterialTheme.shapes.small,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Text(
             text = month,
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .align(CenterHorizontally)
-                .padding(vertical = 6.dp),
-            fontSize = 24.sp
+                .padding(top = 4.dp),
+            fontSize = 20.sp
         )
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+                .padding(bottom = 12.dp, start = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -164,13 +170,13 @@ fun PreviewTopTransactions() {
         TopTransactions(
             topTransactions = listOf(
                 TopTransactions(
-                    "Gas", 50f, MaterialTheme.colorScheme.primary
+                    "Gas", 50, 50f, ColorTransactions.PRIMARY
                 ),
                 TopTransactions(
-                    "Gas", 25f, MaterialTheme.colorScheme.tertiary
+                    "Gas", 60, 25f, ColorTransactions.SECONDARY
                 ),
                 TopTransactions(
-                    "Gas", 25f, MaterialTheme.colorScheme.secondary
+                    "Gas", 56, 25f, ColorTransactions.TERTIARY
                 )
             )
         )
@@ -188,8 +194,21 @@ fun BalanceItem(
         modifier = Modifier.wrapContentSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = nameLabel, style = MaterialTheme.typography.titleLarge)
-        Text(text = value, style = MaterialTheme.typography.labelMedium, color = color)
+        Text(
+            text = nameLabel,
+            style = MaterialTheme.typography.titleLarge,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelMedium,
+            color = color,
+            fontSize = 16.sp,
+            modifier = Modifier.align(
+                Start
+            )
+        )
     }
 }
 
@@ -215,11 +234,12 @@ fun Transactions(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            // TODO: replace to text button
-            Text(
-                text = stringResource(id = R.string.show_more),
-                style = MaterialTheme.typography.labelMedium
-            )
+            TextButton(onClick = { /*TODO*/ }) {
+                Text(
+                    text = stringResource(id = R.string.show_more),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         }
         Spacer(modifier = Modifier.height(4.dp))
         LazyColumn(
@@ -266,24 +286,25 @@ fun TopTransactions(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-
-            // TODO: replace to text button
-            Text(
-                text = stringResource(id = R.string.show_more),
-                style = MaterialTheme.typography.labelMedium
-            )
+            TextButton(onClick = { /*TODO*/ }) {
+                Text(
+                    text = stringResource(id = R.string.show_more),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         }
         Spacer(modifier = Modifier.height(4.dp))
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
-                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(6.dp)),
         ) {
             items(topTransactions) {
                 TopTransactionItem(
                     it.category,
                     it.percent,
+                    it.amount,
                     it.color
                 )
                 Divider()
@@ -292,52 +313,62 @@ fun TopTransactions(
     }
 }
 
+val decimalFormat = DecimalFormat("###,###,##0.0")
+
 @Composable
 fun TopTransactionItem(
     category: String,
     percent: Float,
-    color: Color
+    amount: Long,
+    color: ColorTransactions,
+    modifier: Modifier = Modifier
 ) {
-    var currentMaxWidth by remember {
-        mutableStateOf(0)
-    }
+
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(6.dp)
-            .onGloballyPositioned {
-                currentMaxWidth = it.size.width
-            },
+            .padding(vertical = 12.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = category,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.weight(0.5f)
+            modifier = Modifier.weight(0.8f)
         )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(4f)
+                .weight(2f)
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(percent / 100)
-                    .background(color, RoundedCornerShape(6.dp))
-                    .padding(6.dp)
+                    .background(color.getColor(), RoundedCornerShape(6.dp))
+                    .padding(7.dp)
             ) {
 
             }
         }
-        Text(
-            text = "% $percent",
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(0.8f)
-        )
+        Column(
+            modifier = Modifier.weight(0.8f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = amount.toString().plus(" SR"),
+                maxLines = 1,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = decimalFormat.format(percent).plus("%"),
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+            )
+        }
 
     }
 }
@@ -353,14 +384,18 @@ fun TransactionItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(6.dp),
+            .padding(vertical = 6.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = category, style = MaterialTheme.typography.labelSmall)
         Text(text = comment ?: "", style = MaterialTheme.typography.labelSmall, maxLines = 1)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = amount, style = MaterialTheme.typography.labelSmall, color = color)
+            Text(
+                text = amount.plus(" SR"),
+                style = MaterialTheme.typography.labelSmall,
+                color = color
+            )
             Text(
                 text = date,
                 style = MaterialTheme.typography.labelSmall,
@@ -401,7 +436,9 @@ fun MainScreen(
             currentIncome = mainState.balance.totalIncome,
             currentExpense = mainState.balance.totalExpense
         )
+        Spacer(modifier = Modifier.height(16.dp))
         Transactions(transactions = mainState.transactions)
+        Spacer(modifier = Modifier.height(16.dp))
         TopTransactions(topTransactions = mainState.topTransactions)
     }
 }

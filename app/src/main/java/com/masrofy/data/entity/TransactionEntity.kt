@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
+import com.masrofy.screens.mainScreen.CategoryWithAmount
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.toMillis
 import java.time.LocalDateTime
@@ -53,7 +54,23 @@ data class TransactionEntity(
         )
     }
 }
-
+fun List<TransactionEntity>.getCategoryWithAmount():List<CategoryWithAmount>{
+    val list = mutableListOf<CategoryWithAmount>()
+    forEach {transaction->
+        val findCategory = list.find { it.category == transaction.category.toString() }
+        if (findCategory!= null ){
+            val updateAmount = transaction.amount + findCategory.amount
+            findCategory.amount = updateAmount
+        }else{
+            list.add(
+                CategoryWithAmount(
+                    transaction.category.toString(),transaction.amount
+                )
+            )
+        }
+    }
+    return list
+}
 fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
     val getDates = map {
         LocalDateTime.ofEpochSecond(it.createdAt.toMillis(), 0, ZoneOffset.UTC).toLocalDate()

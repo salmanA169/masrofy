@@ -1,17 +1,22 @@
 package com.masrofy.screens.mainScreen
 
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.AdsManager
 import com.masrofy.coroutine.DispatcherProvider
+import com.masrofy.data.entity.getCategoryWithAmount
 import com.masrofy.data.entity.toTransactionGroup
 import com.masrofy.data.relation.toBalance
 import com.masrofy.data.relation.toTransactions
 import com.masrofy.data.relation.transactionsToBalance
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.BalanceManager
+import com.masrofy.model.ColorTransactions
 import com.masrofy.model.TransactionType
+import com.masrofy.model.calculateTopTransactions
 import com.masrofy.repository.AccountRepository
 import com.masrofy.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +35,7 @@ class MainViewModel @Inject constructor(
     private val dispatcherProvider:DispatcherProvider
 ) : ViewModel() {
 
+
     private val currentDateFlow = LocalDate.now()
     private val _state = MutableStateFlow(MainScreenState())
     val state = _state.asStateFlow()
@@ -39,35 +45,21 @@ class MainViewModel @Inject constructor(
             accountRepository.getAccountsWithTransactions().collect{
                 val getElement = it.firstOrNull()?:return@collect
                 val transactions = getElement.transactions
-                var totalIncome = 0L
-                var totalExpense = 0L
+                var totalIncome = 0f
+                var totalExpense = 0f
+                var totalValue = 0f
 
-                val filterCategory = mutableListOf<CategoryWithAmount>()
                 transactions.forEach {transaction->
+                    totalValue+= transaction.amount
                     if (transaction.transactionType == TransactionType.INCOME) totalIncome+= transaction.amount else totalExpense+= transaction.amount
-                    val findCategory = filterCategory.find { it.category == transaction.category.toString() }
-                    if (findCategory!= null ){
-                        val getCurrentElement = filterCategory.indexOfFirst { findCategory.category == transaction.category.toString() }
-                        val updateAmount = transaction.amount + findCategory.amount
-                        filterCategory[getCurrentElement] = findCategory.copy(amount = updateAmount)
-                    }else{
-                        filterCategory.add(
-                            CategoryWithAmount(
-                                transaction.category.toString(),transaction.amount
-                            )
-                        )
-                    }
                 }
+                val categoryWithAmount = transactions.getCategoryWithAmount()
                 _state.update {
                     it.copy(
                         balance = BalanceManager((totalIncome - totalExpense).toString(),totalIncome.toString(),totalExpense.toString()),
-                        transactions = transactions.toTransactions(),
+                        transactions = transactions.toTransactions().sortedByDescending { it.createdAt }.take(10),
                         month = currentDateFlow.month.name,
-                        topTransactions = listOf(
-                            com.masrofy.model.TopTransactions("Gas",80f, Color.Red),
-                            com.masrofy.model.TopTransactions("Gas",10f, Color.Black),
-                            com.masrofy.model.TopTransactions("Gas",10f, Color.Yellow),
-                        )
+                        topTransactions = calculateTopTransactions(totalValue,categoryWithAmount).sortedByDescending { it.percent }
                     )
                 }
             }
@@ -78,7 +70,7 @@ class MainViewModel @Inject constructor(
 
 data class CategoryWithAmount(
     val category:String,
-    val amount :Long
+    var amount :Long,
 )
 
 enum class DateEvent {

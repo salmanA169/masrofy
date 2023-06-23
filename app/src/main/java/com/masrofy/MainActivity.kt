@@ -81,9 +81,10 @@ fun SetNavigationScreen() {
                     }
                     IconButton(onClick = rememberClick) {
                         Icon(
-                            rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.statistic_icon)),
+                            rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.statistic_icon1)),
                             contentDescription = "",
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }, floatingActionButton = {
