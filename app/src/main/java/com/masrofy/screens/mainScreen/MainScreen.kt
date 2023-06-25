@@ -66,7 +66,7 @@ fun NavGraphBuilder.mainScreenNavigation(
     composable(Screens.MainScreen.route) {
         val mainViewModel: MainViewModel = hiltViewModel()
         val mainState by mainViewModel.state.collectAsState()
-        MainScreen(mainState, paddingValues = paddingValues)
+        MainScreen(mainState, paddingValues = paddingValues,navController)
     }
 }
 
@@ -125,41 +125,41 @@ fun BalanceCard(
 @Composable
 fun PreviewTransactions() {
     MasrofyTheme(dynamicColor = false) {
-        Transactions(
-            transactions = listOf(
-                Transaction(
-                    1,
-                    1,
-                    TransactionType.EXPENSE,
-                    amount = "50.toBigDecimal()",
-                    category = TransactionCategory.CAR
-                ),
-                Transaction(
-                    2,
-                    1,
-                    TransactionType.INCOME,
-                    amount = 50.toString(),
-                    category = TransactionCategory.CAR,
-                    comment = "Gas",
-
-                    ),
-                Transaction(
-                    3,
-                    1,
-                    TransactionType.INCOME,
-                    amount = 50.toString(),
-                    category = TransactionCategory.CAR,
-                    comment = "Gas",
-                ),
-                Transaction(
-                    14,
-                    1,
-                    TransactionType.INCOME,
-                    amount = 50.toString(),
-                    category = TransactionCategory.CAR
-                )
-            )
-        )
+//        Transactions(
+//            transactions = listOf(
+//                Transaction(
+//                    1,
+//                    1,
+//                    TransactionType.EXPENSE,
+//                    amount = "50.toBigDecimal()",
+//                    category = TransactionCategory.CAR
+//                ),
+//                Transaction(
+//                    2,
+//                    1,
+//                    TransactionType.INCOME,
+//                    amount = 50.toString(),
+//                    category = TransactionCategory.CAR,
+//                    comment = "Gas",
+//
+//                    ),
+//                Transaction(
+//                    3,
+//                    1,
+//                    TransactionType.INCOME,
+//                    amount = 50.toString(),
+//                    category = TransactionCategory.CAR,
+//                    comment = "Gas",
+//                ),
+//                Transaction(
+//                    14,
+//                    1,
+//                    TransactionType.INCOME,
+//                    amount = 50.toString(),
+//                    category = TransactionCategory.CAR
+//                )
+//            )
+//        )
     }
 }
 
@@ -215,7 +215,8 @@ fun BalanceItem(
 @Composable
 fun Transactions(
     modifier: Modifier = Modifier,
-    transactions: List<Transaction>
+    transactions: List<Transaction>,
+    navController: NavController
 ) {
     Column(
         modifier = modifier
@@ -234,7 +235,7 @@ fun Transactions(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(onClick = { /*TODO*/ }) {
+            TextButton(onClick = { navController.navigate(Screens.TransactionsDetails.route) }) {
                 Text(
                     text = stringResource(id = R.string.show_more),
                     style = MaterialTheme.typography.labelMedium
@@ -379,12 +380,14 @@ fun TransactionItem(
     comment: String? = null,
     amount: String,
     date: String,
-    color: Color
+    color: Color,
+    padding:PaddingValues = PaddingValues(12.dp,6.dp),
+    backgroundColor:Color = Color.Transparent
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp, horizontal = 12.dp),
+            .padding(padding).background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -421,7 +424,9 @@ fun MainScreenPreview() {
 @Composable
 fun MainScreen(
     mainState: MainScreenState,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    // TODO fore test now
+    navController: NavController
 ) {
     Column(
         modifier = Modifier
@@ -437,7 +442,7 @@ fun MainScreen(
             currentExpense = mainState.balance.totalExpense
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Transactions(transactions = mainState.transactions)
+        Transactions(transactions = mainState.transactions, navController = navController)
         Spacer(modifier = Modifier.height(16.dp))
         TopTransactions(topTransactions = mainState.topTransactions)
     }
@@ -591,7 +596,7 @@ fun IncomeAndExpenseSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItems(
-    transaction: TransactionEntity,
+    transaction: Transaction,
     shape: Shape,
     navController: NavController
 ) {

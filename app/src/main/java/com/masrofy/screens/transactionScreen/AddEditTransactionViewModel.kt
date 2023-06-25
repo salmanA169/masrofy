@@ -31,7 +31,7 @@ class TransactionDetailsViewModel @Inject constructor(
 ) :ViewModel(){
 
     val transactionId = savedStateHandle.get<Int>("transactionId")
-    private val _transactionDetailState = MutableStateFlow(TransactionDetailsState())
+    private val _transactionDetailState = MutableStateFlow(AddEditTransactionState())
     val transactionDetailState = _transactionDetailState.asStateFlow()
 
     private val _effect = MutableStateFlow<TransactionDetailEffect>(TransactionDetailEffect.Noting)

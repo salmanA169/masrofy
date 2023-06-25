@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 @Immutable
-data class TransactionDetailsState(
+data class AddEditTransactionState(
     val transactionId:Int = -1,
     val transactionType: TransactionType = TransactionType.EXPENSE,
     val totalAmount: TextFieldValue = TextFieldValue(),
@@ -28,7 +28,7 @@ data class TransactionDetailsState(
 
 }
 
-fun TransactionDetailsState.toTransactionEntity() = TransactionEntity.createTransaction(
+fun AddEditTransactionState.toTransactionEntity() = TransactionEntity.createTransaction(
     selectedAccount!!.id,
     transactionType,
     LocalDateTime.of(date, LocalTime.now()),
@@ -37,7 +37,7 @@ fun TransactionDetailsState.toTransactionEntity() = TransactionEntity.createTran
     transactionCategory
 )
 
-fun TransactionDetailsState.toTransactionEntityWithId() = TransactionEntity.createTransactionWithId(
+fun AddEditTransactionState.toTransactionEntityWithId() = TransactionEntity.createTransactionWithId(
     transactionId,
     selectedAccount!!.id,
     transactionType,

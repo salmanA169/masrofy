@@ -3,6 +3,7 @@ package com.masrofy.data.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.masrofy.mapper.toTransactions
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
@@ -54,23 +55,25 @@ data class TransactionEntity(
         )
     }
 }
-fun List<TransactionEntity>.getCategoryWithAmount():List<CategoryWithAmount>{
+
+fun List<TransactionEntity>.getCategoryWithAmount(): List<CategoryWithAmount> {
     val list = mutableListOf<CategoryWithAmount>()
-    forEach {transaction->
+    forEach { transaction ->
         val findCategory = list.find { it.category == transaction.category.toString() }
-        if (findCategory!= null ){
+        if (findCategory != null) {
             val updateAmount = transaction.amount + findCategory.amount
             findCategory.amount = updateAmount
-        }else{
+        } else {
             list.add(
                 CategoryWithAmount(
-                    transaction.category.toString(),transaction.amount
+                    transaction.category.toString(), transaction.amount
                 )
             )
         }
     }
     return list
 }
+
 fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
     val getDates = map {
         LocalDateTime.ofEpochSecond(it.createdAt.toMillis(), 0, ZoneOffset.UTC).toLocalDate()
@@ -92,12 +95,14 @@ fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
         }
         transactionGroup.add(
             TransactionGroup(
-                subLists.sortedWith(compareByDescending {
+                subLists.toTransactions().sortedWith(compareByDescending {
                     it.createdAt
                 }),
                 it,
-                formatAsDisplayNormalize(income.toBigDecimal()),
-                formatAsDisplayNormalize(expenve.toBigDecimal())
+//                formatAsDisplayNormalize(income.toBigDecimal()),
+//                formatAsDisplayNormalize(expenve.toBigDecimal())
+                income.toInt().toString(),
+                expenve.toInt().toString()
             )
         )
     }

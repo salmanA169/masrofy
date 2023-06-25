@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
-
+sealed class MainScreenEventUI{
+    object Navigate
+}
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
@@ -40,6 +42,9 @@ class MainViewModel @Inject constructor(
     private val _state = MutableStateFlow(MainScreenState())
     val state = _state.asStateFlow()
 
+    fun onEvent(event:MainScreenEventUI){
+
+    }
     init {
         viewModelScope.launch(dispatcherProvider.io) {
             accountRepository.getAccountsWithTransactions().collect{
@@ -67,7 +72,9 @@ class MainViewModel @Inject constructor(
     }
 
 }
-
+sealed class MainScreenEvent{
+    object OnNavigateTransactionDetails:MainScreenEvent()
+}
 data class CategoryWithAmount(
     val category:String,
     var amount :Long,
