@@ -38,6 +38,11 @@ sealed class Screens(val route: String) {
         override val args: List<NamedNavArgument>
             get() = emptyList()
     }
+
+    object TopTransactionsDetails:Screens("top_transaction_details_route"){
+        override val args: List<NamedNavArgument>
+            get() = emptyList()
+    }
 }
 
 val screens = listOf<Screens>(

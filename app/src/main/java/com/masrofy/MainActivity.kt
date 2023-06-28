@@ -30,6 +30,7 @@ import com.masrofy.screens.transactionScreen.transactionScreenNavigation
 import com.masrofy.ui.theme.MasrofyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.masrofy.screens.mainScreen.mainScreenNavigation
+import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
 import com.masrofy.screens.transactions_details.transactionsDetailsDest
 
 @AndroidEntryPoint
@@ -126,6 +127,7 @@ fun SetNavigationScreen() {
             transactionScreenNavigation(navController)
             statisticsScreen(navController)
             transactionsDetailsDest(navController)
+            topTransactionsDetailsDest(navController)
         }
     }
 }

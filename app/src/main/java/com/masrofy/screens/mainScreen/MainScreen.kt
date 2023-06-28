@@ -1,8 +1,5 @@
 package com.masrofy.screens.mainScreen
 
-import android.content.res.Configuration
-import android.icu.util.Currency
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,12 +17,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.Start
-import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,15 +33,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.mirror
-import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.TopTransactions
 import com.masrofy.model.Transaction
-import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
 import com.masrofy.model.getColor
@@ -57,7 +51,6 @@ import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.itemShapes
 import java.text.DecimalFormat
-import java.util.Locale
 
 fun NavGraphBuilder.mainScreenNavigation(
     navController: NavController,
@@ -66,7 +59,7 @@ fun NavGraphBuilder.mainScreenNavigation(
     composable(Screens.MainScreen.route) {
         val mainViewModel: MainViewModel = hiltViewModel()
         val mainState by mainViewModel.state.collectAsState()
-        MainScreen(mainState, paddingValues = paddingValues,navController)
+        MainScreen(mainState, paddingValues = paddingValues, navController)
     }
 }
 
@@ -178,7 +171,7 @@ fun PreviewTopTransactions() {
                 TopTransactions(
                     "Gas", 56, 25f, ColorTransactions.TERTIARY
                 )
-            )
+            ), navController = rememberNavController()
         )
     }
 }
@@ -268,7 +261,8 @@ fun Transactions(
 @Composable
 fun TopTransactions(
     modifier: Modifier = Modifier,
-    topTransactions: List<TopTransactions> = listOf()
+    topTransactions: List<TopTransactions> = listOf(),
+    navController: NavController
 ) {
     Column(
         modifier = modifier
@@ -287,7 +281,7 @@ fun TopTransactions(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(onClick = { /*TODO*/ }) {
+            TextButton(onClick = { navController.navigate(Screens.TopTransactionsDetails.route) }) {
                 Text(
                     text = stringResource(id = R.string.show_more),
                     style = MaterialTheme.typography.labelMedium
@@ -381,13 +375,14 @@ fun TransactionItem(
     amount: String,
     date: String,
     color: Color,
-    padding:PaddingValues = PaddingValues(12.dp,6.dp),
-    backgroundColor:Color = Color.Transparent
+    padding: PaddingValues = PaddingValues(12.dp, 6.dp),
+    backgroundColor: Color = Color.Transparent
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(padding).background(backgroundColor),
+            .padding(padding)
+            .background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -444,7 +439,7 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Transactions(transactions = mainState.transactions, navController = navController)
         Spacer(modifier = Modifier.height(16.dp))
-        TopTransactions(topTransactions = mainState.topTransactions)
+        TopTransactions(topTransactions = mainState.topTransactions, navController =  navController)
     }
 }
 

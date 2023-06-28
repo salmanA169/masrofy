@@ -64,7 +64,7 @@ class MainViewModel @Inject constructor(
                         balance = BalanceManager((totalIncome - totalExpense).toString(),totalIncome.toString(),totalExpense.toString()),
                         transactions = transactions.toTransactions().sortedByDescending { it.createdAt }.take(10),
                         month = currentDateFlow.month.name,
-                        topTransactions = calculateTopTransactions(totalValue,categoryWithAmount).sortedByDescending { it.percent }
+                        topTransactions = calculateTopTransactions(totalValue,categoryWithAmount).sortedByDescending { it.percent }.take(5)
                     )
                 }
             }
