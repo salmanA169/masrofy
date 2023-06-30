@@ -24,7 +24,7 @@ data class TransactionEntity(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val amount: Long,
     val comment: String? = null,
-    val category: TransactionCategory
+    val category: String
 ) {
     companion object {
         fun createTransaction(
@@ -33,7 +33,7 @@ data class TransactionEntity(
             createdAt: LocalDateTime = LocalDateTime.now(),
             amount: Long,
             comment: String?,
-            category: TransactionCategory
+            category: String
         ) = TransactionEntity(
             0,
             accountId,
@@ -47,7 +47,7 @@ data class TransactionEntity(
             createdAt: LocalDateTime = LocalDateTime.now(),
             amount: Long,
             comment: String?,
-            category: TransactionCategory
+            category: String
         ) = TransactionEntity(
             transactionId,
             accountId,

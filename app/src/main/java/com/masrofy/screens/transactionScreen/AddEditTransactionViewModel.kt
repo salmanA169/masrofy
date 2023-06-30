@@ -19,16 +19,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
-class TransactionDetailsViewModel @Inject constructor(
+class AddEditTransactionViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val adsManager: AdsManager,
     savedStateHandle: SavedStateHandle
-) :ViewModel(){
+) : ViewModel() {
 
     val transactionId = savedStateHandle.get<Int>("transactionId")
     private val _transactionDetailState = MutableStateFlow(AddEditTransactionState())
@@ -37,13 +37,14 @@ class TransactionDetailsViewModel @Inject constructor(
     private val _effect = MutableStateFlow<TransactionDetailEffect>(TransactionDetailEffect.Noting)
     val effect = _effect.asStateFlow()
 
-     fun showAds(activity:Activity){
+    fun showAds(activity: Activity) {
         adsManager.showAds(activity)
     }
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
 
-            accountRepository.getAccounts().collect{accounts->
+            accountRepository.getAccounts().collect { accounts ->
                 _transactionDetailState.update {
                     it.copy(
                         accounts = accounts,
@@ -53,19 +54,19 @@ class TransactionDetailsViewModel @Inject constructor(
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-            if (transactionId !=-1 && transactionId!=null){
+            if (transactionId != -1 && transactionId != null) {
                 val transaction = transactionRepository.getTransactionById(transactionId)
                 val account = accountRepository.getAccountById(transaction.accountTransactionId)
                 _transactionDetailState.update {
                     it.copy(
                         transactionId = transaction.transactionId,
-                        totalAmount = it.totalAmount.copy(text = transaction.amount.toString()),
+                        totalAmount = transaction.amount.toString(),
                         transactionCategory = transaction.category,
                         selectedAccount = account.toAccount(emptyList()),
-                        date = transaction.createdAt.toLocalDate(),
+                        date = transaction.createdAt,
                         transactionType = transaction.transactionType,
                         isEdit = true,
-                        comment = it.comment?.copy(transaction.comment?:"")
+                        comment = it.comment
                     )
                 }
 
@@ -73,9 +74,9 @@ class TransactionDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event:TransactionDetailEvent){
-        when(event){
-            is TransactionDetailEvent.AccountSelected -> {
+    fun onEvent(event: AddEditTransactionEvent) {
+        when (event) {
+            is AddEditTransactionEvent.AccountSelected -> {
                 _transactionDetailState.update {
                     it.copy(
                         selectedAccount = event.account
@@ -83,29 +84,33 @@ class TransactionDetailsViewModel @Inject constructor(
                 }
 
             }
-            is TransactionDetailEvent.AmountChange -> {
+
+            is AddEditTransactionEvent.AmountChange -> {
                 _transactionDetailState.update {
-                    val formatText = event.text.text.replace("\\D".toRegex(), "")
+//                    val formatText = event.text.replace("\\D".toRegex(), "")
                     it.copy(
-                        totalAmount = event.text.copy(formatText)
+                        totalAmount = event.text
                     )
                 }
             }
-            is TransactionDetailEvent.CategorySelected -> {
+
+            is AddEditTransactionEvent.CategorySelected -> {
                 _transactionDetailState.update {
                     it.copy(
                         transactionCategory = event.transactionCategory
                     )
                 }
             }
-            is TransactionDetailEvent.CommentChange -> {
+
+            is AddEditTransactionEvent.CommentChange -> {
                 _transactionDetailState.update {
                     it.copy(
                         comment = event.comment
                     )
                 }
             }
-            is TransactionDetailEvent.DateChanged -> {
+
+            is AddEditTransactionEvent.DateTimeChanged -> {
                 _transactionDetailState.update {
                     it.copy(
                         date = event.date
@@ -113,32 +118,34 @@ class TransactionDetailsViewModel @Inject constructor(
                 }
             }
 
-            TransactionDetailEvent.Delete -> {
+            AddEditTransactionEvent.Delete -> {
                 viewModelScope.launch(Dispatchers.IO) {
 
                     transactionRepository.deleteTransaction(_transactionDetailState.value.toTransactionEntityWithId())
                     _effect.value = TransactionDetailEffect.ClosePage
                 }
             }
-            TransactionDetailEvent.Save -> {
-                viewModelScope.launch (Dispatchers.IO){
-                    if (_transactionDetailState.value.isValidToSave()){
+
+            AddEditTransactionEvent.Save -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (_transactionDetailState.value.isValidToSave()) {
                         val transaction = _transactionDetailState.value
-                        if (transaction.isEdit){
+                        if (transaction.isEdit) {
                             transactionRepository.updateTransaction(transaction.toTransactionEntityWithId())
-                        }else{
+                        } else {
                             transactionRepository.insertTransaction(transaction.toTransactionEntity())
                         }
 
                         _effect.value = TransactionDetailEffect.ClosePage
-                    }else{
+                    } else {
                         _effect.update {
                             TransactionDetailEffect.ErrorMessage("The amount less or equal zero")
                         }
                     }
                 }
             }
-            is TransactionDetailEvent.TransactionTypeChange -> {
+
+            is AddEditTransactionEvent.TransactionTypeChange -> {
                 _transactionDetailState.update {
                     it.copy(
                         transactionType = event.transactionType
@@ -146,27 +153,29 @@ class TransactionDetailsViewModel @Inject constructor(
                 }
             }
 
+            AddEditTransactionEvent.ClosePage -> {
+                _effect.update {
+                    TransactionDetailEffect.ClosePage
+                }
+            }
         }
     }
 }
-sealed class TransactionDetailEffect(){
-    object ClosePage:TransactionDetailEffect()
-    class ErrorMessage(val message:String):TransactionDetailEffect()
-    object Noting:TransactionDetailEffect()
 
+sealed class TransactionDetailEffect() {
+    object ClosePage : TransactionDetailEffect()
+    class ErrorMessage(val message: String) : TransactionDetailEffect()
+    object Noting : TransactionDetailEffect()
 }
-sealed class TransactionDetailEvent{
 
-    class TransactionTypeChange(val transactionType:TransactionType):TransactionDetailEvent()
-    class AmountChange(val text:TextFieldValue):TransactionDetailEvent()
-    class AccountSelected(val account:Account):TransactionDetailEvent()
-    class CategorySelected(val transactionCategory: TransactionCategory):TransactionDetailEvent()
-    class DateChanged(val date:LocalDate):TransactionDetailEvent()
-
-    class CommentChange(val comment:TextFieldValue):TransactionDetailEvent()
-
-    object Save:TransactionDetailEvent()
-    object Delete:TransactionDetailEvent()
-
-
+sealed class AddEditTransactionEvent {
+    class TransactionTypeChange(val transactionType: TransactionType) : AddEditTransactionEvent()
+    class AmountChange(val text: String) : AddEditTransactionEvent()
+    class AccountSelected(val account: Account) : AddEditTransactionEvent()
+    class CategorySelected(val transactionCategory: String) : AddEditTransactionEvent()
+    class DateTimeChanged(val date: LocalDateTime) : AddEditTransactionEvent()
+    class CommentChange(val comment: String) : AddEditTransactionEvent()
+    object Save : AddEditTransactionEvent()
+    object Delete : AddEditTransactionEvent()
+    object ClosePage : AddEditTransactionEvent()
 }

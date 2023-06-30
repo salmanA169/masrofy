@@ -1,21 +1,23 @@
 package com.masrofy.model
 
-import com.masrofy.R
+enum class TransactionCategory(val nameCategory: String, val type: TransactionType) {
+    FOOD("Food", TransactionType.EXPENSE),
+    SOCIAL_LIFE("Social Life", TransactionType.EXPENSE),
+    SELF_DEVELOPMENT("Self Development", TransactionType.EXPENSE),
+    TRANSPORTATION("Transportation", TransactionType.EXPENSE),
+    CULTURE("Culture", TransactionType.EXPENSE),
+    HOUSEHOLD("Household", TransactionType.EXPENSE),
+    APPAREL("Apparel", TransactionType.EXPENSE),
+    BEAUTY("Beauty", TransactionType.EXPENSE),
+    HEALTH("Health", TransactionType.EXPENSE),
+    EDUCATION("Education", TransactionType.EXPENSE),
+    GIFT("Gift", TransactionType.EXPENSE),
+    OTHER("Other", TransactionType.EXPENSE),
+    COFFEE("Coffee", TransactionType.EXPENSE),
+    ALLOWANCE("Allowance", TransactionType.INCOME),
+    SALARY("Salary", TransactionType.INCOME),
+    PETTY_CASH("Petty Cash", TransactionType.INCOME),
+    BOUNCE("Bounce", TransactionType.INCOME),
+    OTHER_INCOME("Other", TransactionType.INCOME)
 
-enum class TransactionCategory(val icon: Int) {
-    CAR(R.drawable.category_car_icon),
-    COFFEE(R.drawable.category_coffee_icon),
-    COMMUTE(R.drawable.category_commute_icon),
-    DELIVERY(R.drawable.category_delivery_icon),
-    EDUCATION(R.drawable.category_education_icon),
-    FAVORITE(R.drawable.category_favorite_icon),
-    GAS(R.drawable.category_gas_icon),
-    GIFT(R.drawable.category_gift_icon),
-    MALL(R.drawable.category_mall_icon),
-    MONEY(R.drawable.category_money_icon),
-    PAYMENT(R.drawable.category_payment_icon),
-    RESTAURANT(R.drawable.category_resturant_icon),
-    SAVING(R.drawable.category_savings_icon),
-    SHOPPING(R.drawable.category_shopping_icon),
-    STORE(R.drawable.category_store_icon),
 }

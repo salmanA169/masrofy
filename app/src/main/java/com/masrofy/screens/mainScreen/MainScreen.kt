@@ -611,16 +611,16 @@ fun TransactionItems(
                 .height(50.dp)
         ) {
             val (icon, category, comment, amount) = createRefs()
-            Icon(
-                modifier = Modifier
-                    .constrainAs(icon) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start, 6.dp)
-                    },
-                painter = painterResource(id = transaction.category.icon),
-                contentDescription = "",
-            )
+//            Icon(
+//                modifier = Modifier
+//                    .constrainAs(icon) {
+//                        top.linkTo(parent.top)
+//                        bottom.linkTo(parent.bottom)
+//                        start.linkTo(parent.start, 6.dp)
+//                    },
+//                painter = painterResource(id = transaction.category.icon),
+//                contentDescription = "",
+//            )
             Text(
                 text = transaction.category.toString(),
                 fontSize = 14.sp,

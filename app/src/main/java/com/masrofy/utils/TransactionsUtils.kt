@@ -18,7 +18,7 @@ fun generateTransactions(): List<Transaction1> {
             TransactionType.INCOME,
             LocalDateTime.of(LocalDate.of(2023, 6, randomDays.random()), LocalTime.now()),
             it.toString(),
-            category = TransactionCategory.CAR
+            category = "TransactionCategory.FOOD"
         )
     }
 }
@@ -32,7 +32,7 @@ fun generateTransactionsEntity(): List<TransactionEntity> {
             TransactionType.INCOME,
             LocalDateTime.of(LocalDate.of(2023, 6, randomDays.random()), LocalTime.now()),
             500,
-            category = TransactionCategory.values().random()
+            category = TransactionCategory.values().random().name
         )
     }
 }

@@ -17,6 +17,12 @@ android {
         versionCode 1
         versionName "1.0"
 
+            kapt {
+                arguments {
+                    arg("room.schemaLocation", "$projectDir/schemas")
+                }
+            }
+
         testInstrumentationRunner "com.masrofy.HiltTestRunner"
         def Properties properties = new Properties()
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
@@ -110,7 +116,7 @@ dependencies {
 
     implementation "androidx.navigation:navigation-compose:$nav_version"
     // date picker
-    implementation("com.marosseleng.android:compose-material3-datetime-pickers:0.4.0")
+//    implementation("com.marosseleng.android:compose-material3-datetime-pickers:0.7.2")
 
     implementation "com.github.PhilJay:MPAndroidChart:v3.1.0"
 

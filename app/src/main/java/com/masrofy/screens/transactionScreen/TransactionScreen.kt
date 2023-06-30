@@ -1,11 +1,9 @@
 package com.masrofy.screens.transactionScreen
 
-import android.app.Activity
-import android.app.DatePickerDialog
+import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -17,25 +15,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -43,6 +38,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -52,44 +48,61 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.marosseleng.compose.material3.datetimepickers.date.ui.dialog.DatePickerDialog
 import com.masrofy.R
 import com.masrofy.Screens
+import com.masrofy.component.InputData
+import com.masrofy.component.InputType
+import com.masrofy.component.LabelEditTextBox
 import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
-import com.masrofy.utils.findOwner
+import com.masrofy.utils.formatShortDate
+import java.time.Instant
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.*
 
 fun NavGraphBuilder.transactionScreenNavigation(
     navController: NavController,
 ) {
-    composable(Screens.TransactionScreen.route + "/{transactionId}", arguments = listOf(
-        navArgument("transactionId") {
-            type = NavType.IntType
-            defaultValue = -1
+    composable(Screens.TransactionScreen.formatRoute, Screens.TransactionScreen.args) {
+        val transactionViewModel: AddEditTransactionViewModel = hiltViewModel()
+        val transactionState by transactionViewModel.transactionDetailState.collectAsState()
+        val transactionEvent by transactionViewModel.effect.collectAsState()
+        val context = LocalContext.current
+        LaunchedEffect(key1 = transactionEvent) {
+            when (transactionEvent) {
+                TransactionDetailEffect.ClosePage -> {
+                    navController.popBackStack()
+                }
+
+                is TransactionDetailEffect.ErrorMessage -> {
+                    Toast.makeText(
+                        context,
+                        (transactionEvent as TransactionDetailEffect.ErrorMessage).message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                TransactionDetailEffect.Noting -> Unit
+            }
         }
-    )) {
-        TransactionScreen(navController = navController)
+        TransactionScreen(transactionState, transactionViewModel::onEvent)
     }
 }
 
-
-@Preview(showBackground = true)
 @Preview(uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun TransactionPreview() {
     MasrofyTheme {
-        TransactionScreen(navController = rememberNavController())
+        TransactionScreen(transactionState = AddEditTransactionState())
     }
 }
 
@@ -99,162 +112,268 @@ fun TransactionPreview() {
 )
 @Composable
 fun TransactionScreen(
-    navController: NavController,
-    viewModel: TransactionDetailsViewModel = hiltViewModel()
+    transactionState: AddEditTransactionState,
+    onEvent: (AddEditTransactionEvent) -> Unit = {}
 ) {
-
-    val transactionDetailsState by viewModel.transactionDetailState.collectAsState()
-
     val focusManager = LocalFocusManager.current
+    val dateState = rememberDatePickerState()
+    var currentInput by remember {
+        mutableStateOf<InputType?>(null)
+    }
+    var currentPaddingInputs by remember{
+        mutableStateOf(0.dp)
+    }
+    LaunchedEffect(key1 = dateState.selectedDateMillis) {
+        dateState.selectedDateMillis?.let {
+            onEvent(
+                AddEditTransactionEvent.DateTimeChanged(
+                    LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(dateState.selectedDateMillis!!),
+                        ZoneId.systemDefault()
+                    )
+                )
+            )
 
-    val context = LocalContext.current
-
-    val activity = findOwner(context = context)
-    LaunchedEffect(key1 = true) {
-        viewModel.effect.collect {
-            when (it) {
-                TransactionDetailEffect.ClosePage -> {
-                    if (navController.popBackStack()){
-                        viewModel.showAds(activity!!)
-                    }
-                }
-                TransactionDetailEffect.Noting -> {}
-
-                is TransactionDetailEffect.ErrorMessage -> {
-                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                }
-            }
         }
     }
-
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         CenterAlignedTopAppBar(scrollBehavior = scrollBehavior, title = {
-            Text(text = stringResource(id = R.string.transaction))
+            Text(
+                text = stringResource(id = R.string.transaction),
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 20.sp
+            )
         }, navigationIcon = {
             IconButton(onClick = {
-                navController.popBackStack()
+                onEvent(AddEditTransactionEvent.ClosePage)
             }) {
                 Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Arrow Back")
             }
         }, actions = {
-            TextButton(onClick = {
-                viewModel.onEvent(TransactionDetailEvent.Save)
-            }) {
-                Text(text = stringResource(id = R.string.save))
+            if (transactionState.isEdit) {
+
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    onClick = {
+                        onEvent(AddEditTransactionEvent.Delete)
+                    }) {
+                    Text(text = stringResource(id = R.string.delete))
+                }
             }
+
         })
     }) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(it)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            focusManager.clearFocus()
-                        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(it)
+                    .padding(bottom = currentPaddingInputs)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                currentInput = null
+                            }
+                        )
+                    }
+            ) {
+                if (transactionState.isEdit.not()) {
+                    TransactionType(
+                        onTransactionTypeChange = onEvent,
+                        selectedType = transactionState.transactionType,
                     )
                 }
-        ) {
-            val selectRemember = remember {
-                { transactionType: TransactionType ->
-                    viewModel.onEvent(TransactionDetailEvent.TransactionTypeChange(transactionType))
-                }
+                InputsTransactions(
+                    currentDateTime = transactionState.date.formatShortDate(),
+                    currentAccount = "transactionState.selectedAccount",
+                    currentCategory = transactionState.transactionCategory.toString(),
+                    currentAmount = transactionState.totalAmount,
+                    currentNote = transactionState.comment ?: "",
+                    onInputChange = { currentInput = it },
+                    onEvent = onEvent
+                )
+                InputsTransactions(
+                    currentDateTime = transactionState.date.formatShortDate(),
+                    currentAccount = "transactionState.selectedAccount",
+                    currentCategory = transactionState.transactionCategory.toString(),
+                    currentAmount = transactionState.totalAmount,
+                    currentNote = transactionState.comment ?: "",
+                    onInputChange = { currentInput = it },
+                    onEvent = onEvent
+                )
+                InputsTransactions(
+                    currentDateTime = transactionState.date.formatShortDate(),
+                    currentAccount = "transactionState.selectedAccount",
+                    currentCategory = transactionState.transactionCategory.toString(),
+                    currentAmount = transactionState.totalAmount,
+                    currentNote = transactionState.comment ?: "",
+                    onInputChange = { currentInput = it },
+                    onEvent = onEvent
+                )
             }
-            if (transactionDetailsState.isEdit.not()) {
-                TransactionType(
-                    transactionType = {
-                        TransactionType.values().toList()
-                    },
-                    onTransactionTypeChange = selectRemember,
-                    selectedType = transactionDetailsState.transactionType,
+
+            AnimatedVisibility(
+                visible = currentInput != null && currentInput != InputType.KEYBOARD,
+                modifier = Modifier.align(BottomStart)
+            ) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(4.dp)
-                )
-            }
-            val rememberTextChange = remember {
-                { text: TextFieldValue ->
-                    viewModel.onEvent(TransactionDetailEvent.AmountChange(text))
-                }
-            }
-            EditTextTransactionSection(
-                transactionDetailsState.totalAmount,
-                rememberTextChange,
-                transactionDetailsState.transactionType.getColor(),
-                transactionDetailsState.isEdit
-            )
+                ) {
+                    if (currentInput == InputType.DATE_INPUT) {
+                        DatePickerDialog(onDismissRequest = {
+                            currentInput = null
+                            focusManager.clearFocus()
+                        }, confirmButton = {
+                            Button(onClick = {
+                                currentInput = null
+                                focusManager.clearFocus()
+                            }) {
+                                Text(text = stringResource(id = R.string.confirm))
+                            }
+                        }) {
+                            DatePicker(state = dateState)
+                        }
+                    } else {
+                        val inputData = remember(currentInput) {
+                            when (currentInput) {
+                                InputType.KEYBOARD -> null
+                                InputType.ACCOUNT_INPUT -> InputData(
+                                    "Account",
+                                    transactionState.accounts.map { it.name },
+                                    InputType.ACCOUNT_INPUT
+                                )
 
-            val rememberSelectedAccount = remember {
-                { account: Account ->
-                    viewModel.onEvent(TransactionDetailEvent.AccountSelected(account))
-                }
-            }
-            transactionDetailsState.selectedAccount?.let { it1 ->
-                AccountSection(
-                    onAccountChange = rememberSelectedAccount, currentAccount = it1.name,
-                    accountAvailable = { transactionDetailsState.accounts }
-                )
-            }
-            val transactionCategoryOnUpdate = remember {
-                { transactionCategory: TransactionCategory ->
-                    viewModel.onEvent(TransactionDetailEvent.CategorySelected(transactionCategory))
+                                InputType.DATE_INPUT -> null
+                                InputType.CATEGORY_INPUT -> {
+                                    val getDataByTransactionType = TransactionCategory.values()
+                                        .filter { it.type == transactionState.transactionType }
+                                        .map { it.nameCategory }
+                                    InputData(
+                                        "Category",
+                                        getDataByTransactionType,
+                                        InputType.CATEGORY_INPUT
+                                    )
+                                }
 
-                }
-            }
-            CategorySection(
-                onSelected = transactionCategoryOnUpdate,
-                categorySelected = { transactionDetailsState.transactionCategory },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            val updateDateRemember = remember {
-                { localDate: LocalDate ->
-                    viewModel.onEvent(TransactionDetailEvent.DateChanged(localDate))
-                }
-            }
-            DateSection(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                onDateChanged = updateDateRemember,
-                date = { transactionDetailsState.date.format(DateTimeFormatter.ISO_DATE) }
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            val rememberTextCommentChange = remember {
-                { text: TextFieldValue ->
-                    viewModel.onEvent(TransactionDetailEvent.CommentChange(text))
-                }
-            }
-
-            OutlinedTextField(value = transactionDetailsState.comment ?: TextFieldValue(),
-                onValueChange = rememberTextCommentChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                label = {
-                    Text(text = stringResource(id = R.string.comment))
-                }
-            )
-
-            if (transactionDetailsState.isEdit) {
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = {
-                    viewModel.onEvent(TransactionDetailEvent.Delete)
-                }) {
-                    Text(text = stringResource(id = R.string.delete))
+                                null -> null
+                            }
+                        }
+                        if (inputData != null) {
+                            Inputs(inputData = inputData, onEvent = onEvent,modifier = Modifier.requiredHeightIn(min = 900.dp).onSizeChanged {
+                                Log.d("TransactionScreen", "TransactionScreen: ${it.height.dp}")
+                                currentPaddingInputs = it.height.dp
+                            })
+                        }
+                    }
                 }
             }
         }
 
-
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Inputs(
+    modifier : Modifier = Modifier,
+    inputData: InputData,
+    onEvent: (AddEditTransactionEvent) -> Unit = {},
+    onHide: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier.fillMaxWidth().background(Color.Black),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.tertiaryContainer)
+        ) {
+            Text(
+                text = inputData.labels,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            IconButton(onClick = { onHide() }) {
+                Icon(imageVector = Icons.Default.Close, contentDescription = "")
+            }
+        }
+        LazyVerticalGrid(columns = GridCells.Fixed(3)) {
+            items(inputData.data) {
+                OutlinedCard(onClick = {
+                    when (inputData.inputType) {
+                        InputType.KEYBOARD -> Unit
+                        InputType.ACCOUNT_INPUT -> {
+//                            onEvent(AddEditTransactionEvent.AccountSelected())
+                        }
+
+                        InputType.DATE_INPUT -> TODO()
+                        InputType.CATEGORY_INPUT -> TODO()
+                    }
+                }) {
+                    Text(text = it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InputsTransactions(
+    onInputChange: (InputType) -> Unit = {},
+    onEvent: (AddEditTransactionEvent) -> Unit = {},
+    currentDateTime: String,
+    currentAccount: String,
+    currentCategory: String,
+    currentAmount: String,
+    currentNote: String
+) {
+    LabelEditTextBox(
+        label = stringResource(id = R.string.date),
+        value = currentDateTime,
+        inputType = InputType.DATE_INPUT,
+        onShowInput = onInputChange
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    LabelEditTextBox(
+        label = stringResource(id = R.string.account),
+        value = currentAccount,
+        inputType = InputType.ACCOUNT_INPUT,
+        onShowInput = onInputChange
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    LabelEditTextBox(
+        label = stringResource(id = R.string.transaction_category),
+        value = currentCategory,
+        inputType = InputType.CATEGORY_INPUT,
+        onShowInput = onInputChange
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    LabelEditTextBox(
+        label = stringResource(id = R.string.amount),
+        value = currentAmount,
+        inputType = InputType.KEYBOARD,
+        onShowInput = onInputChange,
+        onValueChange = { onEvent(AddEditTransactionEvent.AmountChange(it)) })
+    Spacer(modifier = Modifier.height(8.dp))
+
+    LabelEditTextBox(
+        label = stringResource(id = R.string.comment),
+        value = currentNote,
+        inputType = InputType.KEYBOARD,
+        onShowInput = onInputChange,
+        onValueChange = {
+            onEvent(AddEditTransactionEvent.CommentChange(it))
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -272,7 +391,7 @@ fun EditTextTransactionSection(
     LaunchedEffect(key1 = isEdit) {
         if (isEdit.not()) {
             focusRequester.requestFocus()
-        }else{
+        } else {
             focusManager.clearFocus()
         }
     }
@@ -355,14 +474,14 @@ fun DateSection(
     var isDialogShown by remember {
         mutableStateOf(false)
     }
-    if (isDialogShown) {
-        DatePickerDialog(onDismissRequest = {
-            isDialogShown = false
-        }, onDateChange = {
-            onDateChanged(it)
-            isDialogShown = false
-        })
-    }
+//    if (isDialogShown) {
+//        DatePickerDialog(onDismissRequest = {
+//            isDialogShown = false
+//        }, onDateChange = {
+//            onDateChanged(it)
+//            isDialogShown = false
+//        })
+//    }
     Column(modifier = modifier) {
 
         Text(text = stringResource(id = R.string.date))
@@ -444,7 +563,7 @@ fun CategorySection(
                                 },
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = transactionCategory.icon),
+                                imageVector = Icons.Default.Close,
                                 contentDescription = "",
                                 modifier = Modifier
                                     .size(28.dp),
@@ -461,63 +580,57 @@ fun CategorySection(
     }
 }
 
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
+@Composable
+fun ChipPreview() {
+    MasrofyTheme(dynamicColor = false) {
+        TransactionType(
+            onTransactionTypeChange = {},
+            selectedType = TransactionType.EXPENSE
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionType(
-    transactionType: () -> List<TransactionType>,
-    onTransactionTypeChange: (TransactionType) -> Unit,
+    onTransactionTypeChange: (AddEditTransactionEvent) -> Unit,
     selectedType: TransactionType,
     modifier: Modifier = Modifier,
 ) {
 
-    val transactionTypeRemember = remember {
-        transactionType()
-    }
-    Box(
+    Row(
         modifier = modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 1.dp, vertical = 4.dp)
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    MaterialTheme.shapes.extraLarge
+
+        TransactionType.values().forEach {
+            FilterChip(
+                selected = selectedType == it,
+                onClick = {
+                    onTransactionTypeChange(AddEditTransactionEvent.TransactionTypeChange(it))
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = it.getTitle()),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedLabelColor = it.getColor(),
                 ),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-
-            transactionTypeRemember.forEach {
-                FilterChip(selected = selectedType == it,
-                    onClick = {
-                        onTransactionTypeChange(it)
-                    }, label = {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(id = it.getTitle()),
-                                style = MaterialTheme.typography.titleMedium,
-
-                                )
-                        }
-                    }
-//                    , colors = AssistChipDefaults.assistChipColors(
-//                    containerColor = if (selectedType() == it) selectedBackground else unSelectedBackground)
-                    , border = null,
-                    shape = RoundedCornerShape(24.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp, 2.dp)
-                        .weight(1f)
-                )
-            }
-
-
+                border = FilterChipDefaults.filterChipBorder(
+                    selectedBorderColor = it.getColor(),
+                    selectedBorderWidth = 1.dp
+                ),
+            )
         }
-    }
 
+
+    }
 }
 
 
