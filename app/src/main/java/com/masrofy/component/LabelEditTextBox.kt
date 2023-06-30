@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -16,39 +18,77 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masrofy.model.Account
 import com.masrofy.model.TransactionType
 import com.masrofy.ui.theme.MasrofyTheme
 
 // name it user input user,  input selection
 data class InputData(
     val labels: String,
-    val data: List<String>,
+    val data: List<InputDataEntry>,
     val inputType: InputType
 )
 
-enum class InputType {
-    KEYBOARD, ACCOUNT_INPUT, DATE_INPUT, CATEGORY_INPUT
+interface InputDataEntry {
+    fun getDataEntry(): String
+    fun getTagId(): Int?
+}
 
+class AccountDataEntryImplement(private val account: Account) : InputDataEntry {
+    override fun getDataEntry(): String {
+        return account.name
+    }
+
+    override fun getTagId(): Int? {
+        return account.id
+    }
+}
+
+class CategoryDataEntryImpl(private val category: String) : InputDataEntry {
+    override fun getDataEntry(): String {
+        return category
+    }
+
+    override fun getTagId(): Int? {
+        return null
+    }
+}
+
+enum class InputType {
+    ACCOUNT_INPUT, CATEGORY_INPUT, KEYBOARD, DATE_INPUT;
+
+    fun getNextInput(): InputType? {
+        return when (this) {
+            ACCOUNT_INPUT -> CATEGORY_INPUT
+            CATEGORY_INPUT -> KEYBOARD
+            KEYBOARD -> KEYBOARD
+            DATE_INPUT -> null
+        }
+    }
 }
 
 @Composable
 fun LabelEditTextBox(
-    modifier :Modifier = Modifier,
+    modifier: Modifier = Modifier,
     label: String,
     value: String,
     inputType: InputType,
     onValueChange: (String) -> Unit = {},
     onShowInput: (InputType) -> Unit = {},
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
 
     OutlinedTextField(
         textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
         value = value,
         onValueChange = onValueChange,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        singleLine = true, maxLines = 1,
         readOnly = inputType != InputType.KEYBOARD,
         prefix = {
             Text(
@@ -59,12 +99,14 @@ fun LabelEditTextBox(
         },
         modifier = modifier
             .fillMaxWidth()
-            .focusTarget()
             .onFocusChanged {
-                if (it.isFocused && inputType != InputType.KEYBOARD) {
+                if (it.isFocused) {
                     onShowInput(inputType)
                 }
-            }
+            },
+        keyboardActions = KeyboardActions(onDone = {
+            onShowInput(inputType)
+        })
     )
 
 }

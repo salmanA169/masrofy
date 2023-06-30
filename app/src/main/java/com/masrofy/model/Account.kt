@@ -9,7 +9,7 @@ data class Account(
     val type: CategoryAccount,
     val totalAmount:Long,
     val createdAt:LocalDateTime,
-    val transactions:List<TransactionEntity>
+    val transactions:List<TransactionEntity> = emptyList()
 )
 
 fun List<Account>.getDefaultAccount() = find { it.name == "Cash" }

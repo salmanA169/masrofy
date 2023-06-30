@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.AdsManager
+import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.data.entity.toAccount
 import com.masrofy.model.Account
 import com.masrofy.model.TransactionCategory
@@ -27,6 +28,7 @@ class AddEditTransactionViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val adsManager: AdsManager,
+    private val dispatcherProvider: DispatcherProvider,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -42,7 +44,7 @@ class AddEditTransactionViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherProvider.io) {
 
             accountRepository.getAccounts().collect { accounts ->
                 _transactionDetailState.update {
@@ -53,7 +55,7 @@ class AddEditTransactionViewModel @Inject constructor(
                 }
             }
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherProvider.io) {
             if (transactionId != -1 && transactionId != null) {
                 val transaction = transactionRepository.getTransactionById(transactionId)
                 val account = accountRepository.getAccountById(transaction.accountTransactionId)
@@ -77,10 +79,13 @@ class AddEditTransactionViewModel @Inject constructor(
     fun onEvent(event: AddEditTransactionEvent) {
         when (event) {
             is AddEditTransactionEvent.AccountSelected -> {
-                _transactionDetailState.update {
-                    it.copy(
-                        selectedAccount = event.account
-                    )
+                viewModelScope.launch(dispatcherProvider.io) {
+                    val getAccountById = accountRepository.getAccountById(event.accountId)
+                    _transactionDetailState.update {
+                        it.copy(
+                            selectedAccount = getAccountById.toAccount()
+                        )
+                    }
                 }
 
             }
@@ -119,28 +124,30 @@ class AddEditTransactionViewModel @Inject constructor(
             }
 
             AddEditTransactionEvent.Delete -> {
-                viewModelScope.launch(Dispatchers.IO) {
-
+                viewModelScope.launch(dispatcherProvider.io) {
                     transactionRepository.deleteTransaction(_transactionDetailState.value.toTransactionEntityWithId())
                     _effect.value = TransactionDetailEffect.ClosePage
                 }
             }
 
             AddEditTransactionEvent.Save -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    if (_transactionDetailState.value.isValidToSave()) {
-                        val transaction = _transactionDetailState.value
+                viewModelScope.launch(dispatcherProvider.io) {
+                    val transaction = _transactionDetailState.value
+                    if (transaction.transactionCategory == null ) {
+                        _effect.update {
+                            TransactionDetailEffect.ErrorMessage("You must choose category")
+                        }
+                    }else if(transaction.totalAmount.isEmpty()|| transaction.totalAmount.toLong() > 99999){
+                        _effect.update {
+                            TransactionDetailEffect.ErrorMessage("The amount zero or greater then 99999")
+                        }
+                    } else {
                         if (transaction.isEdit) {
                             transactionRepository.updateTransaction(transaction.toTransactionEntityWithId())
                         } else {
                             transactionRepository.insertTransaction(transaction.toTransactionEntity())
                         }
-
                         _effect.value = TransactionDetailEffect.ClosePage
-                    } else {
-                        _effect.update {
-                            TransactionDetailEffect.ErrorMessage("The amount less or equal zero")
-                        }
                     }
                 }
             }
@@ -148,7 +155,8 @@ class AddEditTransactionViewModel @Inject constructor(
             is AddEditTransactionEvent.TransactionTypeChange -> {
                 _transactionDetailState.update {
                     it.copy(
-                        transactionType = event.transactionType
+                        transactionType = event.transactionType,
+                        transactionCategory = null
                     )
                 }
             }
@@ -171,7 +179,7 @@ sealed class TransactionDetailEffect() {
 sealed class AddEditTransactionEvent {
     class TransactionTypeChange(val transactionType: TransactionType) : AddEditTransactionEvent()
     class AmountChange(val text: String) : AddEditTransactionEvent()
-    class AccountSelected(val account: Account) : AddEditTransactionEvent()
+    class AccountSelected(val accountId: Int) : AddEditTransactionEvent()
     class CategorySelected(val transactionCategory: String) : AddEditTransactionEvent()
     class DateTimeChanged(val date: LocalDateTime) : AddEditTransactionEvent()
     class CommentChange(val comment: String) : AddEditTransactionEvent()
