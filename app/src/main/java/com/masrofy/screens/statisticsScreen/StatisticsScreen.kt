@@ -19,6 +19,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.masrofy.R
 import com.masrofy.Screens
+import com.masrofy.component.AdmobCompose
 import com.masrofy.component.PieChart
 import com.masrofy.component.TransactionEntry
 import com.masrofy.component.mirror
@@ -137,6 +138,7 @@ fun StatisticScreen(
 //                    Spacer(modifier = Modifier.height(2.dp))
                 }
             }
+            AdmobCompose()
         }
     }
 

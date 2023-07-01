@@ -3,12 +3,17 @@
     <string name="expense">Expense</string>
     <string name="income">Income</string>
     <string name="transaction_category">Category</string>
-    <string name="transaction">transaction</string>
+    <string name="transaction">Transaction</string>
+    <string name="transactions">Transactions</string>
     <string name="date">Date</string>
-    <string name="amount">amount</string>
-    <string name="comment">comment</string>
-    <string name="save">save</string>
+    <string name="amount">Amount</string>
+    <string name="comment">Comment</string>
+    <string name="save">Save</string>
     <string name="account">account</string>
-    <string name="delete">delete</string>
+    <string name="delete">Delete</string>
     <string name="statistic">statistic</string>
+    <string name="mybalance">My Balance</string>
+    <string name="show_more">show more</string>
+    <string name="top_transactions">Top Transactions</string>
+    <string name="confirm">Confirm</string>
 </resources>

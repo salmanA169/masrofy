@@ -11,38 +11,38 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 @Immutable
-data class TransactionDetailsState(
+data class AddEditTransactionState(
     val transactionId:Int = -1,
     val transactionType: TransactionType = TransactionType.EXPENSE,
-    val totalAmount: TextFieldValue = TextFieldValue(),
+    val totalAmount: String = "",
     val accounts: List<Account> = emptyList(),
     val selectedAccount: Account? = null,
-    val transactionCategory: TransactionCategory = TransactionCategory.CAR,
-    val date: LocalDate = LocalDate.now(),
-    val comment: TextFieldValue? = null,
+    val transactionCategory: String? = null ,
+    val date: LocalDateTime = LocalDateTime.now(),
+    val comment: String? = null,
     var isEdit: Boolean = false
 ) {
     fun isValidToSave(): Boolean {
-        return totalAmount.text.isNotEmpty() && !totalAmount.text.contentEquals("0") && selectedAccount != null
+        return totalAmount.isNotEmpty() && !totalAmount.contentEquals("0") && selectedAccount != null
     }
 
 }
 
-fun TransactionDetailsState.toTransactionEntity() = TransactionEntity.createTransaction(
+fun AddEditTransactionState.toTransactionEntity() = TransactionEntity.createTransaction(
     selectedAccount!!.id,
     transactionType,
-    LocalDateTime.of(date, LocalTime.now()),
-    totalAmount.text.toLong(),
-    comment?.text,
-    transactionCategory
+    date,
+    totalAmount.toLong(),
+    comment,
+    transactionCategory!!
 )
 
-fun TransactionDetailsState.toTransactionEntityWithId() = TransactionEntity.createTransactionWithId(
+fun AddEditTransactionState.toTransactionEntityWithId() = TransactionEntity.createTransactionWithId(
     transactionId,
     selectedAccount!!.id,
     transactionType,
-    LocalDateTime.of(date, LocalTime.now()),
-    totalAmount.text.toLong(),
-    comment?.text,
-    transactionCategory
+    date,
+    totalAmount.toLong(),
+    comment,
+    transactionCategory!!
 )

@@ -3,17 +3,25 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
+secrets {
+    // Optionally specify a different file name containing your secrets.
+    // The plugin defaults to "local.properties"
+    propertiesFileName = "secrets.properties"
 
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.properties"
+
+    // Configure which keys should be ignored by the plugin by providing regular expressions.
+    // "sdk.dir" is ignored by default.
+    ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
+}
 android {
-    signingConfigs {
-        release {
-            storeFile file('C:\\Users\\salma\\AndroidStudioProjects\\masrofy\\app\\release\\masrofyKey.jks')
-            storePassword 'alamode151412'
-            keyAlias 'salmanalamode15'
-            keyPassword 'Salmanalamode15'
-        }
-    }
+    def localProperties =  new Properties()
+    localProperties.load(new FileInputStream(rootProject.file("local.properties")))
     namespace 'com.masrofy'
     compileSdk 33
 
@@ -21,16 +29,22 @@ android {
         applicationId "com.masrofy"
         minSdk 28
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "2.0.0"
+
+            kapt {
+                arguments {
+                    arg("room.schemaLocation", "$projectDir/schemas")
+                }
+            }
 
         testInstrumentationRunner "com.masrofy.HiltTestRunner"
-        def Properties properties = new Properties()
-        properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
-        buildConfigField("String","ADMOB_ID",properties.getProperty("ADMOB_ID"))
-        buildConfigField("String","ADMOB_ADS_ID",properties.getProperty("ADMOB_ADS_ID"))
-        manifestPlaceholders = [ADMOB_ID:properties.getProperty("ADMOB_ID")]
+        buildConfigField("String","ADMOB_ID",localProperties.getProperty("ADMOB_ID"))
+        buildConfigField("String","ADMOB_ADS_ID",localProperties.getProperty("ADMOB_ADS_ID"))
+        buildConfigField("String","ADMOBE_BANNER_UNIT_ID",localProperties.getProperty("ADMOBE_BANNER_UNIT_ID"))
+
+        manifestPlaceholders = [ADMOB_ID:localProperties.getProperty("ADMOB_ID")]
         vectorDrawables {
             useSupportLibrary true
         }
@@ -42,7 +56,9 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
+            applicationIdSuffix '.release'
+
 
         }
         debug {
@@ -54,11 +70,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
@@ -82,6 +98,7 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.compose.material3:material3:1.1.0'
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
@@ -107,7 +124,6 @@ dependencies {
     // ...with Kotlin.
     kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.44.2'
 
-    androidTestImplementation "com.google.truth:truth:1.1.3"
 
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
@@ -115,14 +131,18 @@ dependencies {
 
     implementation "androidx.navigation:navigation-compose:$nav_version"
     // date picker
-    implementation("com.marosseleng.android:compose-material3-datetime-pickers:0.4.0")
+//    implementation("com.marosseleng.android:compose-material3-datetime-pickers:0.7.2")
 
     implementation "com.github.PhilJay:MPAndroidChart:v3.1.0"
 
-    testImplementation "com.google.truth:truth:1.1.3"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
 
     implementation "androidx.compose.runtime:runtime:1.4.3"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
     implementation 'com.google.android.gms:play-services-ads:22.1.0'
+
+    testImplementation "com.google.truth:truth:1.1.4"
+
+    testImplementation 'app.cash.turbine:turbine:1.0.0'
+
 }

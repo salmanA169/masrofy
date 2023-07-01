@@ -1,7 +1,7 @@
 package com.masrofy.data.dao
 
 import androidx.room.*
-import androidx.room.OnConflictStrategy.REPLACE
+import androidx.room.OnConflictStrategy.Companion.REPLACE
 import com.masrofy.data.entity.AccountEntity
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.data.relation.AccountWithTransactions

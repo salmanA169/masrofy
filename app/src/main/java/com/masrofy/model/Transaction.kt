@@ -10,5 +10,5 @@ data class Transaction(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val amount: BigDecimal,
     val comment: String? = null,
-    val category: TransactionCategory
+    val category: String
 )

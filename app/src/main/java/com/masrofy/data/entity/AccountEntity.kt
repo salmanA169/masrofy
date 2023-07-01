@@ -29,7 +29,7 @@ fun List<AccountEntity>.hasDefaultAccount():Boolean  = if (isNotEmpty()){any {
 }} else false
 
 fun defaultAccount() = AccountEntity(0, "Cash", CategoryAccount.CASH, 0, LocalDateTime.now())
-fun AccountEntity.toAccount(transactions: List<TransactionEntity>) = Account(
+fun AccountEntity.toAccount(transactions: List<TransactionEntity> = emptyList()) = Account(
     accountId,
     name,
     type, totalAmount, createdAt, transactions

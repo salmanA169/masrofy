@@ -15,7 +15,6 @@ class CurrencyAmountInputVisualTransformation(
         return try {
             ifBlank { "0" }
                 .replace("\\D".toRegex(), "")
-
                 .toBigDecimal()
         } catch (e: Exception) {
             BigDecimal.ZERO

@@ -3,6 +3,7 @@ package com.masrofy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,15 +26,20 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.masrofy.screens.mainScreen.MainViewModel
 import com.masrofy.screens.statisticsScreen.statisticsScreen
 import com.masrofy.screens.transactionScreen.transactionScreenNavigation
 import com.masrofy.ui.theme.MasrofyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.masrofy.screens.mainScreen.mainScreenNavigation
+import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
+import com.masrofy.screens.transactions_details.transactionsDetailsDest
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -45,8 +51,8 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
+}
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
     ExperimentalComposeUiApi::class
@@ -81,9 +87,10 @@ fun SetNavigationScreen() {
                     }
                     IconButton(onClick = rememberClick) {
                         Icon(
-                            rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.statistic_icon)),
+                            rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.statistic_icon1)),
                             contentDescription = "",
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }, floatingActionButton = {
@@ -123,6 +130,8 @@ fun SetNavigationScreen() {
             mainScreenNavigation(navController, it)
             transactionScreenNavigation(navController)
             statisticsScreen(navController)
+            transactionsDetailsDest(navController)
+            topTransactionsDetailsDest(navController)
         }
     }
 }
