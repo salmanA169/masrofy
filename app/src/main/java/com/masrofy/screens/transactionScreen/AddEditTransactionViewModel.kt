@@ -1,21 +1,18 @@
 package com.masrofy.screens.transactionScreen
 
 import android.app.Activity
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.AdsManager
+import com.masrofy.TRANSACTION_ID
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.data.entity.toAccount
-import com.masrofy.model.Account
-import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionType
 import com.masrofy.model.getDefaultAccount
 import com.masrofy.repository.AccountRepository
 import com.masrofy.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,7 +29,7 @@ class AddEditTransactionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val transactionId = savedStateHandle.get<Int>("transactionId")
+    val transactionId = savedStateHandle.get<Int>(TRANSACTION_ID)
     private val _transactionDetailState = MutableStateFlow(AddEditTransactionState())
     val transactionDetailState = _transactionDetailState.asStateFlow()
 
@@ -68,7 +65,7 @@ class AddEditTransactionViewModel @Inject constructor(
                         date = transaction.createdAt,
                         transactionType = transaction.transactionType,
                         isEdit = true,
-                        comment = it.comment
+                        comment = transaction.comment
                     )
                 }
 
@@ -92,9 +89,9 @@ class AddEditTransactionViewModel @Inject constructor(
 
             is AddEditTransactionEvent.AmountChange -> {
                 _transactionDetailState.update {
-//                    val formatText = event.text.replace("\\D".toRegex(), "")
+                    val formatText = event.text.replace("\\D".toRegex(), "")
                     it.copy(
-                        totalAmount = event.text
+                        totalAmount = formatText
                     )
                 }
             }
@@ -137,12 +134,12 @@ class AddEditTransactionViewModel @Inject constructor(
                         _effect.update {
                             TransactionDetailEffect.ErrorMessage("You must choose category")
                         }
-                    }else if(transaction.totalAmount.isEmpty()|| transaction.totalAmount.toLong() > 99999){
+                    }else if(transaction.totalAmount.isEmpty()|| transaction.totalAmount.toLong() > 99999999){
                         _effect.update {
                             TransactionDetailEffect.ErrorMessage("The amount zero or greater then 99999")
                         }
                     } else {
-                        if (transaction.isEdit) {
+                        if (transaction.isEdit!!) {
                             transactionRepository.updateTransaction(transaction.toTransactionEntityWithId())
                         } else {
                             transactionRepository.insertTransaction(transaction.toTransactionEntity())
@@ -153,11 +150,13 @@ class AddEditTransactionViewModel @Inject constructor(
             }
 
             is AddEditTransactionEvent.TransactionTypeChange -> {
-                _transactionDetailState.update {
-                    it.copy(
-                        transactionType = event.transactionType,
-                        transactionCategory = null
-                    )
+                if (_transactionDetailState.value.transactionType != event.transactionType){
+                    _transactionDetailState.update {
+                        it.copy(
+                            transactionType = event.transactionType,
+                            transactionCategory = null
+                        )
+                    }
                 }
             }
 

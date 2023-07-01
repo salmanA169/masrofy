@@ -3,6 +3,7 @@ package com.masrofy.model
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import com.masrofy.R
 import com.masrofy.ui.theme.ColorTotalExpense
 import com.masrofy.ui.theme.ColorTotalIncome

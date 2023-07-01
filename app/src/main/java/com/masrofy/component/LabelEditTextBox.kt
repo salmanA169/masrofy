@@ -19,6 +19,7 @@ import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,7 +81,8 @@ fun LabelEditTextBox(
     inputType: InputType,
     onValueChange: (String) -> Unit = {},
     onShowInput: (InputType) -> Unit = {},
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
 
     OutlinedTextField(
@@ -90,6 +92,7 @@ fun LabelEditTextBox(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true, maxLines = 1,
         readOnly = inputType != InputType.KEYBOARD,
+        visualTransformation = visualTransformation,
         prefix = {
             Text(
                 text = label,

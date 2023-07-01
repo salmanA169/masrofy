@@ -1,65 +1,91 @@
 package com.masrofy.screens.mainScreen
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.masrofy.R
 import com.masrofy.Screens
-import com.masrofy.component.mirror
-import com.masrofy.model.BalanceManager
+import com.masrofy.component.AdmobCompose
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.TopTransactions
 import com.masrofy.model.Transaction
-import com.masrofy.model.TransactionGroup
-import com.masrofy.model.TransactionType
 import com.masrofy.model.getColor
-import com.masrofy.ui.theme.ColorTotalExpense
-import com.masrofy.ui.theme.ColorTotalIncome
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
-import com.masrofy.utils.itemShapes
 import java.text.DecimalFormat
 
 fun NavGraphBuilder.mainScreenNavigation(
-    navController: NavController,
-    paddingValues: PaddingValues
+    navController: NavController, paddingValues: PaddingValues
 ) {
     composable(Screens.MainScreen.route) {
         val mainViewModel: MainViewModel = hiltViewModel()
         val mainState by mainViewModel.state.collectAsState()
-        MainScreen(mainState, paddingValues = paddingValues, navController)
+        val effect by mainViewModel.effect.collectAsState()
+        LaunchedEffect(key1 = effect) {
+            when (effect) {
+                MainScreenEvent.None -> Unit
+                MainScreenEvent.OnNavigateTopTransaction -> {
+                    navController.navigate(Screens.TopTransactionsDetails.route)
+                    mainViewModel.resetEffect()
+                }
+
+                is MainScreenEvent.OnNavigateTransactionWithId -> {
+                    navController.navigate(Screens.TransactionScreen.navigateToTransactionWithId((effect as MainScreenEvent.OnNavigateTransactionWithId).transactionId))
+                    mainViewModel.resetEffect()
+
+                }
+
+                MainScreenEvent.OnNavigateTransactionDetails -> {
+                    navController.navigate(Screens.TransactionsDetails.route)
+                    mainViewModel.resetEffect()
+
+                }
+            }
+        }
+        MainScreen(mainState, paddingValues = paddingValues, onEvent = mainViewModel::onEvent)
     }
 }
 
@@ -72,8 +98,7 @@ fun BalanceCard(
     currentExpense: String
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
 
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
@@ -163,15 +188,13 @@ fun PreviewTopTransactions() {
         TopTransactions(
             topTransactions = listOf(
                 TopTransactions(
-                    "Gas", 50, 50f, ColorTransactions.PRIMARY
-                ),
-                TopTransactions(
-                    "Gas", 60, 25f, ColorTransactions.SECONDARY
-                ),
-                TopTransactions(
-                    "Gas", 56, 25f, ColorTransactions.TERTIARY
+                    "Gas", "50.toBigDecimal()", 50f, ColorTransactions.PRIMARY
+                ), TopTransactions(
+                    "Gas", "60.55", 25f, ColorTransactions.SECONDARY
+                ), TopTransactions(
+                    "Gas", "50.52", 25f, ColorTransactions.TERTIARY
                 )
-            ), navController = rememberNavController()
+            )
         )
     }
 }
@@ -184,8 +207,7 @@ fun BalanceItem(
     textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium
 ) {
     Column(
-        modifier = Modifier.wrapContentSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = nameLabel,
@@ -209,7 +231,7 @@ fun BalanceItem(
 fun Transactions(
     modifier: Modifier = Modifier,
     transactions: List<Transaction>,
-    navController: NavController
+    onEvent: (MainScreenEventUI) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -228,7 +250,7 @@ fun Transactions(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(onClick = { navController.navigate(Screens.TransactionsDetails.route) }) {
+            TextButton(onClick = { onEvent(MainScreenEventUI.NavigateToTransactionsDetails) }) {
                 Text(
                     text = stringResource(id = R.string.show_more),
                     style = MaterialTheme.typography.labelMedium
@@ -246,11 +268,13 @@ fun Transactions(
                 it.transactionId
             }) {
                 TransactionItem(
+                    transactionId = it.transactionId,
                     category = it.category.toString(),
-                    amount = it.amount.toString(),
+                    amount = formatAsDisplayNormalize(it.amount, true),
                     date = it.createdAt.formatShortDate(),
                     color = it.transactionType.getColor(),
-                    comment = it.comment
+                    comment = it.comment,
+                    onEvent = onEvent
                 )
                 Divider()
             }
@@ -262,7 +286,7 @@ fun Transactions(
 fun TopTransactions(
     modifier: Modifier = Modifier,
     topTransactions: List<TopTransactions> = listOf(),
-    navController: NavController
+    onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -281,7 +305,7 @@ fun TopTransactions(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(onClick = { navController.navigate(Screens.TopTransactionsDetails.route) }) {
+            TextButton(onClick = { onEvent(MainScreenEventUI.NavigateToTopTransaction) }) {
                 Text(
                     text = stringResource(id = R.string.show_more),
                     style = MaterialTheme.typography.labelMedium
@@ -297,10 +321,7 @@ fun TopTransactions(
         ) {
             items(topTransactions) {
                 TopTransactionItem(
-                    it.category,
-                    it.percent,
-                    it.amount,
-                    it.color
+                    it.category, it.percent, it.amount, it.color
                 )
                 Divider()
             }
@@ -314,7 +335,7 @@ val decimalFormat = DecimalFormat("###,###,##0.0")
 fun TopTransactionItem(
     category: String,
     percent: Float,
-    amount: Long,
+    amount: String,
     color: ColorTransactions,
     modifier: Modifier = Modifier
 ) {
@@ -329,7 +350,8 @@ fun TopTransactionItem(
         Text(
             text = category,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.weight(0.8f)
+            modifier = Modifier.weight(0.8f),
+            textAlign = TextAlign.Center
         )
         Box(
             modifier = Modifier
@@ -353,7 +375,7 @@ fun TopTransactionItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = amount.toString().plus(" SR"),
+                text = amount,
                 maxLines = 1,
                 style = MaterialTheme.typography.labelSmall,
                 textAlign = TextAlign.Center,
@@ -370,34 +392,43 @@ fun TopTransactionItem(
 
 @Composable
 fun TransactionItem(
+    transactionId: Int = 0,
     category: String,
     comment: String? = null,
     amount: String,
     date: String,
     color: Color,
     padding: PaddingValues = PaddingValues(12.dp, 6.dp),
-    backgroundColor: Color = Color.Transparent
+    backgroundColor: Color = Color.Transparent,
+    onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(padding)
-            .background(backgroundColor),
+            .clickable() {
+                onEvent(MainScreenEventUI.NavigateTransactionWithId(transactionId))
+            }
+            .background(backgroundColor)
+            .padding(padding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = category, style = MaterialTheme.typography.labelSmall)
         Text(text = comment ?: "", style = MaterialTheme.typography.labelSmall, maxLines = 1)
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
             Text(
-                text = amount.plus(" SR"),
+                text = amount,
                 style = MaterialTheme.typography.labelSmall,
-                color = color
+                color = color,
+                modifier = Modifier,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
             )
             Text(
                 text = date,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
+                textAlign = TextAlign.End,
             )
         }
     }
@@ -408,27 +439,22 @@ fun TransactionItem(
 fun MainScreenPreview() {
     MasrofyTheme(dynamicColor = false) {
         BalanceCard(
-            month = "May",
-            currentBalance = "1500",
-            currentIncome = "700",
-            currentExpense = "500"
+            month = "May", currentBalance = "1500", currentIncome = "700", currentExpense = "500"
         )
     }
 }
 
 @Composable
 fun MainScreen(
-    mainState: MainScreenState,
-    paddingValues: PaddingValues,
-    // TODO fore test now
-    navController: NavController
+    mainState: MainScreenState, paddingValues: PaddingValues,
+    onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(paddingValues)
-            .padding(16.dp)
+            .padding(12.dp)
     ) {
         BalanceCard(
             month = mainState.month,
@@ -437,263 +463,10 @@ fun MainScreen(
             currentExpense = mainState.balance.totalExpense
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Transactions(transactions = mainState.transactions, navController = navController)
+        Transactions(transactions = mainState.transactions, onEvent = onEvent)
         Spacer(modifier = Modifier.height(16.dp))
-        TopTransactions(topTransactions = mainState.topTransactions, navController =  navController)
-    }
-}
-
-@Composable
-fun Balance(
-    balanceManager: BalanceManager
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(2.dp)
-    ) {
-        BalanceItem(
-            transactionType = "Income",
-            totalAmount = balanceManager.totalIncome.toString(),
-            ColorTotalIncome
-        )
-        BalanceItem(
-            transactionType = "Expense",
-            totalAmount = balanceManager.totalExpense.toString(),
-            ColorTotalExpense
-        )
-        BalanceItem(transactionType = "Total", totalAmount = balanceManager.totalAmount.toString())
-
-    }
-}
-
-@Composable
-fun BalanceItem(
-    transactionType: String,
-    totalAmount: String,
-    color: Color = MaterialTheme.colorScheme.onBackground
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(text = transactionType, fontSize = 14.sp)
-        Spacer(modifier = Modifier.height(3.dp))
-        Text(
-            modifier = Modifier,
-            text = totalAmount,
-            fontSize = 14.sp,
-            color = color,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun TransactionGroupList(
-    transactionGroup: List<TransactionGroup>,
-    navController: NavController,
-    paddingValues: PaddingValues
-) {
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = paddingValues.calculateBottomPadding()),
-        contentPadding = PaddingValues(6.dp)
-    ) {
-        transactionGroup.forEach { transaction ->
-            item {
-                InfoTransactionItem(
-                    date = { transaction.dateString },
-                    totalIncome = transaction.totalIncome,
-                    totalExpense = transaction.totalExpense
-                )
-            }
-
-            itemShapes(transaction.transactions, key = {
-                it.transactionId
-            }) { item, shape, shouldShowDivider ->
-                TransactionItems(
-                    transaction = item,
-                    shape,
-                    navController
-                )
-                if (shouldShowDivider) {
-                    Divider(modifier = Modifier.fillMaxWidth(), thickness = 0.5.dp)
-                }
-            }
-
-        }
-    }
-}
-
-
-@Composable
-fun InfoTransactionItem(
-    date: () -> String,
-    totalIncome: String,
-    totalExpense: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    ) {
-        Text(
-            text = date(),
-            style = MaterialTheme.typography.titleMedium
-        )
-        IncomeAndExpenseSection(
-            totalIncome = { totalIncome }, totalExpense = { totalExpense }, Modifier.align(
-                Alignment.CenterEnd
-            )
-        )
-    }
-}
-
-@Composable
-fun IncomeAndExpenseSection(
-    totalIncome: () -> String,
-    totalExpense: () -> String,
-    modifier: Modifier = Modifier,
-    incomeIcon: Int = R.drawable.total_income_icon,
-    expenseIcon: Int = R.drawable.total_expense_icone
-
-) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = totalIncome(),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Icon(
-            painter = painterResource(incomeIcon),
-            contentDescription = "totalIncome",
-            modifier = Modifier.size(24.dp),
-            tint = ColorTotalIncome
-        )
-        Text(
-            text = totalExpense(),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Icon(
-            painter = painterResource(id = expenseIcon),
-            contentDescription = "expenseIncome",
-            modifier = Modifier.size(24.dp),
-            tint = ColorTotalExpense
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TransactionItems(
-    transaction: Transaction,
-    shape: Shape,
-    navController: NavController
-) {
-    val rememberClick = remember {
-        {
-            navController.navigate(Screens.TransactionScreen.route + "/${transaction.transactionId}")
-        }
-    }
-    Card(
-        onClick = rememberClick,
-        shape = shape,
-        modifier = Modifier
-    ) {
-        ConstraintLayout(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            val (icon, category, comment, amount) = createRefs()
-//            Icon(
-//                modifier = Modifier
-//                    .constrainAs(icon) {
-//                        top.linkTo(parent.top)
-//                        bottom.linkTo(parent.bottom)
-//                        start.linkTo(parent.start, 6.dp)
-//                    },
-//                painter = painterResource(id = transaction.category.icon),
-//                contentDescription = "",
-//            )
-            Text(
-                text = transaction.category.toString(),
-                fontSize = 14.sp,
-                modifier = Modifier.constrainAs(category) {
-                    start.linkTo(icon.end, 8.dp)
-                    centerVerticallyTo(parent, 0.3f)
-                }
-            )
-            if (transaction.comment != null) {
-                Text(
-                    text = transaction.comment,
-                    fontSize = 12.sp,
-                    modifier = Modifier.constrainAs(comment) {
-                        top.linkTo(category.bottom)
-                        linkTo(category.start, category.end, bias = 0f)
-                        bottom.linkTo(parent.bottom)
-                    }
-                )
-            }
-            Text(
-                text = formatAsDisplayNormalize(transaction.amount.toBigDecimal()),
-                color = if (transaction.transactionType == TransactionType.INCOME) ColorTotalIncome else ColorTotalExpense,
-                fontSize = 15.sp,
-                maxLines = 1,
-                modifier = Modifier.constrainAs(amount) {
-                    centerVerticallyTo(parent)
-                    end.linkTo(parent.end, 6.dp)
-                }
-            )
-        }
-
-    }
-}
-
-
-@Composable
-fun TopBarDetails(
-    onNextMonth: () -> Unit = {},
-    onPreviousMonth: () -> Unit = {},
-    onBackCurrentMonth: () -> Unit = {},
-    currentMonth: String
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(1.dp)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .statusBarsPadding(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        IconButton(
-            onNextMonth, modifier = Modifier
-                .weight(1f)
-                .mirror()
-        ) {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "next month")
-        }
-        Text(
-            text = currentMonth,
-            modifier = Modifier
-                .weight(2f)
-                .align(Alignment.CenterVertically),
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        IconButton(
-            onClick = onPreviousMonth, modifier = Modifier
-                .weight(1f)
-                .mirror()
-        ) {
-            Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "previous month")
-        }
+        TopTransactions(topTransactions = mainState.topTransactions, onEvent = onEvent)
+        Spacer(modifier = Modifier.height(16.dp))
+        AdmobCompose()
     }
 }

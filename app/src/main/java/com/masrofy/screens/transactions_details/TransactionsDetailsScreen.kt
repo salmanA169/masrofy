@@ -2,6 +2,7 @@ package com.masrofy.screens.transactions_details
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,12 +23,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,17 +45,30 @@ import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.getColor
 import com.masrofy.screens.mainScreen.DateEvent
+import com.masrofy.screens.mainScreen.MainScreenEventUI
 import com.masrofy.screens.mainScreen.TransactionItem
 import com.masrofy.ui.theme.MasrofyTheme
+import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.generateTransactions
 import java.time.LocalDate
 
 fun NavGraphBuilder.transactionsDetailsDest(navController: NavController) {
     composable(Screens.TransactionsDetails.route) {
-        val viewModel :TransactionsDetailsViewModel = hiltViewModel()
+        val viewModel: TransactionsDetailsViewModel = hiltViewModel()
         val state by viewModel.state.collectAsState()
-        TransactionsDetailsScreen(transactionsDetailsState = state,viewModel::onEvent)
+        val effect by viewModel.effect.collectAsState()
+        LaunchedEffect(key1 = effect) {
+            when (effect) {
+                is TransactionDetailsEvent.NavigateToTransactionWithId -> {
+                    navController.navigate(Screens.TransactionScreen.navigateToTransactionWithId((effect as TransactionDetailsEvent.NavigateToTransactionWithId).transactionId))
+                    viewModel.resetEffect()
+                }
+
+                TransactionDetailsEvent.None -> Unit
+            }
+        }
+        TransactionsDetailsScreen(transactionsDetailsState = state, viewModel::onEvent)
 
     }
 }
@@ -88,10 +105,14 @@ fun PreviewTransactionsDetails() {
 @Composable
 fun TransactionsDetailsScreen(
     transactionsDetailsState: TransactionsDetailsState,
-    onEventTransactionDetails:(TransactionDetailsEventUI)->Unit ={}
+    onEventTransactionDetails: (TransactionDetailsEventUI) -> Unit = {}
 ) {
 
-    Column(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,7 +121,13 @@ fun TransactionsDetailsScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = {onEventTransactionDetails(TransactionDetailsEventUI.OnDateChange(DateEvent.MIN)) }) {
+            IconButton(onClick = {
+                onEventTransactionDetails(
+                    TransactionDetailsEventUI.OnDateChange(
+                        DateEvent.MIN
+                    )
+                )
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_left),
                     contentDescription = "arrow left"
@@ -111,7 +138,13 @@ fun TransactionsDetailsScreen(
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 24.sp
             )
-            IconButton(onClick = { onEventTransactionDetails(TransactionDetailsEventUI.OnDateChange(DateEvent.PLUS))}) {
+            IconButton(onClick = {
+                onEventTransactionDetails(
+                    TransactionDetailsEventUI.OnDateChange(
+                        DateEvent.PLUS
+                    )
+                )
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_right_48px),
                     contentDescription = "arrow left"
@@ -130,19 +163,20 @@ fun TransactionsDetailsScreen(
                     Divider()
                 }
                 items(transactionGroup.transactions) {
-                    TransactionItem(
-                        category = it.category.toString(),
-                        amount = it.amount,
+                    TransactionItemDetails(
+                        transactionId = it.transactionId,
+                        category = it.category,
+                        amount = formatAsDisplayNormalize(it.amount, true),
                         date = it.createdAt.formatShortDate(),
                         color = it.transactionType.getColor(),
                         backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                        padding = PaddingValues(0.dp)
+                        comment = it.comment,
+                        onEvent = onEventTransactionDetails
                     )
                     Divider()
                 }
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
-
                 }
             }
         }
@@ -182,5 +216,49 @@ fun TransactionGroupDetail(
             color = MaterialTheme.colorScheme.error
         )
 
+    }
+}
+
+@Composable
+fun TransactionItemDetails(
+    transactionId: Int = 0,
+    category: String,
+    comment: String? = null,
+    amount: String,
+    date: String,
+    color: Color,
+    padding: PaddingValues = PaddingValues(12.dp, 6.dp),
+    backgroundColor: Color = Color.Transparent,
+    onEvent: (TransactionDetailsEventUI) -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable() {
+                onEvent(TransactionDetailsEventUI.OnNavigateToTransactionWithId(transactionId))
+            }
+            .background(backgroundColor)
+            .padding(padding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = category, style = MaterialTheme.typography.labelSmall)
+        Text(text = comment ?: "", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
+            Text(
+                text = amount,
+                style = MaterialTheme.typography.labelSmall,
+                color = color,
+                modifier = Modifier,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+            Text(
+                text = date,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                textAlign = TextAlign.End,
+            )
+        }
     }
 }

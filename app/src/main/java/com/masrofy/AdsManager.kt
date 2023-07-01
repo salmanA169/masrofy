@@ -7,27 +7,49 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import dagger.hilt.android.scopes.ActivityRetainedScoped
-import dagger.hilt.android.scopes.ActivityScoped
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import javax.inject.Inject
 
 interface EventFullScreenAds {
     fun onDismiss()
-
 }
 
-private const val TEST_ID = "ca-app-pub-3940256099942544/1033173712"
+private const val TEST_ID = "ca-app-pub-3940256099942544/5354046379"
 
-class AdsManager @Inject constructor(private val context: Context) : InterstitialAdLoadCallback(), EventFullScreenAds {
+class AdsChecker(private val conditionTimes: Int = 3) {
+    private var shouldShowAds: Boolean = false
+    private var currentTimes = 0
+    private fun resetTimes() {
+        currentTimes = 1
+    }
+
+    private fun incrementTimes() {
+        if (currentTimes >= conditionTimes) {
+            resetTimes()
+        } else {
+            currentTimes += 1
+        }
+        shouldShowAds = currentTimes == 1
+    }
+
+    fun checkConditions(): Boolean {
+        incrementTimes()
+        return shouldShowAds
+    }
+}
+
+class AdsManager @Inject constructor(private val context: Context) : RewardedInterstitialAdLoadCallback(),
+    EventFullScreenAds {
     private val TAG = javaClass.simpleName
-    private var mInterstitialAd: InterstitialAd? = null
+    private var rewardedAd: RewardedInterstitialAd? = null
     private val fullEventScreenAdsCallback = FullScreenAdsCallbackImpl(this)
     private val adsRequester = AdRequest.Builder().build()
-
+    private val adsChecker = AdsChecker()
     private fun loadAds() {
-        InterstitialAd.load(context, BuildConfig.ADMOB_ADS_ID, adsRequester, this)
+        RewardedInterstitialAd.load(context, BuildConfig.ADMOB_ADS_ID, adsRequester, this)
     }
 
     init {
@@ -37,25 +59,30 @@ class AdsManager @Inject constructor(private val context: Context) : Interstitia
     override fun onAdFailedToLoad(p0: LoadAdError) {
         super.onAdFailedToLoad(p0)
         Log.d(TAG, "onAdFailedToLoad: called $p0")
-        mInterstitialAd = null
+        rewardedAd = null
     }
 
-    override fun onAdLoaded(p0: InterstitialAd) {
+
+    override fun onAdLoaded(p0: RewardedInterstitialAd) {
         super.onAdLoaded(p0)
-        mInterstitialAd = p0
-        mInterstitialAd?.fullScreenContentCallback = fullEventScreenAdsCallback
+        rewardedAd = p0
+        rewardedAd?.fullScreenContentCallback = fullEventScreenAdsCallback
     }
 
-    fun showAds(activity:Activity) {
-        if (mInterstitialAd != null) {
-            mInterstitialAd?.show(activity)
+    fun showAds(activity: Activity) {
+        if (rewardedAd != null) {
+            if (adsChecker.checkConditions()) {
+                rewardedAd?.show(activity){
+
+                }
+            }
         } else {
             loadAds()
         }
     }
 
     override fun onDismiss() {
-        mInterstitialAd = null
+        rewardedAd = null
         loadAds()
     }
 }

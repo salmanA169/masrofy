@@ -75,7 +75,10 @@ import com.masrofy.component.LabelEditTextBox
 import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
+import com.masrofy.ui.theme.Orange
+import com.masrofy.utils.findOwner
 import com.masrofy.utils.formatShortDate
+import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -91,10 +94,14 @@ fun NavGraphBuilder.transactionScreenNavigation(
         val transactionState by transactionViewModel.transactionDetailState.collectAsState()
         val transactionEvent by transactionViewModel.effect.collectAsState()
         val context = LocalContext.current
+        val findActivity = findOwner(context)
         LaunchedEffect(key1 = transactionEvent) {
             when (transactionEvent) {
                 TransactionDetailEffect.ClosePage -> {
                     navController.popBackStack()
+                    if (findActivity != null) {
+                        transactionViewModel.showAds(findActivity)
+                    }
                 }
 
                 is TransactionDetailEffect.ErrorMessage -> {
@@ -224,7 +231,7 @@ fun TransactionScreen(
                     currentAmount = transactionState.totalAmount,
                     currentNote = transactionState.comment ?: "",
                     onInputChange = rememberInput,
-                    onEvent = onEvent
+                    onEvent = onEvent,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(onClick = { onEvent(AddEditTransactionEvent.Save) }, modifier = Modifier.fillMaxWidth()) {
@@ -285,10 +292,6 @@ fun TransactionScreen(
                                 .onSizeChanged {
                                     with(localDensity) {
                                         currentPaddingInputs = it.height.toDp()
-                                        Log.d(
-                                            "TransactionScreen",
-                                            "TransactionScreen: ${it.height.toDp()}"
-                                        )
                                     }
                                 }
                                 .navigationBarsPadding(), onHide = {
@@ -335,21 +338,22 @@ fun Inputs(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.Black),
+            .background(Color.Black)
+            .clickable(false) {},
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .background(MaterialTheme.colorScheme.tertiaryContainer),
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)),
             verticalAlignment = Alignment.CenterVertically,
 
             ) {
             Text(
                 text = inputData.labels,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
@@ -363,7 +367,7 @@ fun Inputs(
             columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
 
             items(inputData.data) {
@@ -410,13 +414,13 @@ fun InputsTransactions(
     currentAccount: String,
     currentCategory: String,
     currentAmount: String,
-    currentNote: String
+    currentNote: String,
 ) {
     val focusRequester = remember{
         FocusRequester()
     }
     LaunchedEffect(key1 = true ){
-        focusRequester.requestFocus()
+            focusRequester.requestFocus()
     }
     LabelEditTextBox(
         label = stringResource(id = R.string.date),
@@ -449,7 +453,8 @@ fun InputsTransactions(
         inputType = InputType.KEYBOARD,
         onShowInput = onInputChange,
         onValueChange = { onEvent(AddEditTransactionEvent.AmountChange(it)) },
-        keyboardType = KeyboardType.Number
+        keyboardType = KeyboardType.Number,
+        visualTransformation = CurrencyAmountInputVisualTransformation()
         )
     Spacer(modifier = Modifier.height(8.dp))
 
@@ -508,166 +513,6 @@ fun EditTextTransactionSection(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AccountSection(
-    onAccountChange: (Account) -> Unit,
-    currentAccount: String,
-    accountAvailable: () -> List<Account>
-) {
-    var shouldExpand by remember {
-        mutableStateOf(false)
-    }
-    ElevatedCard(modifier = Modifier
-        .fillMaxWidth()
-        .padding(4.dp), onClick = {
-        shouldExpand = !shouldExpand
-    }) {
-        Text(text = currentAccount, modifier = Modifier.padding(12.dp))
-    }
-    AnimatedVisibility(visible = shouldExpand) {
-        AccountSelectionItem(accountAvailable = accountAvailable()) {
-            shouldExpand = false
-            onAccountChange(it)
-        }
-    }
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AccountSelectionItem(
-    accountAvailable: List<Account>,
-    onItemSelected: (Account) -> Unit
-) {
-
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        items(accountAvailable) {
-            OutlinedCard(modifier = Modifier, onClick = {
-                onItemSelected(it)
-            }) {
-                Text(text = it.name, modifier = Modifier.padding(8.dp))
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun DateSection(
-    modifier: Modifier = Modifier,
-    onDateChanged: (LocalDate) -> Unit,
-    date: () -> String
-) {
-    var isDialogShown by remember {
-        mutableStateOf(false)
-    }
-//    if (isDialogShown) {
-//        DatePickerDialog(onDismissRequest = {
-//            isDialogShown = false
-//        }, onDateChange = {
-//            onDateChanged(it)
-//            isDialogShown = false
-//        })
-//    }
-    Column(modifier = modifier) {
-
-        Text(text = stringResource(id = R.string.date))
-        Button(modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp), onClick = {
-            isDialogShown = true
-        }) {
-            Icon(imageVector = Icons.Filled.DateRange, contentDescription = "Date")
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = date())
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
-@Composable
-fun CategorySection(
-    categorySelected: () -> TransactionCategory,
-    onSelected: (TransactionCategory) -> Unit,
-    modifier: Modifier = Modifier
-
-) {
-
-    Column(
-        modifier = modifier
-    ) {
-        Text(text = stringResource(id = R.string.transaction_category))
-        Spacer(modifier = Modifier.height(4.dp))
-        Box(
-            modifier = modifier
-        ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(6),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        MaterialTheme.shapes.medium
-                    ),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                contentPadding = PaddingValues(4.dp)
-            ) {
-                items(TransactionCategory.values()) { transactionCategory ->
-                    val selectedAnimated by animateFloatAsState(
-                        targetValue = if (categorySelected() == transactionCategory) 360f else 0f,
-                        animationSpec = spring(2f)
-                    )
-                    val color = MaterialTheme.colorScheme.primary
-
-                    Card(
-                        shape = CircleShape,
-                        onClick = {
-                            onSelected(transactionCategory)
-                        },
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        modifier = Modifier
-                            .size(60.dp)
-
-                    ) {
-                        Box(
-                            contentAlignment = Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .align(CenterHorizontally)
-                                .drawBehind {
-                                    drawArc(
-                                        color,
-                                        270f,
-                                        selectedAnimated,
-                                        false,
-                                        style = Stroke(8f),
-                                    )
-                                },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .size(28.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-
-                    }
-                    Spacer(modifier = Modifier.size(6.dp))
-                }
-            }
-        }
-
-    }
-}
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
@@ -695,7 +540,7 @@ fun TransactionType(
     ) {
 
         TransactionType.values().forEach {
-            FilterChip(
+            ElevatedFilterChip(
                 selected = selectedType == it,
                 onClick = {
                     onTransactionTypeChange(AddEditTransactionEvent.TransactionTypeChange(it))
@@ -704,21 +549,17 @@ fun TransactionType(
                     Text(
                         text = stringResource(id = it.getTitle()),
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedLabelColor = it.getColor(),
+                colors = FilterChipDefaults.elevatedFilterChipColors(
+                    selectedLabelColor = if (selectedType == TransactionType.EXPENSE)Orange else it.getColor(),
                 ),
                 border = FilterChipDefaults.filterChipBorder(
-                    selectedBorderColor = it.getColor(),
+                    selectedBorderColor = if (selectedType == TransactionType.EXPENSE)Orange else it.getColor(),
                     selectedBorderWidth = 1.dp
                 ),
             )
         }
-
-
     }
 }
-
-

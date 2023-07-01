@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.data.entity.getCategoryWithAmount
+import com.masrofy.mapper.toTransactions
 import com.masrofy.model.calculateTopTransactions
 import com.masrofy.screens.mainScreen.TopTransactionItem
 import com.masrofy.ui.theme.MasrofyTheme
@@ -46,7 +47,7 @@ fun NavGraphBuilder.topTransactionsDetailsDest(navController: NavController) {
 fun TopPreview() {
     MasrofyTheme(dynamicColor = false) {
         val transactions = generateTransactionsEntity()
-        val categoryWithAmount = transactions.getCategoryWithAmount()
+        val categoryWithAmount = transactions.toTransactions().getCategoryWithAmount()
         val total = transactions.sumOf { it.amount }
         val topTransactions = calculateTopTransactions(total.toFloat(),categoryWithAmount)
         TopTransactionsDetailsScreen(

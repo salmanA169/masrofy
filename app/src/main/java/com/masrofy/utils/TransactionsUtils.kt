@@ -17,7 +17,7 @@ fun generateTransactions(): List<Transaction1> {
             1,
             TransactionType.INCOME,
             LocalDateTime.of(LocalDate.of(2023, 6, randomDays.random()), LocalTime.now()),
-            it.toString(),
+            it.toBigDecimal(),
             category = "TransactionCategory.FOOD"
         )
     }

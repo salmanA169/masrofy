@@ -25,7 +25,7 @@ sealed class Screens(val route: String) {
                 append(route)
                 val args = listOf(id)
                 args.forEach {
-                    append(it.toString())
+                    append("/$it")
                 }
             }
         }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.data.entity.getCategoryWithAmount
+import com.masrofy.mapper.toTransactions
 import com.masrofy.model.calculateTopTransactions
 import com.masrofy.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,7 @@ class TopTransactionDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch(dispatcherProvider.io) {
             val transactions = transaction.getTransactions()
-            val categoryWithAmount = transactions.getCategoryWithAmount()
+            val categoryWithAmount = transactions.toTransactions().getCategoryWithAmount()
             val total = transactions.sumOf { it.amount }
             val calculateTopTransaction = calculateTopTransactions(total.toFloat(),categoryWithAmount).sortedByDescending { it.percent }
             _state.update {

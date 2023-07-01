@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.masrofy.mapper.toTransactions
+import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionGroup
 import com.masrofy.model.TransactionType
@@ -56,7 +57,7 @@ data class TransactionEntity(
     }
 }
 
-fun List<TransactionEntity>.getCategoryWithAmount(): List<CategoryWithAmount> {
+fun List<Transaction>.getCategoryWithAmount(): List<CategoryWithAmount> {
     val list = mutableListOf<CategoryWithAmount>()
     forEach { transaction ->
         val findCategory = list.find { it.category == transaction.category.toString() }
@@ -99,10 +100,9 @@ fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
                     it.createdAt
                 }),
                 it,
-//                formatAsDisplayNormalize(income.toBigDecimal()),
-//                formatAsDisplayNormalize(expenve.toBigDecimal())
-                income.toInt().toString(),
-                expenve.toInt().toString()
+                formatAsDisplayNormalize(income.toBigDecimal()),
+                formatAsDisplayNormalize(expenve.toBigDecimal())
+
             )
         )
     }
