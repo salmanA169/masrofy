@@ -1,8 +1,11 @@
 package com.masrofy.ui.theme
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
+
 val Orange = Color(0xfff26419)
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
@@ -14,8 +17,57 @@ val Pink40 = Color(0xFF7D5260)
 val ColorTotalIncome = Color(0xFF21AB51)
 val ColorTotalExpense = Color(0xFFFF3F3F)
 
+data class SurfaceColors(
+    val surfaceContainerHighest: Color = Color(0xffE3E2E6),
+    val surfaceContainerHigh: Color = Color(0xffE3E2E6),
+    val surfaceContainer: Color = Color(0xffE3E2E6),
+    val surfaceContainerLow: Color = Color(0xffE3E2E6),
+    val surfaceContainerLowest: Color = Color(0xffE3E2E6),
+    val surfaceBright: Color = Color(0xffE3E2E6),
+    val surfaceDim: Color = Color(0xffE3E2E6)
+)
 
+object SurfaceColor {
 
+    val surfaces: SurfaceColors
+        @Composable
+        get() = LocalSurfaceColors.current
+}
+
+val LocalSurfaceColors = compositionLocalOf { SurfaceColors() }
+val light_surfaceContainerHighest: Color = Color(0xffE3E2E6)
+val light_surfaceContainerHigh: Color = Color(0xffE9E7EC)
+val light_surfaceContainer: Color = Color(0xffEFEDF1)
+val light_surfaceContainerLow: Color = Color(0xffF4F3F7)
+val light_surfaceContainerLowest: Color = Color(0xffFFFFFF)
+val light_surfaceBright: Color = Color(0xffFAF9FD)
+val light_surfaceDim: Color = Color(0xffDBD9DD)
+
+val dark_surfaceContainerHighest: Color = Color(0xff343538)
+val dark_surfaceContainerHigh: Color = Color(0xff292A2D)
+val dark_surfaceContainer: Color = Color(0xff1F1F23)
+val dark_surfaceContainerLow: Color = Color(0xff1A1B1F)
+val dark_surfaceContainerLowest: Color = Color(0xff0D0E11)
+val dark_surfaceBright: Color = Color(0xff38393C)
+val dark_surfaceDim: Color = Color(0xff121316)
+val lightSurfaceColors = SurfaceColors(
+    light_surfaceContainerHighest,
+    light_surfaceContainerHigh,
+    light_surfaceContainer,
+    light_surfaceContainerLow,
+    light_surfaceContainerLowest,
+    light_surfaceBright,
+    light_surfaceDim
+)
+val darkSurfaceColors = SurfaceColors(
+    dark_surfaceContainerHighest,
+    dark_surfaceContainerHigh,
+    dark_surfaceContainer,
+    dark_surfaceContainerLow,
+    dark_surfaceContainerLowest,
+    dark_surfaceBright,
+    dark_surfaceDim
+)
 val md_theme_light_primary = Color(0xFF2D5DA7)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFD7E2FF)
@@ -79,5 +131,6 @@ val md_theme_dark_scrim = Color(0xFF000000)
 
 val surface2Light = Color(md_theme_light_primary.copy(alpha = 0.08f).toArgb())
     .compositeOver(
-    md_theme_light_surface)
+        md_theme_light_surface
+    )
 val seed = Color(0xFF00677D)

@@ -48,6 +48,7 @@ import com.masrofy.screens.mainScreen.DateEvent
 import com.masrofy.screens.mainScreen.MainScreenEventUI
 import com.masrofy.screens.mainScreen.TransactionItem
 import com.masrofy.ui.theme.MasrofyTheme
+import com.masrofy.ui.theme.SurfaceColor
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.generateTransactions
@@ -169,7 +170,7 @@ fun TransactionsDetailsScreen(
                         amount = formatAsDisplayNormalize(it.amount, true),
                         date = it.createdAt.formatShortDate(),
                         color = it.transactionType.getColor(),
-                        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                        backgroundColor = SurfaceColor.surfaces.surfaceContainerHigh,
                         comment = it.comment,
                         onEvent = onEventTransactionDetails
                     )

@@ -34,6 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import com.masrofy.screens.mainScreen.mainScreenNavigation
 import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
 import com.masrofy.screens.transactions_details.transactionsDetailsDest
+import com.masrofy.ui.theme.SurfaceColor
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -79,7 +80,7 @@ fun SetNavigationScreen() {
     Scaffold(
         bottomBar = {
             AnimatedVisibility(visible = showBottom, enter = fadeIn(), exit = fadeOut()) {
-                BottomAppBar(actions = {
+                BottomAppBar(containerColor = SurfaceColor.surfaces.surfaceContainer,actions = {
                     val rememberClick = remember {
                         {
                             navController.navigate(Screens.StatisticsScreen.route)

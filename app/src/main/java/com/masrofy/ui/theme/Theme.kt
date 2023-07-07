@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -82,13 +83,26 @@ fun MasrofyTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val surfaceColors :SurfaceColors
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme){
+                surfaceColors = darkSurfaceColors
+                dynamicDarkColorScheme(context)
+            } else {
+                surfaceColors = lightSurfaceColors
+                dynamicLightColorScheme(context)
+            }
         }
-        darkTheme -> DarkColors
-        else -> LightColors
+        darkTheme -> {
+            surfaceColors = darkSurfaceColors
+            DarkColors
+        }
+        else -> {
+            surfaceColors = lightSurfaceColors
+            LightColors
+        }
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -97,10 +111,11 @@ fun MasrofyTheme(
             ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = !darkTheme
         }
     }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalSurfaceColors provides surfaceColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

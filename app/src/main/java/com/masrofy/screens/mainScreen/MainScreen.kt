@@ -1,5 +1,7 @@
 package com.masrofy.screens.mainScreen
 
+import android.content.res.Configuration
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -26,6 +29,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,13 +53,20 @@ import androidx.navigation.compose.composable
 import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.AdmobCompose
+import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.TopTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.getColor
+import com.masrofy.overview_interface.OverviewInterface
+import com.masrofy.overview_interface.OverviewWeek
+import com.masrofy.overview_interface.WeeklyTransactions
+import com.masrofy.ui.theme.LocalSurfaceColors
 import com.masrofy.ui.theme.MasrofyTheme
+import com.masrofy.ui.theme.SurfaceColor
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
+import com.masrofy.utils.generateTransactions
 import java.text.DecimalFormat
 
 fun NavGraphBuilder.mainScreenNavigation(
@@ -102,7 +114,7 @@ fun BalanceCard(
         shape = MaterialTheme.shapes.large,
 
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
         Text(
             text = month,
@@ -181,24 +193,6 @@ fun PreviewTransactions() {
     }
 }
 
-@Preview
-@Composable
-fun PreviewTopTransactions() {
-    MasrofyTheme(dynamicColor = false) {
-        TopTransactions(
-            topTransactions = listOf(
-                TopTransactions(
-                    "Gas", "50.toBigDecimal()", 50f, ColorTransactions.PRIMARY
-                ), TopTransactions(
-                    "Gas", "60.55", 25f, ColorTransactions.SECONDARY
-                ), TopTransactions(
-                    "Gas", "50.52", 25f, ColorTransactions.TERTIARY
-                )
-            )
-        )
-    }
-}
-
 @Composable
 fun BalanceItem(
     nameLabel: String,
@@ -262,7 +256,10 @@ fun Transactions(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
-                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(6.dp))
+                .background(
+                    LocalSurfaceColors.current.surfaceContainerHigh,
+                    RoundedCornerShape(6.dp)
+                )
         ) {
             items(transactions, key = {
                 it.transactionId
@@ -282,50 +279,25 @@ fun Transactions(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TopTransactions(
     modifier: Modifier = Modifier,
-    topTransactions: List<TopTransactions> = listOf(),
+    overViews: List<OverviewInterface<List<WeeklyTransactions>>> = listOf(),
     onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
-    Column(
-        modifier = modifier
+    HorizontalPager(
+        pageCount = overViews.size, modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(id = R.string.top_transactions),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+            .height(250.dp)
+            .background(
+                SurfaceColor.surfaces.surfaceContainerHigh,
+                RoundedCornerShape(6.dp)
             )
-            TextButton(onClick = { onEvent(MainScreenEventUI.NavigateToTopTransaction) }) {
-                Text(
-                    text = stringResource(id = R.string.show_more),
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(6.dp)),
-        ) {
-            items(topTransactions) {
-                TopTransactionItem(
-                    it.category, it.percent, it.amount, it.color
-                )
-                Divider()
-            }
-        }
+    ) {
+        overViews[it].GetContent(
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
@@ -414,7 +386,12 @@ fun TransactionItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = category, style = MaterialTheme.typography.labelSmall)
-        Text(text = comment ?: "", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+        Text(
+            text = comment ?: "",
+            style = MaterialTheme.typography.labelSmall,
+            textAlign = TextAlign.End,
+            maxLines = 1
+        )
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
             Text(
                 text = amount,
@@ -434,12 +411,25 @@ fun TransactionItem(
     }
 }
 
-@Preview()
+@Preview(
+    "MainScreen", showSystemUi = true, showBackground = true,
+    wallpaper = Wallpapers.BLUE_DOMINATED_EXAMPLE
+)
+@Preview(
+    "MainScreen", showSystemUi = true, showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+    wallpaper = Wallpapers.RED_DOMINATED_EXAMPLE, backgroundColor = 0xFF1B1B1B
+)
 @Composable
 fun MainScreenPreview() {
-    MasrofyTheme(dynamicColor = false) {
-        BalanceCard(
-            month = "May", currentBalance = "1500", currentIncome = "700", currentExpense = "500"
+    MasrofyTheme(dynamicColor = true) {
+        MainScreen(
+            mainState = MainScreenState(
+                balance = BalanceManager(
+                    "1500", "1500", "1500"
+                ),
+                transactions = generateTransactions()
+            ), paddingValues = PaddingValues(4.dp)
         )
     }
 }
@@ -465,8 +455,33 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Transactions(transactions = mainState.transactions, onEvent = onEvent)
         Spacer(modifier = Modifier.height(16.dp))
-        TopTransactions(topTransactions = mainState.topTransactions, onEvent = onEvent)
+        TopTransactions(
+            overViews = listOf(
+                OverviewWeek(
+                    listOf(
+                        WeeklyTransactions("Sat", 75f),
+                        WeeklyTransactions("Sun", 200f),
+                        WeeklyTransactions("Mon", 100f),
+                        WeeklyTransactions("Tus", 50f),
+                        WeeklyTransactions("Wed", 60f),
+                        WeeklyTransactions("Thr", 590f),
+                        WeeklyTransactions("Fri", 200f),
+                    )
+                ), OverviewWeek( listOf(
+                    WeeklyTransactions("S", 500f),
+                    WeeklyTransactions("S", 200f),
+                    WeeklyTransactions("S", 100f),
+                    WeeklyTransactions("S", 50f),
+                )), OverviewWeek( listOf(
+                    WeeklyTransactions("S", 500f),
+                    WeeklyTransactions("S", 200f),
+                    WeeklyTransactions("S", 100f),
+                    WeeklyTransactions("S", 50f),
+                ))
+            ),
+            onEvent = onEvent
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        AdmobCompose()
+//        AdmobCompose()
     }
 }
