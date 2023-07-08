@@ -286,6 +286,7 @@ fun TopTransactions(
     overViews: List<OverviewInterface<List<WeeklyTransactions>>> = listOf(),
     onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
+
     HorizontalPager(
         pageCount = overViews.size, modifier = Modifier
             .fillMaxWidth()
