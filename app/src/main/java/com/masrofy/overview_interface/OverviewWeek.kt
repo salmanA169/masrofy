@@ -5,7 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import com.masrofy.R
 import com.masrofy.utils.formatAsDisplayNormalize
+import com.masrofy.utils.localizeToString
 import com.patrykandpatrick.vico.compose.axis.horizontal.bottomAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.column.columnChart
@@ -19,22 +22,30 @@ import com.patrykandpatrick.vico.core.component.text.textComponent
 import com.patrykandpatrick.vico.core.entry.ChartEntry
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatrick.vico.core.formatter.ValueFormatter
+import java.time.DayOfWeek
 
 data class WeeklyTransactions(
-    val nameOfDay: String,
-    val amount: Float,
+    val nameOfDay: DayOfWeek,
+    var amount: Float,
 )
 
 class OverviewWeek(override val data: List<WeeklyTransactions>) :
     BaseOverView<List<WeeklyTransactions>> {
+    override fun getIcon(): Int {
+        return R.drawable.statistic_icon1
+    }
 
+    override fun getLabel(): Int {
+        return R.string.this_week
+    }
 
     @Composable
     override fun GetContent(modifier: Modifier) {
+        val resource = LocalContext.current.resources
         val chartEntry = remember(data) {
             ChartEntryModelProducer(data.mapIndexed { index, value ->
                 WeekEntry(
-                    value.nameOfDay,
+                    resource.getString(value.nameOfDay.localizeToString()),
                     index.toFloat(),
                     value.amount
                 )
@@ -52,8 +63,7 @@ class OverviewWeek(override val data: List<WeeklyTransactions>) :
                                 primaryColor,
                                 10f,
                                 shape = Shapes.roundedCornerShape(allPercent = 25),
-
-                                )
+                            )
                         }
                     },
                     dataLabel = textComponent {
@@ -77,8 +87,8 @@ class WeekEntry(
 }
 
 val axisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, chartValues ->
-    (chartValues.chartEntryModel.entries.first()
-        .getOrNull(value.toInt()) as? WeekEntry)?.nameOfDay.toString()
+    (chartValues.chartEntryModel.entries.firstOrNull()
+        ?.getOrNull(value.toInt()) as? WeekEntry)?.nameOfDay.toString()
 }
 
 val valueLabelFormatter = object : ValueFormatter {

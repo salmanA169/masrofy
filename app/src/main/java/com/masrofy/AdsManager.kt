@@ -70,14 +70,16 @@ class AdsManager @Inject constructor(private val context: Context) : RewardedInt
     }
 
     fun showAds(activity: Activity) {
-        if (rewardedAd != null) {
-            if (adsChecker.checkConditions()) {
-                rewardedAd?.show(activity){
+        if (!BuildConfig.DEBUG){
+            if (rewardedAd != null) {
+                if (adsChecker.checkConditions()) {
+                    rewardedAd?.show(activity){
 
+                    }
                 }
+            } else {
+                loadAds()
             }
-        } else {
-            loadAds()
         }
     }
 

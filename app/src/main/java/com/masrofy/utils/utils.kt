@@ -9,16 +9,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import com.masrofy.R
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.*
 
 
@@ -48,6 +48,17 @@ inline fun <T> LazyListScope.itemShapes(
     }
 }
 
+fun DayOfWeek.localizeToString():Int{
+    return when(this){
+        DayOfWeek.MONDAY -> R.string.monday
+        DayOfWeek.TUESDAY -> R.string.tuesday
+        DayOfWeek.WEDNESDAY -> R.string.wednesday
+        DayOfWeek.THURSDAY -> R.string.thursday
+        DayOfWeek.FRIDAY -> R.string.friday
+        DayOfWeek.SATURDAY -> R.string.saturday
+        DayOfWeek.SUNDAY -> R.string.sunday
+    }
+}
 fun LocalDate.isBetweenDates(startDate:LocalDate,endDate:LocalDate):Boolean{
 
     //    ////////E----+-----S////////

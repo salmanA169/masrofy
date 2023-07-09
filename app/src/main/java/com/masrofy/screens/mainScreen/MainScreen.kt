@@ -1,6 +1,7 @@
 package com.masrofy.screens.mainScreen
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,7 +30,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,10 +52,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.masrofy.R
 import com.masrofy.Screens
-import com.masrofy.component.AdmobCompose
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
-import com.masrofy.model.TopTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.getColor
 import com.masrofy.overview_interface.OverviewInterface
@@ -281,7 +279,7 @@ fun Transactions(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TopTransactions(
+fun OverviewScreens(
     modifier: Modifier = Modifier,
     overViews: List<OverviewInterface<List<WeeklyTransactions>>> = listOf(),
     onEvent: (MainScreenEventUI) -> Unit = {}
@@ -456,29 +454,12 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Transactions(transactions = mainState.transactions, onEvent = onEvent)
         Spacer(modifier = Modifier.height(16.dp))
-        TopTransactions(
+        Log.d("MainSCreen", "MainScreen: ${mainState.weeklyTransactions}")
+        OverviewScreens(
             overViews = listOf(
                 OverviewWeek(
-                    listOf(
-                        WeeklyTransactions("Sat", 75f),
-                        WeeklyTransactions("Sun", 200f),
-                        WeeklyTransactions("Mon", 100f),
-                        WeeklyTransactions("Tus", 50f),
-                        WeeklyTransactions("Wed", 60f),
-                        WeeklyTransactions("Thr", 590f),
-                        WeeklyTransactions("Fri", 200f),
-                    )
-                ), OverviewWeek( listOf(
-                    WeeklyTransactions("S", 500f),
-                    WeeklyTransactions("S", 200f),
-                    WeeklyTransactions("S", 100f),
-                    WeeklyTransactions("S", 50f),
-                )), OverviewWeek( listOf(
-                    WeeklyTransactions("S", 500f),
-                    WeeklyTransactions("S", 200f),
-                    WeeklyTransactions("S", 100f),
-                    WeeklyTransactions("S", 50f),
-                ))
+                    mainState.weeklyTransactions
+                )
             ),
             onEvent = onEvent
         )

@@ -11,6 +11,7 @@ import com.masrofy.model.calculateTopTransactions
 import com.masrofy.repository.AccountRepository
 import com.masrofy.repository.TransactionRepository
 import com.masrofy.utils.formatAsDisplayNormalize
+import com.masrofy.utils.getWeeklyTransaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,7 +83,8 @@ class MainViewModel @Inject constructor(
                     totalValue += transaction.amount
                     if (transaction.transactionType == TransactionType.INCOME) totalIncome += transaction.amount else totalExpense += transaction.amount
                 }
-                val categoryWithAmount = transactions.toTransactions().getCategoryWithAmount()
+                val toTransactions = transactions.toTransactions()
+                val categoryWithAmount = toTransactions.getCategoryWithAmount()
                 _state.update {
                     it.copy(
                         balance = BalanceManager(
@@ -96,7 +98,8 @@ class MainViewModel @Inject constructor(
                         topTransactions = calculateTopTransactions(
                             totalValue,
                             categoryWithAmount
-                        ).sortedByDescending { it.percent }.take(5)
+                        ).sortedByDescending { it.percent }.take(5),
+                        weeklyTransactions = toTransactions.getWeeklyTransaction()
                     )
                 }
             }

@@ -18,52 +18,7 @@ internal class WeeklyDateFilterTest {
     private lateinit var transactionDateFilterMonthly:TransactionDateFilter
     @Before
     fun setUp() {
-        val transactionList = buildList<TransactionEntity> {
-            repeat(15){
-                add(
-                    TransactionEntity.createTransaction(
-                        1,
-                        TransactionType.EXPENSE,
-                        LocalDateTime.of(LocalDate.of(2023,2,it+1), LocalTime.now()),
-                        1450,
-                        "$it",
-                        TransactionCategory.CAR
-                    )
-                )
-            }
-            add(
-                TransactionEntity.createTransaction(
-                    1,
-                    TransactionType.EXPENSE,
-                    LocalDateTime.of(LocalDate.of(2023,2,1), LocalTime.now()),
-                    1450,
-                    "",
-                    TransactionCategory.CAR
-                )
-            )
-            add(
-                TransactionEntity.createTransaction(
-                    1,
-                    TransactionType.EXPENSE,
-                    LocalDateTime.of(LocalDate.of(2023,3,1), LocalTime.now()),
-                    1450,
-                    "",
-                    TransactionCategory.CAR
-                )
-            )
-            add(
-                TransactionEntity.createTransaction(
-                    1,
-                    TransactionType.EXPENSE,
-                    LocalDateTime.of(LocalDate.of(2023,3,1), LocalTime.now()),
-                    1450,
-                    "",
-                    TransactionCategory.CAR
-                )
-            )
-        }
-        transactionDateFilter = WeeklyDateFilter(transactionList)
-        transactionDateFilterMonthly = MonthlyDateFilter(transactionList)
+
     }
 
 

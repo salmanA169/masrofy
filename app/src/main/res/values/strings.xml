@@ -16,5 +16,12 @@
     <string name="show_more">show more</string>
     <string name="top_transactions">Top Transactions</string>
     <string name="confirm">Confirm</string>
-    <string name="this_week">This Week</string>
+    <string name="this_week">Your Transaction This Week (last 7 days)</string>
+    <string name="monday">Mon</string>
+    <string name="tuesday">Tue</string>
+    <string name="wednesday">Wed</string>
+    <string name="thursday">Thu</string>
+    <string name="friday">Fri</string>
+    <string name="saturday">Sat</string>
+    <string name="sunday">Sun</string>
 </resources>
