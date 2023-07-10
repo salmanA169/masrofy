@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -56,6 +57,8 @@ import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.getColor
+import com.masrofy.overview_interface.MonthlyTransaction
+import com.masrofy.overview_interface.MonthlyTransactionsOverview
 import com.masrofy.overview_interface.OverviewInterface
 import com.masrofy.overview_interface.OverviewWeek
 import com.masrofy.overview_interface.WeeklyTransactions
@@ -66,14 +69,15 @@ import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.generateTransactions
 import java.text.DecimalFormat
+import java.time.Month
 
 fun NavGraphBuilder.mainScreenNavigation(
     navController: NavController, paddingValues: PaddingValues
 ) {
     composable(Screens.MainScreen.route) {
         val mainViewModel: MainViewModel = hiltViewModel()
-        val mainState by mainViewModel.state.collectAsState()
-        val effect by mainViewModel.effect.collectAsState()
+        val mainState by mainViewModel.state.collectAsStateWithLifecycle()
+        val effect by mainViewModel.effect.collectAsStateWithLifecycle()
         LaunchedEffect(key1 = effect) {
             when (effect) {
                 MainScreenEvent.None -> Unit
@@ -281,7 +285,7 @@ fun Transactions(
 @Composable
 fun OverviewScreens(
     modifier: Modifier = Modifier,
-    overViews: List<OverviewInterface<List<WeeklyTransactions>>> = listOf(),
+    overViews: List<OverviewInterface<*>> = listOf(),
     onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
 
@@ -454,11 +458,26 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Transactions(transactions = mainState.transactions, onEvent = onEvent)
         Spacer(modifier = Modifier.height(16.dp))
-        Log.d("MainSCreen", "MainScreen: ${mainState.weeklyTransactions}")
         OverviewScreens(
             overViews = listOf(
                 OverviewWeek(
                     mainState.weeklyTransactions
+                ),
+                MonthlyTransactionsOverview(
+                    listOf(
+                        MonthlyTransaction(Month.JULY, 51f),
+                        MonthlyTransaction(Month.JULY, 10f),
+                        MonthlyTransaction(Month.JULY, 20f),
+                        MonthlyTransaction(Month.JULY, 30f),
+                        MonthlyTransaction(Month.JULY, 40f),
+                        MonthlyTransaction(Month.JULY, 51f),
+                        MonthlyTransaction(Month.JULY, 70f),
+                        MonthlyTransaction(Month.JULY, 120f),
+                        MonthlyTransaction(Month.JULY, 80f),
+                        MonthlyTransaction(Month.JULY, 6f),
+                        MonthlyTransaction(Month.JULY, 51f),
+                        MonthlyTransaction(Month.JULY, 51f)
+                    )
                 )
             ),
             onEvent = onEvent

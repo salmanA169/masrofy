@@ -24,4 +24,5 @@
     <string name="friday">Fri</string>
     <string name="saturday">Sat</string>
     <string name="sunday">Sun</string>
+    <string name="monthly_transaction">Your Expense This Year</string>
 </resources>

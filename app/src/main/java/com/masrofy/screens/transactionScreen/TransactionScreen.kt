@@ -76,6 +76,7 @@ import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.ui.theme.Orange
+import com.masrofy.ui.theme.SurfaceColor
 import com.masrofy.utils.findOwner
 import com.masrofy.utils.formatShortDate
 import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
@@ -346,7 +347,7 @@ fun Inputs(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)),
+                .background(SurfaceColor.surfaces.surfaceDim),
             verticalAlignment = Alignment.CenterVertically,
 
             ) {
@@ -367,7 +368,7 @@ fun Inputs(
             columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(SurfaceColor.surfaces.surfaceBright)
         ) {
 
             items(inputData.data) {
@@ -515,6 +516,7 @@ fun EditTextTransactionSection(
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun ChipPreview() {
     MasrofyTheme(dynamicColor = false) {
@@ -540,7 +542,7 @@ fun TransactionType(
     ) {
 
         TransactionType.values().forEach {
-            ElevatedFilterChip(
+            FilterChip(
                 selected = selectedType == it,
                 onClick = {
                     onTransactionTypeChange(AddEditTransactionEvent.TransactionTypeChange(it))
@@ -554,6 +556,7 @@ fun TransactionType(
                 },
                 colors = FilterChipDefaults.elevatedFilterChipColors(
                     selectedLabelColor = if (selectedType == TransactionType.EXPENSE)Orange else it.getColor(),
+                    selectedContainerColor = SurfaceColor.surfaces.surfaceContainer
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     selectedBorderColor = if (selectedType == TransactionType.EXPENSE)Orange else it.getColor(),

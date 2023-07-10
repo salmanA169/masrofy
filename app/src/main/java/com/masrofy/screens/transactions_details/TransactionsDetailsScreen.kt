@@ -163,7 +163,7 @@ fun TransactionsDetailsScreen(
                     )
                     Divider()
                 }
-                items(transactionGroup.transactions) {
+                items(transactionGroup.transactions,key = {it.transactionId}, contentType = {it.transactionId}) {
                     TransactionItemDetails(
                         transactionId = it.transactionId,
                         category = it.category,
