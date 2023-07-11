@@ -25,4 +25,16 @@
     <string name="saturday">Sat</string>
     <string name="sunday">Sun</string>
     <string name="monthly_transaction">Your Expense This Year</string>
+    <string name="january">Jan</string>
+    <string name="february">Feb</string>
+    <string name="march">Mar</string>
+    <string name="april">Apr</string>
+    <string name="may">May</string>
+    <string name="june">Jun</string>
+    <string name="july">Jul</string>
+    <string name="august">Aug</string>
+    <string name="september">Sep</string>
+    <string name="october">Oct</string>
+    <string name="november">Nov</string>
+    <string name="decmber">Dec</string>
 </resources>

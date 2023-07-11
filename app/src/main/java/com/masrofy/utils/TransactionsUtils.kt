@@ -9,6 +9,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.Month
 import java.time.format.DateTimeFormatter
 import com.masrofy.model.Transaction as Transaction1
 
@@ -56,6 +57,22 @@ fun DayOfWeek.sortIndex():Int{
         DayOfWeek.FRIDAY -> 7
         DayOfWeek.SATURDAY -> 1
         DayOfWeek.SUNDAY -> 2
+    }
+}
+fun Month.sortIndex():Int{
+    return when(this){
+        Month.JANUARY -> 0
+        Month.FEBRUARY -> 1
+        Month.MARCH -> 2
+        Month.APRIL -> 3
+        Month.MAY -> 4
+        Month.JUNE -> 5
+        Month.JULY -> 6
+        Month.AUGUST -> 7
+        Month.SEPTEMBER -> 8
+        Month.OCTOBER -> 9
+        Month.NOVEMBER -> 10
+        Month.DECEMBER -> 11
     }
 }
 private fun getFirstDayOfWeek():LocalDate{
