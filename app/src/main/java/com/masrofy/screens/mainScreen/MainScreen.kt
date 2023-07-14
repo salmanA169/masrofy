@@ -466,17 +466,17 @@ fun MainScreen(
                 MonthlyTransactionsOverview(
                     listOf(
                         MonthlyTransaction(Month.JULY, 51f),
-                        MonthlyTransaction(Month.JULY, 10f),
-                        MonthlyTransaction(Month.JULY, 20f),
-                        MonthlyTransaction(Month.JULY, 30f),
-                        MonthlyTransaction(Month.JULY, 40f),
-                        MonthlyTransaction(Month.JULY, 51f),
-                        MonthlyTransaction(Month.JULY, 70f),
-                        MonthlyTransaction(Month.JULY, 120f),
-                        MonthlyTransaction(Month.JULY, 80f),
-                        MonthlyTransaction(Month.JULY, 6f),
-                        MonthlyTransaction(Month.JULY, 51f),
-                        MonthlyTransaction(Month.JULY, 51f)
+                        MonthlyTransaction(Month.FEBRUARY, 10f),
+                        MonthlyTransaction(Month.MARCH, 20f),
+                        MonthlyTransaction(Month.APRIL, 30f),
+                        MonthlyTransaction(Month.AUGUST, 40f),
+                        MonthlyTransaction(Month.DECEMBER, 51f),
+                        MonthlyTransaction(Month.JANUARY, 70f),
+                        MonthlyTransaction(Month.JUNE, 120f),
+                        MonthlyTransaction(Month.MAY, 80f),
+                        MonthlyTransaction(Month.NOVEMBER, 6f),
+                        MonthlyTransaction(Month.OCTOBER, 51f),
+                        MonthlyTransaction(Month.SEPTEMBER, 51f)
                     )
                 )
             ),
