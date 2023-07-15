@@ -11,6 +11,15 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
+import com.masrofy.utils.datastore
+import com.masrofy.utils.getCurrentCountFlow
+import com.masrofy.utils.updateCurrentAdsCount
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 interface EventFullScreenAds {
@@ -19,24 +28,40 @@ interface EventFullScreenAds {
 
 private const val TEST_ID = "ca-app-pub-3940256099942544/5354046379"
 
-class AdsChecker(private val conditionTimes: Int = 3) {
+class AdsChecker(private val conditionTimes: Int = 4,context: Context) {
     private var shouldShowAds: Boolean = false
+    private val dataStore = context.datastore
     private var currentTimes = 0
+    private val coroutineScope = CoroutineScope(Job() + Dispatchers.IO)
+    init {
+        coroutineScope.launch {
+            dataStore.getCurrentCountFlow().collect{
+                currentTimes = it
+                shouldShowAds = it == 1
+                Log.d("AdsChecker", "count ads: current count is $it, condition count is : $conditionTimes")
+            }
+        }
+    }
     private fun resetTimes() {
-        currentTimes = 1
+        coroutineScope.launch {
+            dataStore.updateCurrentAdsCount(1)
+        }
     }
 
     private fun incrementTimes() {
         if (currentTimes >= conditionTimes) {
             resetTimes()
         } else {
-            currentTimes += 1
+            coroutineScope.launch {
+                dataStore.updateCurrentAdsCount(++currentTimes)
+            }
         }
-        shouldShowAds = currentTimes == 1
+
     }
 
     fun checkConditions(): Boolean {
         incrementTimes()
+        // TODO: fix it later to sync
         return shouldShowAds
     }
 }
@@ -47,7 +72,8 @@ class AdsManager @Inject constructor(private val context: Context) : RewardedInt
     private var rewardedAd: RewardedInterstitialAd? = null
     private val fullEventScreenAdsCallback = FullScreenAdsCallbackImpl(this)
     private val adsRequester = AdRequest.Builder().build()
-    private val adsChecker = AdsChecker()
+    private val adsChecker = AdsChecker(context = context)
+
     private fun loadAds() {
         RewardedInterstitialAd.load(context, BuildConfig.ADMOB_ADS_ID, adsRequester, this)
     }

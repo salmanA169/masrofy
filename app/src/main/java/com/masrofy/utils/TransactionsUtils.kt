@@ -4,6 +4,7 @@ import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionType
+import com.masrofy.overview_interface.MonthlyTransaction
 import com.masrofy.overview_interface.WeeklyTransactions
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -47,6 +48,23 @@ fun List<Transaction>.getWeeklyTransaction():List<WeeklyTransactions>{
             }
         }
     }.sortedWith(comparator = compareBy { it.nameOfDay.sortIndex()})
+}
+
+fun List<Transaction>.getMonthlyTransactions():List<MonthlyTransaction>{
+    val currentDate = LocalDateTime.now()
+    return buildList {
+        Month.values().forEach {
+            add(MonthlyTransaction(it,0f))
+        }
+        this@getMonthlyTransactions.filter {transactions->
+            transactions.createdAt.year == currentDate.year
+        }.forEach {transactoin->
+            val getIndex = indexOfFirst { it.monthOfYear == transactoin.createdAt.month }
+            get(getIndex).apply {
+                amount += transactoin.amount.toFloat()
+            }
+        }
+    }
 }
 fun DayOfWeek.sortIndex():Int{
     return when(this){

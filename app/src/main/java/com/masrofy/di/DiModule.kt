@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.masrofy.data.database.MasrofyDatabase
 import com.masrofy.data.database.RoomCallback
 import com.masrofy.utils.Constants
+import com.masrofy.utils.datastore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +24,7 @@ object DiModule {
     ) = Room.databaseBuilder(context, MasrofyDatabase::class.java, Constants.DATABASE_NAME)
         .addCallback(roomCallback).build()
 
+    @Provides
+    @Singleton
+    fun provideDatastore(@ApplicationContext context: Context) = context.datastore
 }

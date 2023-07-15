@@ -14,6 +14,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.masrofy.overview_interface.MonthlyTransaction
+import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.localizeToString
 
 
@@ -22,7 +23,6 @@ fun LineChart(
     modifier: Modifier = Modifier,
     data: List<MonthlyTransaction>,
 ) {
-    // TODO: continue to get data from transactions
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
     val resource = LocalContext.current
     AndroidView(modifier = modifier, factory = {
@@ -47,6 +47,11 @@ fun LineChart(
             circleHoleColor = colorOnBackground.toArgb()
             valueTextSize = 9f
             valueTextColor = colorOnBackground.toArgb()
+            valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return formatAsDisplayNormalize(value.toBigDecimal())
+                }
+            }
         }
 
         it.description.isEnabled = false
@@ -66,7 +71,11 @@ fun LineChart(
         }
         it.axisLeft.apply {
             this.textColor = colorOnBackground.toArgb()
-
+            valueFormatter =  object : com.github.mikephil.charting.formatter.ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                return formatAsDisplayNormalize(value.toBigDecimal())
+            }
+        }
         }
         it.legend.isEnabled = false
         it.isAutoScaleMinMaxEnabled = true

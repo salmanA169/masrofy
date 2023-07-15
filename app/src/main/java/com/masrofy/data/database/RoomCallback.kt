@@ -21,6 +21,7 @@ class RoomCallback @Inject constructor(
         val database = this.db.get()
         CoroutineScope(Job()).launch {
             database.transactionDao.addAccount(defaultAccount)
+            // TODO: create categories entity
         }
     }
 }

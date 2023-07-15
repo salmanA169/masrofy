@@ -11,6 +11,7 @@ import com.masrofy.model.calculateTopTransactions
 import com.masrofy.repository.AccountRepository
 import com.masrofy.repository.TransactionRepository
 import com.masrofy.utils.formatAsDisplayNormalize
+import com.masrofy.utils.getMonthlyTransactions
 import com.masrofy.utils.getWeeklyTransaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,7 +100,8 @@ class MainViewModel @Inject constructor(
                             totalValue,
                             categoryWithAmount
                         ).sortedByDescending { it.percent }.take(5),
-                        weeklyTransactions = toTransactions.getWeeklyTransaction()
+                        weeklyTransactions = toTransactions.getWeeklyTransaction(),
+                        monthlyTransactions = toTransactions.getMonthlyTransactions()
                     )
                 }
             }

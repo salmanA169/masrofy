@@ -1,7 +1,6 @@
 package com.masrofy.screens.mainScreen
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -53,15 +51,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.masrofy.R
 import com.masrofy.Screens
+import com.masrofy.component.AdmobCompose
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.getColor
-import com.masrofy.overview_interface.MonthlyTransaction
 import com.masrofy.overview_interface.MonthlyTransactionsOverview
 import com.masrofy.overview_interface.OverviewInterface
 import com.masrofy.overview_interface.OverviewWeek
-import com.masrofy.overview_interface.WeeklyTransactions
 import com.masrofy.ui.theme.LocalSurfaceColors
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.ui.theme.SurfaceColor
@@ -69,7 +66,6 @@ import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.generateTransactions
 import java.text.DecimalFormat
-import java.time.Month
 
 fun NavGraphBuilder.mainScreenNavigation(
     navController: NavController, paddingValues: PaddingValues
@@ -464,25 +460,12 @@ fun MainScreen(
                     mainState.weeklyTransactions
                 ),
                 MonthlyTransactionsOverview(
-                    listOf(
-                        MonthlyTransaction(Month.JULY, 51f),
-                        MonthlyTransaction(Month.FEBRUARY, 10f),
-                        MonthlyTransaction(Month.MARCH, 20f),
-                        MonthlyTransaction(Month.APRIL, 30f),
-                        MonthlyTransaction(Month.AUGUST, 40f),
-                        MonthlyTransaction(Month.DECEMBER, 51f),
-                        MonthlyTransaction(Month.JANUARY, 70f),
-                        MonthlyTransaction(Month.JUNE, 120f),
-                        MonthlyTransaction(Month.MAY, 80f),
-                        MonthlyTransaction(Month.NOVEMBER, 6f),
-                        MonthlyTransaction(Month.OCTOBER, 51f),
-                        MonthlyTransaction(Month.SEPTEMBER, 51f)
-                    )
+                    mainState.monthlyTransactions
                 )
             ),
             onEvent = onEvent
         )
         Spacer(modifier = Modifier.height(16.dp))
-//        AdmobCompose()
+        AdmobCompose()
     }
 }
