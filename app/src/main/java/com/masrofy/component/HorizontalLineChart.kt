@@ -73,7 +73,7 @@ fun LineChart(
             this.textColor = colorOnBackground.toArgb()
             valueFormatter =  object : com.github.mikephil.charting.formatter.ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                return formatAsDisplayNormalize(value.toBigDecimal())
+                return formatAsDisplayNormalize(value.toLong().toBigDecimal())
             }
         }
         }

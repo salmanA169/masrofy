@@ -2,6 +2,7 @@ package com.masrofy.screens.mainScreen
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,17 +16,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerSnapDistance
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,7 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -250,6 +259,7 @@ fun Transactions(
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -259,6 +269,12 @@ fun Transactions(
                     RoundedCornerShape(6.dp)
                 )
         ) {
+            item {
+                if (transactions.isEmpty()) {
+                    // TODO: fix it center images
+                    NoTransactionsImage(modifier = Modifier.align(CenterHorizontally))
+                }
+            }
             items(transactions, key = {
                 it.transactionId
             }) {
@@ -275,6 +291,27 @@ fun Transactions(
             }
         }
     }
+
+
+}
+
+@Composable
+fun NoTransactionsImage(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.wallet_icon),
+            contentDescription = "",modifier= Modifier.size(100.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = stringResource(id = R.string.no_transactions),
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -284,20 +321,51 @@ fun OverviewScreens(
     overViews: List<OverviewInterface<*>> = listOf(),
     onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
-
-    HorizontalPager(
-        pageCount = overViews.size, modifier = Modifier
+    val pagerState = rememberPagerState()
+    val fling = PagerDefaults.flingBehavior(
+        state = pagerState,
+        pagerSnapDistance = PagerSnapDistance.atMost(10)
+    )
+    Column(
+        modifier = modifier
             .fillMaxWidth()
-            .height(250.dp)
             .background(
                 SurfaceColor.surfaces.surfaceContainerHigh,
                 RoundedCornerShape(6.dp)
             )
     ) {
-        overViews[it].GetContent(
-            modifier = Modifier.fillMaxSize(),
-        )
+        HorizontalPager(
+            flingBehavior = fling,
+            state = pagerState,
+            pageCount = overViews.size, modifier = Modifier
+                .height(250.dp)
+
+        ) {
+            overViews[it].GetContent(
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(overViews.size) { iteration ->
+                val color =
+                    if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .size(8.dp)
+                )
+            }
+        }
     }
+
 }
 
 val decimalFormat = DecimalFormat("###,###,##0.0")

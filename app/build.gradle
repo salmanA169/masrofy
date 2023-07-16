@@ -20,6 +20,14 @@ secrets {
     ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\kd\\Desktop\\masrofyKey.jks')
+            storePassword 'alamode151412'
+            keyAlias 'salmanalamode15'
+            keyPassword 'Salmanalamode15'
+        }
+    }
     def localProperties =  new Properties()
     localProperties.load(new FileInputStream(rootProject.file("local.properties")))
     namespace 'com.masrofy'
@@ -56,7 +64,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
 
 
         }

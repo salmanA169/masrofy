@@ -37,4 +37,5 @@
     <string name="october">Oct</string>
     <string name="november">Nov</string>
     <string name="decmber">Dec</string>
+    <string name="no_transactions">No Transactions</string>
 </resources>
