@@ -24,10 +24,10 @@ localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\kd\\Desktop\\masrofyKey.jks')
-            storePassword localProperties.getProperty("RELEASE_STORE_PASSWORD")
-            keyAlias localProperties.getProperty("RELEASE_KEY_ALIAS")
-            keyPassword localProperties.getProperty("RELEASE_KEY_PASSWORD")
+            storeFile file('C:\\Users\\salma\\Desktop\\masrofy key\\masrofyKey.jks')
+            storePassword 'alamode151412'
+            keyAlias 'salmanalamode15'
+            keyPassword 'Salmanalamode15'
         }
     }
 
@@ -38,8 +38,8 @@ android {
         applicationId "com.masrofy"
         minSdk 28
         targetSdk 33
-        versionCode 4
-        versionName "2.0.0"
+        versionCode 5
+        versionName "3.0.0"
 
             kapt {
                 arguments {
