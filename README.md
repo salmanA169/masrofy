@@ -5,10 +5,10 @@
 </div>
     
 # New Update (3.0.0)
-  <img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_232127.png" width="260">  <img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_232246.png" width="260"> 
-<img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_233302.png" width="260">  
+  <img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_232127.png" width="260">  <img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_232246.png" width="260"> 
+<img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_233302.png" width="260">  
  <img src="https://github.com/salmanA169/masrofy/assets/40442174/eb636e32-9fce-4b2c-b289-effd3a2a5d55" width="260"> 
-<img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_233323.png" width="260"> 
+<img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_233323.png" width="260"> 
   
 
 # Compose Masrofy - Track your expense , income and set budget
