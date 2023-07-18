@@ -19,17 +19,18 @@ secrets {
     ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
     ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
+def localProperties =  new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 android {
     signingConfigs {
         release {
             storeFile file('C:\\Users\\kd\\Desktop\\masrofyKey.jks')
-            storePassword 'alamode151412'
-            keyAlias 'salmanalamode15'
-            keyPassword 'Salmanalamode15'
+            storePassword localProperties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias localProperties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword localProperties.getProperty("RELEASE_KEY_PASSWORD")
         }
     }
-    def localProperties =  new Properties()
-    localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
     namespace 'com.masrofy'
     compileSdk 33
 

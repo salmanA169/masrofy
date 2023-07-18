@@ -9,9 +9,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,6 +51,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
@@ -227,7 +230,13 @@ fun BalanceItem(
         )
     }
 }
-
+@Preview
+@Composable
+fun PreviewTransactionsd() {
+    MasrofyTheme() {
+        Transactions(transactions = emptyList(), onEvent = {})
+    }
+}
 @Composable
 fun Transactions(
     modifier: Modifier = Modifier,
@@ -271,8 +280,7 @@ fun Transactions(
         ) {
             item {
                 if (transactions.isEmpty()) {
-                    // TODO: fix it center images
-                    NoTransactionsImage(modifier = Modifier.align(CenterHorizontally))
+                    NoTransactionsImage(modifier = Modifier.fillParentMaxSize())
                 }
             }
             items(transactions, key = {
@@ -298,18 +306,20 @@ fun Transactions(
 @Composable
 fun NoTransactionsImage(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             painter = painterResource(id = R.drawable.wallet_icon),
-            contentDescription = "",modifier= Modifier.size(100.dp),
+            contentDescription = "",modifier = Modifier.fillMaxSize(0.5f),
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
             text = stringResource(id = R.string.no_transactions),
-            style = MaterialTheme.typography.labelSmall
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis
         )
     }
 }
