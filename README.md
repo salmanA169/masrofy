@@ -4,11 +4,11 @@
     </kbd>
 </div>
     
-# New Update
-  <img src="https://github.com/salmanA169/masrofy/assets/40442174/dd409c64-1871-4280-8e73-9047c27ba17c" width="260">  <img src="https://github.com/salmanA169/masrofy/assets/40442174/e93f8cc8-21f8-4d6a-8366-076b35befac3" width="260"> 
-<img src="https://github.com/salmanA169/masrofy/assets/40442174/1a402ae9-67f0-45e2-afc5-2c089b4c826e" width="260">  
+# New Update (3.0.0)
+  <img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_232127.png" width="260">  <img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_232246.png" width="260"> 
+<img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_233302.png" width="260">  
  <img src="https://github.com/salmanA169/masrofy/assets/40442174/eb636e32-9fce-4b2c-b289-effd3a2a5d55" width="260"> 
-<img src="https://github.com/salmanA169/masrofy/assets/40442174/17c76200-028d-4d24-92cc-701e5dc57bb4" width="260">  <img src="https://github.com/salmanA169/masrofy/assets/40442174/3e6578f7-9817-4c32-8b1d-6c7fbf307619" width="260"> 
+<img src="https://github.com/salmanA169/masrofy/blob/(3.0.0)/files/Screenshot_20230718_233323.png" width="260"> 
   
 
 # Compose Masrofy - Track your expense , income and set budget
