@@ -50,6 +50,7 @@ fun List<Transaction>.getWeeklyTransaction():List<WeeklyTransactions>{
     }.sortedWith(comparator = compareBy { it.nameOfDay.sortIndex()})
 }
 
+// TODO: maybe try to add transaction type parameter
 fun List<Transaction>.getMonthlyTransactions():List<MonthlyTransaction>{
     val currentDate = LocalDateTime.now()
     return buildList {

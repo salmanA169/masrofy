@@ -9,7 +9,9 @@ import com.masrofy.ui.theme.ColorTotalExpense
 import com.masrofy.ui.theme.ColorTotalIncome
 
 enum class TransactionType {
-    EXPENSE,INCOME
+    EXPENSE,INCOME;
+
+
 }
 
 @Composable
