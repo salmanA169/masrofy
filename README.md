@@ -14,6 +14,7 @@
 # Compose Masrofy - Track your expense , income and set budget
 - [x] Add transaction for income and expense 
 - [x] Add statistics screen
+- [x] implement filter for transaction monthly
 - [ ] Add account screen
 - [ ] Add budget screen and implement functionality
 
