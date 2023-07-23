@@ -26,6 +26,7 @@ sealed class MainScreenEventUI {
     class NavigateTransactionWithId(val transactionId: Int) : MainScreenEventUI()
     object NavigateToTopTransaction:MainScreenEventUI()
     object NavigateToTransactionsDetails:MainScreenEventUI()
+    class OnTransactionTypeMonthlyChange(val transactionType: TransactionType):MainScreenEventUI()
 }
 
 @HiltViewModel
@@ -35,7 +36,7 @@ class MainViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
-
+    private var currentTransactionTypeMonthly = TransactionType.EXPENSE
     private val currentDateFlow = LocalDate.now()
     private val _state = MutableStateFlow(MainScreenState())
     val state = _state.asStateFlow()
@@ -61,6 +62,20 @@ class MainViewModel @Inject constructor(
                 _effect.update {
                     MainScreenEvent.OnNavigateTransactionDetails
                 }
+            }
+
+            is MainScreenEventUI.OnTransactionTypeMonthlyChange -> {
+
+                if (event.transactionType != currentTransactionTypeMonthly){
+                    val getTransactions = _state.value.transactions
+                    _state.update {
+                        it.copy(
+                            monthlyTransactions = getTransactions.getMonthlyTransactions(event.transactionType)
+                        )
+                    }
+                    currentTransactionTypeMonthly = event.transactionType
+                }
+
             }
         }
 
@@ -101,7 +116,7 @@ class MainViewModel @Inject constructor(
                             categoryWithAmount
                         ).sortedByDescending { it.percent }.take(5),
                         weeklyTransactions = toTransactions.getWeeklyTransaction(),
-                        monthlyTransactions = toTransactions.getMonthlyTransactions()
+                        monthlyTransactions = toTransactions.getMonthlyTransactions(currentTransactionTypeMonthly)
                     )
                 }
             }
@@ -115,6 +130,7 @@ sealed class MainScreenEvent {
     object OnNavigateTopTransaction:MainScreenEvent()
     object OnNavigateTransactionDetails:MainScreenEvent()
     object None : MainScreenEvent()
+
 }
 
 data class CategoryWithAmount(

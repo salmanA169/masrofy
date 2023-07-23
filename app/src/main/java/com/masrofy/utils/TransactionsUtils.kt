@@ -50,14 +50,17 @@ fun List<Transaction>.getWeeklyTransaction():List<WeeklyTransactions>{
     }.sortedWith(comparator = compareBy { it.nameOfDay.sortIndex()})
 }
 
-fun List<Transaction>.getMonthlyTransactions():List<MonthlyTransaction>{
+fun List<Transaction>.getMonthlyTransactions(transactionType: TransactionType = TransactionType.EXPENSE):List<MonthlyTransaction>{
     val currentDate = LocalDateTime.now()
+    if (isEmpty()){
+        return emptyList()
+    }
     return buildList {
         Month.values().forEach {
             add(MonthlyTransaction(it,0f))
         }
         this@getMonthlyTransactions.filter {transactions->
-            transactions.createdAt.year == currentDate.year
+            transactions.createdAt.year == currentDate.year && transactions.transactionType == transactionType
         }.forEach {transactoin->
             val getIndex = indexOfFirst { it.monthOfYear == transactoin.createdAt.month }
             get(getIndex).apply {
