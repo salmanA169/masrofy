@@ -29,7 +29,6 @@ fun LineChart(
         LineChart(it).apply {
             setScaleEnabled(false)
             isDoubleTapToZoomEnabled = false
-
         }
     }, update = {
         val mapValues = data.mapIndexed { index, monthlyTransaction ->
@@ -77,9 +76,11 @@ fun LineChart(
             }
         }
         }
+        it.setNoDataText("No transactions yet")
+        it.setNoDataTextColor(colorOnBackground.toArgb())
         it.legend.isEnabled = false
         it.isAutoScaleMinMaxEnabled = true
-        it.data = barData
+        it.data = if (barData.entryCount == 0) null else barData
 
         it.invalidate()
     })

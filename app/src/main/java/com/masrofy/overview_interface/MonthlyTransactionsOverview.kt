@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.masrofy.R
 import com.masrofy.component.LineChart
 import com.masrofy.model.TransactionType
+import com.masrofy.screens.mainScreen.MainScreenEventUI
 import com.masrofy.screens.transactionScreen.AddEditTransactionEvent
 import com.masrofy.utils.localizeToString
 import com.patrykandpatrick.vico.compose.component.lineComponent
@@ -43,33 +44,27 @@ class MonthlyTransactionsOverview(override val data: List<MonthlyTransaction>) :
     override fun getIcon(): Int {
         return R.drawable.statistic_icon1
     }
-    private var currentType = TransactionType.EXPENSE
 
-    // TODO: add on event main ui to trigger on view model and update data
-    var mData = mutableStateListOf<MonthlyTransaction>()
-    private set
+    var onEventUiChange: ((MainScreenEventUI) -> Unit)? = null
     override fun getLabel(): Int {
         return R.string.monthly_transaction
     }
 
     override fun onEvent(overViewEventType: OverViewEventType) {
-        if (overViewEventType is OverViewEventType.ChangeTransactionType){
-            if (overViewEventType.transactionType == currentType){
-                return
-            }else{
-                currentType = overViewEventType.transactionType
-                mData = mData.filter { it. }
-            }
+        if (overViewEventType is OverViewEventType.ChangeTransactionType) {
+            onEventUiChange?.invoke(
+                MainScreenEventUI.OnTransactionTypeMonthlyChange(
+                    overViewEventType.transactionType
+                )
+            )
         }
     }
+
     override val overFlowMenu: OverflowMenuTypeTransactions?
         get() = OverflowMenuTypeTransactions.TYPE_TRANSACTIONS
 
     @Composable
     override fun GetContent(modifier: Modifier) {
-        val rData = rememberSaveable(mData) {
-            
-        }
         BaseOverViewScreen(modifier = modifier) {
             LineChart(data = data, modifier = modifier)
         }
@@ -93,7 +88,8 @@ internal fun rememberMarker(): Marker {
         padding = labelPadding
         typeface = Typeface.MONOSPACE
     }
-    val indicatorInnerComponent = shapeComponent(Shapes.pillShape, MaterialTheme.colorScheme.surface)
+    val indicatorInnerComponent =
+        shapeComponent(Shapes.pillShape, MaterialTheme.colorScheme.surface)
     val indicatorCenterComponent = shapeComponent(Shapes.pillShape, Color.White)
     val indicatorOuterComponent = shapeComponent(Shapes.pillShape, Color.White)
     val indicator = overlayingComponent(
@@ -115,10 +111,14 @@ internal fun rememberMarker(): Marker {
             init {
                 indicatorSizeDp = INDICATOR_SIZE_DP
                 onApplyEntryColor = { entryColor ->
-                    indicatorOuterComponent.color = entryColor.copyColor(INDICATOR_OUTER_COMPONENT_ALPHA)
+                    indicatorOuterComponent.color =
+                        entryColor.copyColor(INDICATOR_OUTER_COMPONENT_ALPHA)
                     with(indicatorCenterComponent) {
                         color = entryColor
-                        setShadow(radius = INDICATOR_CENTER_COMPONENT_SHADOW_RADIUS, color = entryColor)
+                        setShadow(
+                            radius = INDICATOR_CENTER_COMPONENT_SHADOW_RADIUS,
+                            color = entryColor
+                        )
                     }
                 }
             }
@@ -155,4 +155,5 @@ private val labelPadding = dimensionsOf(labelHorizontalPaddingValue, labelVertic
 private val indicatorInnerAndCenterComponentPaddingValue = 5.dp
 private val indicatorCenterAndOuterComponentPaddingValue = 10.dp
 private val guidelineThickness = 2.dp
-private val guidelineShape = DashedShape(Shapes.pillShape, GUIDELINE_DASH_LENGTH_DP, GUIDELINE_GAP_LENGTH_DP)
+private val guidelineShape =
+    DashedShape(Shapes.pillShape, GUIDELINE_DASH_LENGTH_DP, GUIDELINE_GAP_LENGTH_DP)

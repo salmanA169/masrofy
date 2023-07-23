@@ -42,6 +42,10 @@ class OverviewWeek(override val data: List<WeeklyTransactions>) :
     override val overFlowMenu: OverflowMenuTypeTransactions?
         get() = null
 
+    override fun onEvent(overViewEventType: OverViewEventType) {
+
+    }
+
     @Composable
     override fun GetContent(modifier: Modifier) {
         val resource = LocalContext.current.resources

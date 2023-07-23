@@ -538,7 +538,9 @@ fun MainScreen(
                 ),
                 MonthlyTransactionsOverview(
                     mainState.monthlyTransactions
-                )
+                ).apply {
+                    onEventUiChange = onEvent
+                }
             ),
             onEvent = onEvent
         )

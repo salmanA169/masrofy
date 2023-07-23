@@ -68,7 +68,7 @@ class ExampleInstrumentedTest {
                             accountId = getDefaultAccount.accountId,
                             transactionType = TransactionType.EXPENSE,
                             amount = i * 2L,
-                            category = TransactionCategory.CAR,
+                            category = TransactionCategory.FOOD.nameCategory,
                             comment = ""
                     )
                 )
@@ -78,8 +78,8 @@ class ExampleInstrumentedTest {
                     TransactionEntity.createTransaction(
                         accountId = newAccount.accountId,
                         transactionType = TransactionType.EXPENSE,
-                        amount = i * 2f,
-                        category = TransactionCategory.S,
+                        amount = i * 2L,
+                        category = TransactionCategory.FOOD.nameCategory,
                         comment = ""
                     )
                 )

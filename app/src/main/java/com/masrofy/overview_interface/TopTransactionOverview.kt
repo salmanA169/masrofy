@@ -14,6 +14,13 @@ class TopTransactionOverview(override val data: List<TopTransactions>):BaseOverV
         return R.drawable.statistic_icon1
     }
 
+    override val overFlowMenu: OverflowMenuTypeTransactions?
+        get() = null
+
+    override fun onEvent(overViewEventType: OverViewEventType) {
+
+    }
+
     @Composable
     override fun GetContent(modifier: Modifier) {
         BaseOverViewScreen(modifier = modifier){
