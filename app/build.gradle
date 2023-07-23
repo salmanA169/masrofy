@@ -66,8 +66,6 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-
-
         }
         debug {
             applicationIdSuffix '.debug'
@@ -93,6 +91,12 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+    flavorDimensions 'gp'
+    productFlavors {
+        gplay {
+            dimension 'gp'
         }
     }
 }
@@ -148,7 +152,7 @@ dependencies {
 
     implementation "androidx.compose.runtime:runtime:1.4.3"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
-    implementation 'com.google.android.gms:play-services-ads:22.1.0'
+    gplayImplementation 'com.google.android.gms:play-services-ads:22.1.0'
 
     testImplementation "com.google.truth:truth:1.1.4"
     testImplementation 'app.cash.turbine:turbine:1.0.0'
