@@ -74,9 +74,6 @@ android {
             matchingFallbacks = ['release']
             initWith buildTypes.release
         }
-        gplay {
-            initWith buildTypes.release
-        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -94,6 +91,12 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+    flavorDimensions 'gp'
+    productFlavors {
+        gplay {
+            dimension 'gp'
         }
     }
 }
