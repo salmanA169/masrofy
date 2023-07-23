@@ -93,12 +93,7 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
-    flavorDimensions 'gp'
-    productFlavors {
-        gplay {
-            dimension 'gp'
-        }
-    }
+
 }
 
 dependencies {
@@ -152,7 +147,7 @@ dependencies {
 
     implementation "androidx.compose.runtime:runtime:1.4.3"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
-    gplayImplementation 'com.google.android.gms:play-services-ads:22.1.0'
+    implementation 'com.google.android.gms:play-services-ads:22.1.0'
 
     testImplementation "com.google.truth:truth:1.1.4"
     androidTestImplementation "com.google.truth:truth:1.1.4"
