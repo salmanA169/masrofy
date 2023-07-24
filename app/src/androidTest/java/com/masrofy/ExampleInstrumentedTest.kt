@@ -11,6 +11,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 
@@ -45,6 +46,15 @@ class ExampleInstrumentedTest {
         database.close()
     }
 
+
+    @Test
+    fun testMigrationCategory(){
+        runTest(StandardTestDispatcher()) {
+            val data = TransactionCategory.values().map { CategoryEntity(0,it.name,it.type.name,true) }
+            val getCategories = database.categoryDao.getCategories()
+            Truth.assertThat(getCategories).isEqualTo(data)
+        }
+    }
     @Test
     fun testIfAccountAvailable(){
         runTest {

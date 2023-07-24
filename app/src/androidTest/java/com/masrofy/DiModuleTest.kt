@@ -21,5 +21,8 @@ object DiModule {
     fun provideDataBase(
         @ApplicationContext context: Context,
         roomCallback: RoomCallback
-    ) = Room.inMemoryDatabaseBuilder(context, MasrofyDatabase::class.java).addCallback(roomCallback).build()
+    ):MasrofyDatabase  {
+        println("init room ")
+        return Room.inMemoryDatabaseBuilder(context, MasrofyDatabase::class.java).addCallback(roomCallback).build()
+    }
 }
