@@ -26,6 +26,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.masrofy.screens.categories.categoriesDest
 import com.masrofy.screens.mainScreen.MainViewModel
 import com.masrofy.screens.statisticsScreen.statisticsScreen
 import com.masrofy.screens.transactionScreen.transactionScreenNavigation
@@ -133,6 +134,7 @@ fun SetNavigationScreen() {
             statisticsScreen(navController)
             transactionsDetailsDest(navController)
             topTransactionsDetailsDest(navController)
+            categoriesDest(navController)
         }
     }
 }

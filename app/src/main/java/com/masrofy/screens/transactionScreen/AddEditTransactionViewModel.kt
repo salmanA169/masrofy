@@ -5,13 +5,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.AdsManager
+import com.masrofy.Screens
 import com.masrofy.TRANSACTION_ID
+import com.masrofy.component.InputType
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.data.entity.toAccount
 import com.masrofy.model.TransactionType
 import com.masrofy.model.getDefaultAccount
 import com.masrofy.repository.AccountRepository
 import com.masrofy.repository.TransactionRepository
+import com.masrofy.repository.category_repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +29,7 @@ class AddEditTransactionViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val adsManager: AdsManager,
     private val dispatcherProvider: DispatcherProvider,
+    private val categoryRepository: CategoryRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -41,6 +45,15 @@ class AddEditTransactionViewModel @Inject constructor(
     }
 
     init {
+        viewModelScope.launch(dispatcherProvider.io) {
+            categoryRepository.observeCategories().collect{categories->
+                _transactionDetailState.update {
+                    it.copy(
+                        transactionCategories = categories
+                    )
+                }
+            }
+        }
         viewModelScope.launch(dispatcherProvider.io) {
 
             accountRepository.getAccounts().collect { accounts ->
@@ -160,11 +173,31 @@ class AddEditTransactionViewModel @Inject constructor(
                 }
             }
 
+
             AddEditTransactionEvent.ClosePage -> {
                 _effect.update {
                     TransactionDetailEffect.ClosePage
                 }
             }
+
+            is AddEditTransactionEvent.NavigateTo -> {
+                val getTransactionType = _transactionDetailState.value.transactionType
+                when(event.inputType){
+                    InputType.ACCOUNT_INPUT -> Unit
+                    InputType.CATEGORY_INPUT -> {
+                        _effect.update {
+                            TransactionDetailEffect.Navigate(Screens.CategoriesScreen.navigateToCategoriesWithArg(getTransactionType.name))
+                        }
+                    }
+                    InputType.KEYBOARD -> Unit
+                    InputType.DATE_INPUT -> Unit
+                }
+            }
+        }
+    }
+    fun resetEffect(){
+        _effect.update {
+            TransactionDetailEffect.Noting
         }
     }
 }
@@ -172,6 +205,7 @@ class AddEditTransactionViewModel @Inject constructor(
 sealed class TransactionDetailEffect() {
     object ClosePage : TransactionDetailEffect()
     class ErrorMessage(val message: String) : TransactionDetailEffect()
+    class Navigate(val route: String) : TransactionDetailEffect()
     object Noting : TransactionDetailEffect()
 }
 
@@ -182,6 +216,7 @@ sealed class AddEditTransactionEvent {
     class CategorySelected(val transactionCategory: String) : AddEditTransactionEvent()
     class DateTimeChanged(val date: LocalDateTime) : AddEditTransactionEvent()
     class CommentChange(val comment: String) : AddEditTransactionEvent()
+    class NavigateTo(val inputType: InputType) : AddEditTransactionEvent()
     object Save : AddEditTransactionEvent()
     object Delete : AddEditTransactionEvent()
     object ClosePage : AddEditTransactionEvent()

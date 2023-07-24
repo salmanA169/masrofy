@@ -5,11 +5,30 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
 const val TRANSACTION_ID = "transactions_id_arg"
+const val TRANSACTION_TYPE_ARG = "transaction_type_arg"
 sealed class Screens(val route: String) {
       abstract val args:List<NamedNavArgument>
     object MainScreen : Screens("mainScreen"){
         override val args: List<NamedNavArgument>
             get() = emptyList()
+    }
+    object CategoriesScreen:Screens("categories_route"){
+        val formatRoute = "$route/{$TRANSACTION_TYPE_ARG}"
+        override val args: List<NamedNavArgument>
+            get() = listOf(
+                navArgument(TRANSACTION_TYPE_ARG){
+                    type = NavType.StringType
+                }
+            )
+        fun navigateToCategoriesWithArg(transactionType:String):String{
+            return buildString {
+                append(route)
+                val args = listOf(transactionType)
+                args.forEach {
+                    append("/$it")
+                }
+            }
+        }
     }
     object TransactionScreen : Screens("transaction"){
         val formatRoute = "$route/{$TRANSACTION_ID}"

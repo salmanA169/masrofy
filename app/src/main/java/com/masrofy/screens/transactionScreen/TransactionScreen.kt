@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -98,6 +99,7 @@ fun NavGraphBuilder.transactionScreenNavigation(
         val findActivity = findOwner(context)
         LaunchedEffect(key1 = transactionEvent) {
             when (transactionEvent) {
+
                 TransactionDetailEffect.ClosePage -> {
                     navController.popBackStack()
                     if (findActivity != null) {
@@ -114,6 +116,10 @@ fun NavGraphBuilder.transactionScreenNavigation(
                 }
 
                 TransactionDetailEffect.Noting -> Unit
+                is TransactionDetailEffect.Navigate -> {
+                    navController.navigate((transactionEvent as TransactionDetailEffect.Navigate).route)
+                    transactionViewModel.resetEffect()
+                }
             }
         }
         TransactionScreen(transactionState, transactionViewModel::onEvent)
@@ -263,7 +269,7 @@ fun TransactionScreen(
                             DatePicker(state = dateState)
                         }
                     } else {
-                        val inputData = remember(currentInput,transactionState.transactionType) {
+                        val inputData = remember(currentInput,transactionState.transactionType,transactionState.transactionCategories) {
                             when (currentInput) {
                                 InputType.KEYBOARD -> null
                                 InputType.ACCOUNT_INPUT -> InputData(
@@ -274,8 +280,8 @@ fun TransactionScreen(
 
                                 InputType.DATE_INPUT -> null
                                 InputType.CATEGORY_INPUT -> {
-                                    val getDataByTransactionType = TransactionCategory.values()
-                                        .filter { it.type == transactionState.transactionType }
+                                    val getDataByTransactionType = transactionState.transactionCategories
+                                        .filter { it.type == transactionState.transactionType.name }
                                         .map { it.nameCategory }
                                     InputData(
                                         "Category",
@@ -334,7 +340,7 @@ fun Inputs(
     inputData: InputData,
     onEvent: (AddEditTransactionEvent) -> Unit = {},
     onHide: () -> Unit = {},
-    focusManager:FocusManager = LocalFocusManager.current
+    focusManager:FocusManager = LocalFocusManager.current,
 ) {
     Column(
         modifier = modifier
@@ -360,6 +366,13 @@ fun Inputs(
                     .padding(horizontal = 8.dp)
                     .weight(1f)
             )
+            if (inputData.inputType == InputType.CATEGORY_INPUT){
+                IconButton(modifier = Modifier, onClick = {
+                    onEvent(AddEditTransactionEvent.NavigateTo(inputData.inputType))
+                }) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "")
+                }
+            }
             IconButton(modifier = Modifier, onClick = { onHide() }) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = "")
             }
