@@ -28,6 +28,10 @@ class CategoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteCategory(category: Category) {
-        TODO("Not yet implemented")
+        categoryDao.deleteCategory(category.toCategoryEntity())
+    }
+
+    override suspend fun getCategoryById(id: Int): Category {
+        return categoryDao.getCategoryById(id).toCategory()
     }
 }

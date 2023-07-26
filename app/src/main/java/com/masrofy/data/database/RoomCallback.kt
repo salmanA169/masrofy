@@ -26,7 +26,7 @@ class RoomCallback @Inject constructor(
             val getCategories = database.categoryDao.getCategories()
             if (getCategories.isEmpty()){
                 val toCategoryEntity = TransactionCategory.values().map {
-                    CategoryEntity(it.nameCategory,it.type.name,true)
+                    CategoryEntity(0,it.nameCategory,it.type.name,true,0)
                 }
                 database.categoryDao.upsertCategory(toCategoryEntity)
 
@@ -41,7 +41,7 @@ class RoomCallback @Inject constructor(
             val getCategories = database.categoryDao.getCategories()
             if (getCategories.isEmpty()){
                 val toCategoryEntity = TransactionCategory.values().map {
-                    CategoryEntity(it.nameCategory,it.type.name,true)
+                    CategoryEntity(0,it.nameCategory,it.type.name,true,0)
                 }
                 database.categoryDao.upsertCategory(toCategoryEntity)
             }

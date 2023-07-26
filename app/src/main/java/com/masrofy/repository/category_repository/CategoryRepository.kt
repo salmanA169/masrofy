@@ -9,4 +9,5 @@ interface CategoryRepository {
     suspend fun insertCategory(category: Category)
     suspend fun insertCategory(category: List<Category>)
     suspend fun deleteCategory(category: Category)
+    suspend fun getCategoryById(id:Int):Category
 }
