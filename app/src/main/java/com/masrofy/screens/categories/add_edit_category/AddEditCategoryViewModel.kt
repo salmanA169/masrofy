@@ -103,6 +103,12 @@ class AddEditCategoryViewModel @Inject constructor(
                     }
                 }
             }
+
+            AddEditCategoryEvent.ClosePage -> {
+                _categoryEffect.update {
+                    AddEditCategoryEffect.ClosePage
+                }
+            }
         }
     }
 
@@ -128,9 +134,11 @@ class AddEditCategoryViewModel @Inject constructor(
 sealed interface AddEditCategoryEffect {
     object Nothing : AddEditCategoryEffect
     object Saved : AddEditCategoryEffect
+    object ClosePage:AddEditCategoryEffect
 }
 
 sealed class AddEditCategoryEvent {
     class OnChangeText(val text: String) : AddEditCategoryEvent()
     object Save : AddEditCategoryEvent()
+    object ClosePage:AddEditCategoryEvent()
 }

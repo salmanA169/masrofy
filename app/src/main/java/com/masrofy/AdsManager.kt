@@ -7,6 +7,8 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
@@ -27,8 +29,8 @@ interface EventFullScreenAds {
 }
 
 private const val TEST_ID = "ca-app-pub-3940256099942544/5354046379"
-
-class AdsChecker(private val conditionTimes: Int = 4,context: Context) {
+private const val TESTINS_ID = "ca-app-pub-3940256099942544/1033173712"
+class AdsChecker(private val conditionTimes: Int = 5,context: Context) {
     private var shouldShowAds: Boolean = false
     private val dataStore = context.datastore
     private var currentTimes = 0
@@ -66,16 +68,16 @@ class AdsChecker(private val conditionTimes: Int = 4,context: Context) {
     }
 }
 
-class AdsManager @Inject constructor(private val context: Context) : RewardedInterstitialAdLoadCallback(),
+class AdsManager @Inject constructor(private val context: Context) : InterstitialAdLoadCallback(),
     EventFullScreenAds {
     private val TAG = javaClass.simpleName
-    private var rewardedAd: RewardedInterstitialAd? = null
+    private var rewardedAd: InterstitialAd? = null
     private val fullEventScreenAdsCallback = FullScreenAdsCallbackImpl(this)
     private val adsRequester = AdRequest.Builder().build()
     private val adsChecker = AdsChecker(context = context)
 
     private fun loadAds() {
-        RewardedInterstitialAd.load(context, BuildConfig.ADMOB_ADS_ID, adsRequester, this)
+        InterstitialAd.load(context, if (BuildConfig.DEBUG) TESTINS_ID else BuildConfig.ADMOB_ADS_ID, adsRequester, this)
     }
 
     init {
@@ -89,7 +91,7 @@ class AdsManager @Inject constructor(private val context: Context) : RewardedInt
     }
 
 
-    override fun onAdLoaded(p0: RewardedInterstitialAd) {
+    override fun onAdLoaded(p0: InterstitialAd) {
         super.onAdLoaded(p0)
         rewardedAd = p0
         rewardedAd?.fullScreenContentCallback = fullEventScreenAdsCallback
@@ -99,9 +101,7 @@ class AdsManager @Inject constructor(private val context: Context) : RewardedInt
         if (!BuildConfig.DEBUG){
             if (rewardedAd != null) {
                 if (adsChecker.checkConditions()) {
-                    rewardedAd?.show(activity){
-
-                    }
+                    rewardedAd?.show(activity)
                 }
             } else {
                 loadAds()

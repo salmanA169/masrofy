@@ -5,5 +5,5 @@ data class Category(
     val nameCategory:String,
     val type:String,
     val isPrimary : Boolean,
-    val position:Int
+    var position:Int
 )

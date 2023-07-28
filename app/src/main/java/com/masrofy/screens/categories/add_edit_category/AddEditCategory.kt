@@ -41,6 +41,10 @@ fun NavGraphBuilder.addEditCategoryDest(navController: NavController) {
                 AddEditCategoryEffect.Saved -> {
                     navController.popBackStack()
                 }
+
+                AddEditCategoryEffect.ClosePage -> {
+                    navController.popBackStack()
+                }
             }
         }
         AddEditCategoryScreen(state, viewModel::onEvent)
@@ -55,10 +59,10 @@ fun AddEditCategoryScreen(
     Scaffold (
         topBar = {
             AppBar(
-                TranslatableString.ResString(R.string.categories,state.category),
+                TranslatableString.ResString(R.string.categories,""),
                 {
                     IconButton(onClick = {
-//                        onEvent(AddEditCategoryEvent.PopBack)
+                        onEvent(AddEditCategoryEvent.ClosePage)
                     }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }

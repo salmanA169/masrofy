@@ -46,10 +46,10 @@ class AddEditTransactionViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatcherProvider.io) {
-            categoryRepository.observeCategories().collect{categories->
+            categoryRepository.observeCategories().collect { categories ->
                 _transactionDetailState.update {
                     it.copy(
-                        transactionCategories = categories
+                        transactionCategories = categories.sortedWith(compareBy { if (it.position == 0) categories.size else it.position })
                     )
                 }
             }
@@ -143,11 +143,11 @@ class AddEditTransactionViewModel @Inject constructor(
             AddEditTransactionEvent.Save -> {
                 viewModelScope.launch(dispatcherProvider.io) {
                     val transaction = _transactionDetailState.value
-                    if (transaction.transactionCategory == null ) {
+                    if (transaction.transactionCategory == null) {
                         _effect.update {
                             TransactionDetailEffect.ErrorMessage("You must choose category")
                         }
-                    }else if(transaction.totalAmount.isEmpty()|| transaction.totalAmount.toLong() > 99999999){
+                    } else if (transaction.totalAmount.isEmpty() || transaction.totalAmount.toLong() > 99999999) {
                         _effect.update {
                             TransactionDetailEffect.ErrorMessage("The amount zero or greater then 99999")
                         }
@@ -163,7 +163,7 @@ class AddEditTransactionViewModel @Inject constructor(
             }
 
             is AddEditTransactionEvent.TransactionTypeChange -> {
-                if (_transactionDetailState.value.transactionType != event.transactionType){
+                if (_transactionDetailState.value.transactionType != event.transactionType) {
                     _transactionDetailState.update {
                         it.copy(
                             transactionType = event.transactionType,
@@ -182,20 +182,26 @@ class AddEditTransactionViewModel @Inject constructor(
 
             is AddEditTransactionEvent.NavigateTo -> {
                 val getTransactionType = _transactionDetailState.value.transactionType
-                when(event.inputType){
+                when (event.inputType) {
                     InputType.ACCOUNT_INPUT -> Unit
                     InputType.CATEGORY_INPUT -> {
                         _effect.update {
-                            TransactionDetailEffect.Navigate(Screens.CategoriesScreen.navigateToCategoriesWithArg(getTransactionType.name))
+                            TransactionDetailEffect.Navigate(
+                                Screens.CategoriesScreen.navigateToCategoriesWithArg(
+                                    getTransactionType.name
+                                )
+                            )
                         }
                     }
+
                     InputType.KEYBOARD -> Unit
                     InputType.DATE_INPUT -> Unit
                 }
             }
         }
     }
-    fun resetEffect(){
+
+    fun resetEffect() {
         _effect.update {
             TransactionDetailEffect.Noting
         }

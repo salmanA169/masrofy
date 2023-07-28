@@ -8,6 +8,7 @@ import com.masrofy.data.entity.defaultAccount
 import com.masrofy.model.TransactionCategory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,27 +22,12 @@ class RoomCallback @Inject constructor(
         super.onCreate(db)
         val defaultAccount = defaultAccount()
         val database = this.db.get()
-        CoroutineScope(Job()).launch {
+        CoroutineScope(Job()+Dispatchers.IO).launch {
             database.transactionDao.addAccount(defaultAccount)
             val getCategories = database.categoryDao.getCategories()
             if (getCategories.isEmpty()){
                 val toCategoryEntity = TransactionCategory.values().map {
-                    CategoryEntity(0,it.nameCategory,it.type.name,true,0)
-                }
-                database.categoryDao.upsertCategory(toCategoryEntity)
-
-            }
-        }
-    }
-
-    override fun onOpen(db: SupportSQLiteDatabase) {
-        super.onOpen(db)
-        val database = this.db.get()
-        CoroutineScope(Job()).launch {
-            val getCategories = database.categoryDao.getCategories()
-            if (getCategories.isEmpty()){
-                val toCategoryEntity = TransactionCategory.values().map {
-                    CategoryEntity(0,it.nameCategory,it.type.name,true,0)
+                    CategoryEntity(0,it.nameCategory,it.type.name,true,it.position)
                 }
                 database.categoryDao.upsertCategory(toCategoryEntity)
             }
