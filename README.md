@@ -50,3 +50,8 @@
   - navigation compose
   - Constraint layout compose
   - Themed icon Android 13
+  - kotlin
+  - Coroutine
+  - Data store
+  - Admob
+  - Reorder list [Compose Reorderlist](https://github.com/aclassen/ComposeReorderable) 
