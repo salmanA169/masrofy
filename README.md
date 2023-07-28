@@ -3,8 +3,16 @@
     <img width="200" height="200" style="display: block; border: 1px solid #f5f5f5; border-radius: 9999px;" src="https://user-images.githubusercontent.com/40442174/219127385-5d1d7561-c532-48db-851a-b41535542b9c.png" >
     </kbd>
 </div>
-    
-# New Update (3.0.0)
+
+# (3.5.0)
+- Implement custom category add , edit ,delete and reorder list
+
+  
+<img src="https://github.com/salmanA169/masrofy/assets/40442174/e588c92a-4caa-43a1-ae50-9bcf2d8de910" width="260"> <img src="https://github.com/salmanA169/masrofy/assets/40442174/586c2087-7e6f-4563-8b34-9e9dc318d809" width="260"> 
+
+<img src="https://github.com/salmanA169/masrofy/assets/40442174/60ee18e6-8ace-4932-9100-5cab507b39ec" width="260">  <img src="https://github.com/salmanA169/masrofy/assets/40442174/9f8e20dc-ea49-4088-8c44-90d2599bc163" width="260"> 
+
+# Screenshoot
   <img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_232127.png" width="260">  <img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_232246.png" width="260"> 
 <img src="https://github.com/salmanA169/masrofy/blob/master/files/Screenshot_20230718_233302.png" width="260">  
  <img src="https://github.com/salmanA169/masrofy/assets/40442174/eb636e32-9fce-4b2c-b289-effd3a2a5d55" width="260"> 
