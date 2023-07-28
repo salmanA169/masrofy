@@ -16,7 +16,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -26,7 +25,8 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.masrofy.screens.mainScreen.MainViewModel
+import com.masrofy.screens.categories.add_edit_category.addEditCategoryDest
+import com.masrofy.screens.categories.categoriesDest
 import com.masrofy.screens.statisticsScreen.statisticsScreen
 import com.masrofy.screens.transactionScreen.transactionScreenNavigation
 import com.masrofy.ui.theme.MasrofyTheme
@@ -35,12 +35,12 @@ import com.masrofy.screens.mainScreen.mainScreenNavigation
 import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
 import com.masrofy.screens.transactions_details.transactionsDetailsDest
 import com.masrofy.ui.theme.SurfaceColor
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
 
+    private val viewModel by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -133,6 +133,8 @@ fun SetNavigationScreen() {
             statisticsScreen(navController)
             transactionsDetailsDest(navController)
             topTransactionsDetailsDest(navController)
+            categoriesDest(navController)
+            addEditCategoryDest(navController)
         }
     }
 }

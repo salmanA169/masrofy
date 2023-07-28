@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.TextFieldValue
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.Account
+import com.masrofy.model.Category
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionType
 import java.time.LocalDate
@@ -20,6 +21,7 @@ data class AddEditTransactionState(
     val transactionCategory: String? = null ,
     val date: LocalDateTime = LocalDateTime.now(),
     val comment: String? = null,
+    val transactionCategories:List<Category> = listOf(),
     var isEdit: Boolean = false
 ) {
     fun isValidToSave(): Boolean {

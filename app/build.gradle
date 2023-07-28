@@ -24,7 +24,7 @@ localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\salma\\Desktop\\masrofy key\\masrofyKey.jks')
+            storeFile file('C:\\Users\\kd\\Downloads\\masrofyKey.jks')
             storePassword 'alamode151412'
             keyAlias 'salmanalamode15'
             keyPassword 'Salmanalamode15'
@@ -66,6 +66,7 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+
         }
         debug {
             applicationIdSuffix '.debug'
@@ -73,6 +74,10 @@ android {
         benchmark {
             matchingFallbacks = ['release']
             initWith buildTypes.release
+        }
+        AppCenter {
+            initWith buildTypes.release
+            applicationIdSuffix '.appReleaseCenter'
         }
     }
     compileOptions {
@@ -155,5 +160,5 @@ dependencies {
 
     implementation "com.patrykandpatrick.vico:compose-m3:1.6.5"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
-
+    implementation 'org.burnoutcrew.composereorderable:reorderable:0.9.6'
 }

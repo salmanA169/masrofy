@@ -27,4 +27,8 @@ object DiModule {
     @Provides
     @Singleton
     fun provideDatastore(@ApplicationContext context: Context) = context.datastore
+
+    @Provides
+    @Singleton
+    fun provideCategoryDao(db:MasrofyDatabase) = db.categoryDao
 }
