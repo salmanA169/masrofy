@@ -15,6 +15,7 @@
 - [x] Add transaction for income and expense 
 - [x] Add statistics screen
 - [x] implement filter for transaction monthly
+- [x] implement add edit delete custom category and reorder lsit
 - [ ] Add account screen
 - [ ] Add budget screen and implement functionality
 
