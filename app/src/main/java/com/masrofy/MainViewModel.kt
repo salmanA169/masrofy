@@ -1,5 +1,6 @@
 package com.masrofy
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.coroutine.DispatcherProvider
@@ -16,13 +17,12 @@ class MainViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val dispatcherProvider: DispatcherProvider
 ):ViewModel() {
-    init {
 
-        checkCategories()
-    }
-    private fun checkCategories(){
+    fun checkCategories(){
         viewModelScope.launch(dispatcherProvider.io) {
+            // TODO: fix here if update app no categories inserted
             val getCategories = categoryRepository.getCategories()
+            Log.d("MainViewModel", "checkCategories: ${getCategories.isEmpty()}")
             if (getCategories.isEmpty()){
                 val toCategoryEntity = TransactionCategory.values().map {
                     CategoryEntity(0,it.nameCategory,it.type.name,true,it.position)

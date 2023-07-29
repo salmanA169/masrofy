@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        viewModel.checkCategories()
         setContent {
             MasrofyTheme {
                 // A surface container using the 'background' color from the theme
