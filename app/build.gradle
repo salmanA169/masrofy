@@ -38,7 +38,7 @@ android {
         applicationId "com.masrofy"
         minSdk 28
         targetSdk 33
-        versionCode 7
+        versionCode 9
         versionName "3.5.1"
 
             kapt {
