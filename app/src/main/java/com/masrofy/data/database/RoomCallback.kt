@@ -24,13 +24,6 @@ class RoomCallback @Inject constructor(
         val database = this.db.get()
         CoroutineScope(Job()+Dispatchers.IO).launch {
             database.transactionDao.addAccount(defaultAccount)
-            val getCategories = database.categoryDao.getCategories()
-            if (getCategories.isEmpty()){
-                val toCategoryEntity = TransactionCategory.values().map {
-                    CategoryEntity(0,it.nameCategory,it.type.name,true,it.position)
-                }
-                database.categoryDao.upsertCategory(toCategoryEntity)
-            }
         }
     }
 }
