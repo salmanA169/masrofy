@@ -4,12 +4,19 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
+// TODO: add currency code to transaction entity and account and get data from compose expense
 const val TRANSACTION_ID = "transactions_id_arg"
 const val TRANSACTION_TYPE_ARG = "transaction_type_arg"
 const val CATEGORY_ID_ARG = "category-id-arg"
 sealed class Screens(val route: String) {
     abstract val args: List<NamedNavArgument>
 
+    sealed class OnBoardingScreens(route: String):Screens(route){
+        object CurrencyScreen:OnBoardingScreens("currency_screen"){
+            override val args: List<NamedNavArgument>
+                get() = emptyList()
+        }
+    }
 
     object AddEditCategoryScreen : Screens("add-edit-category-route") {
         val formatRoute = "$route/{$TRANSACTION_TYPE_ARG}/{$CATEGORY_ID_ARG}"
