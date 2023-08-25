@@ -4,6 +4,7 @@ import com.masrofy.coroutine.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import javax.inject.Inject
 
 class TestDispatcherProvider @Inject constructor():DispatcherProvider {
@@ -11,7 +12,7 @@ class TestDispatcherProvider @Inject constructor():DispatcherProvider {
         get() = StandardTestDispatcher()
     @OptIn(ExperimentalCoroutinesApi::class)
     override val io: CoroutineDispatcher
-        get() = StandardTestDispatcher()
+        get() = UnconfinedTestDispatcher()
     override val default: CoroutineDispatcher
         get() = StandardTestDispatcher()
 }

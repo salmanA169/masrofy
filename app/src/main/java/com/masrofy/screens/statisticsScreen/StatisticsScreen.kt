@@ -110,7 +110,6 @@ fun StatisticScreen(
                             Card(
                                 colors = CardDefaults.cardColors(containerColor = it.color),
                                 shape = RoundedCornerShape(4.dp),
-                                modifier = Modifier.size(45.dp, 27.dp)
                             ) {
                                 Text(
                                     text = it.percentage,
@@ -128,7 +127,7 @@ fun StatisticScreen(
                             )
                             Spacer(modifier = Modifier.weight(1f))
                             Text(
-                                text = it.amount.formatAsDisplayNormalize(),
+                                text = it.currency.formatAsDisplayNormalize(it.amount.toBigDecimal(),true),
                                 modifier = Modifier.padding(end = 8.dp)
                             )
 

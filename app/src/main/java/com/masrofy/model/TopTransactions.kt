@@ -3,6 +3,7 @@ package com.masrofy.model
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.masrofy.currency.Currency
 import com.masrofy.screens.mainScreen.CategoryWithAmount
 import com.masrofy.utils.formatAsDisplayNormalize
 
@@ -27,7 +28,8 @@ enum class ColorTransactions {
 
 fun calculateTopTransactions(
     totalValue: Float,
-    categoryWithAmount: List<CategoryWithAmount>
+    categoryWithAmount: List<CategoryWithAmount>,
+    currency: Currency
 ): List<TopTransactions> = buildList {
     var currentColor: ColorTransactions = ColorTransactions.PRIMARY
     categoryWithAmount.forEachIndexed { index, categoryWithAmount ->
@@ -35,7 +37,7 @@ fun calculateTopTransactions(
         add(
             TopTransactions(
                 categoryWithAmount.category,
-                formatAsDisplayNormalize(categoryWithAmount.amount), calculatePercent, currentColor
+                currency.formatAsDisplayNormalize(categoryWithAmount.amount), calculatePercent, currentColor
             )
         )
         currentColor = currentColor.getNextColor()

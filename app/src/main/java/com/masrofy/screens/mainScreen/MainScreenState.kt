@@ -1,6 +1,7 @@
 package com.masrofy.screens.mainScreen
 
 import androidx.compose.runtime.Immutable
+import com.masrofy.currency.Currency
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.TopTransactions
@@ -19,6 +20,7 @@ data class MainScreenState(
     val topTransactions:List<TopTransactions> = listOf(),
     val month :String = "",
     val weeklyTransactions:List<WeeklyTransactions> = emptyList(),
-    val monthlyTransactions :List<MonthlyTransaction> = listOf()
+    val monthlyTransactions :List<MonthlyTransaction> = listOf(),
+    val currency:Currency = Currency("USD","US")
 )
 

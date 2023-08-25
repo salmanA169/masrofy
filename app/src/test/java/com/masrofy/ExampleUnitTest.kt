@@ -12,6 +12,7 @@ import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjuster
 import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -21,6 +22,11 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 class ExampleUnitTest {
 
+    @Test
+    fun CurrencyCode(){
+        val locale = Locale("ar","sa")
+        println(locale.country)
+    }
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)

@@ -24,6 +24,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.masrofy.R
 import com.masrofy.Screens
+import com.masrofy.currency.Currency
 import com.masrofy.data.entity.getCategoryWithAmount
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.calculateTopTransactions
@@ -49,7 +50,9 @@ fun TopPreview() {
         val transactions = generateTransactionsEntity()
         val categoryWithAmount = transactions.toTransactions().getCategoryWithAmount()
         val total = transactions.sumOf { it.amount }
-        val topTransactions = calculateTopTransactions(total.toFloat(),categoryWithAmount)
+        val topTransactions = calculateTopTransactions(total.toFloat(),categoryWithAmount,
+            Currency("USD","US")
+        )
         TopTransactionsDetailsScreen(
             topTransactionsDetailsState = TopTransactionDetailsState(
                 topTransactionsDetails = topTransactions

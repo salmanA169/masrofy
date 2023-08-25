@@ -2,6 +2,9 @@ package com.masrofy.repository
 
 import com.masrofy.data.database.MasrofyDatabase
 import com.masrofy.data.entity.TransactionEntity
+import com.masrofy.mapper.toAccountEntity
+import com.masrofy.mapper.toAccounts
+import com.masrofy.model.Account
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -32,5 +35,13 @@ class TransactionRepositoryImpl @Inject constructor(
 
     override suspend fun getTransactionById(id: Int): TransactionEntity {
         return transactionDao.getTransactionById(id)
+    }
+
+    override suspend fun getAccount(): List<Account> {
+        return transactionDao.getAccounts().toAccounts()
+    }
+
+    override suspend fun upsertAccount(account: Account) {
+        transactionDao.upsertAccount(account.toAccountEntity())
     }
 }

@@ -1,6 +1,7 @@
 package com.masrofy.repository
 
 import com.masrofy.data.entity.TransactionEntity
+import com.masrofy.model.Account
 import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
@@ -12,4 +13,7 @@ interface TransactionRepository {
 
     suspend fun getTransactionById(id: Int): TransactionEntity
 
+    suspend fun getAccount():List<Account>
+
+    suspend fun upsertAccount(account: Account)
 }

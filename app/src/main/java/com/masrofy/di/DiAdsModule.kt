@@ -16,4 +16,6 @@ object DiAdsModule {
     @ActivityRetainedScoped
     @Provides
     fun provideAdsManager(@ApplicationContext activity:Context)= AdsManager(activity)
+
+
 }

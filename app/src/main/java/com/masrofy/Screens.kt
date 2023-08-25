@@ -1,23 +1,44 @@
 package com.masrofy
 
+import android.util.Log
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
-// TODO: add currency code to transaction entity and account and get data from compose expense
 const val TRANSACTION_ID = "transactions_id_arg"
 const val TRANSACTION_TYPE_ARG = "transaction_type_arg"
 const val CATEGORY_ID_ARG = "category-id-arg"
+
+const val ONBOARDING_IS_FIRST_TIME = "onboarding_is_first_time"
+const val ONBOARDING_SCREENS_ARGS = "onboarding_screens"
 sealed class Screens(val route: String) {
     abstract val args: List<NamedNavArgument>
 
-    sealed class OnBoardingScreens(route: String):Screens(route){
-        object CurrencyScreen:OnBoardingScreens("currency_screen"){
-            override val args: List<NamedNavArgument>
-                get() = emptyList()
+
+    object OnboardingScreen:Screens("currency_screen"){
+        val formatRoute = "$route/{$ONBOARDING_SCREENS_ARGS}/{$ONBOARDING_IS_FIRST_TIME}"
+        override val args: List<NamedNavArgument>
+            get() = listOf(
+                navArgument(ONBOARDING_IS_FIRST_TIME){
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+                navArgument(ONBOARDING_SCREENS_ARGS){
+                    type = NavType.StringArrayType
+                    nullable = true
+                }
+            )
+        fun navigateToOnboardingWithArg(screens:List<String>?= null , isFirstTime:Boolean):String{
+            return buildString {
+                append(route)
+                val args = mutableListOf(screens,isFirstTime)
+
+                args.forEach {
+                    append("/$it")
+                }
+            }
         }
     }
-
     object AddEditCategoryScreen : Screens("add-edit-category-route") {
         val formatRoute = "$route/{$TRANSACTION_TYPE_ARG}/{$CATEGORY_ID_ARG}"
         override val args: List<NamedNavArgument>

@@ -3,12 +3,14 @@ package com.masrofy.screens.statisticsScreen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.masrofy.currency.Currency
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.filterDate.MonthlyDateFilter
 import com.masrofy.filterDate.TransactionDateFilter
 import com.masrofy.filterDate.WeeklyDateFilter
 import com.masrofy.model.PieChartData
 import com.masrofy.model.TransactionType
+import com.masrofy.model.getDefaultAccount
 import com.masrofy.model.toPieChart
 import com.masrofy.repository.TransactionRepository
 import com.masrofy.screens.mainScreen.DateEvent
@@ -31,11 +33,13 @@ class StatisticViewModel @Inject constructor(
     private var transactionDateFilter: TransactionDateFilter? = null
 
     private var currentData = emptyList<TransactionEntity>()
+    private var currentCurrency: Currency? = null
     private fun setDateFilter(dateType: DateType, data: List<TransactionEntity>) {
         when (dateType) {
             DateType.MONTHLY -> {
                 transactionDateFilter = MonthlyDateFilter(data)
             }
+
             DateType.WEEKLY -> {
                 transactionDateFilter = WeeklyDateFilter(data)
             }
@@ -43,32 +47,45 @@ class StatisticViewModel @Inject constructor(
         updateData()
     }
 
+    private suspend fun updateCurrency() {
+
+            val account = transactionRepository.getAccount().getDefaultAccount()!!
+            currentCurrency = account.currency
+
+    }
+
     private fun load() {
         viewModelScope.launch(Dispatchers.IO) {
             val getTransactions = transactionRepository.getTransactions()
             currentData = getTransactions
+            updateCurrency()
             setDateFilter(DateType.MONTHLY, getTransactions)
         }
     }
-    private fun changeFilterDate(dateType:DateType){
-        setDateFilter(dateType,currentData)
+
+    private fun changeFilterDate(dateType: DateType) {
+        setDateFilter(dateType, currentData)
     }
-    fun onEvent(statisticEvent: StatisticEvent){
-        when(statisticEvent){
+
+    fun onEvent(statisticEvent: StatisticEvent) {
+        when (statisticEvent) {
             is StatisticEvent.DateTypeEvent -> {
                 changeFilterDate(statisticEvent.dateType)
             }
+
             is StatisticEvent.StatisticTypeChangeEvent -> {
                 changeTransactionType(statisticEvent.statisticType)
             }
         }
     }
-    fun changeDateValue(dateEvent: DateEvent){
+
+    fun changeDateValue(dateEvent: DateEvent) {
         transactionDateFilter?.let {
-            it.updateDate(dateEvent,1)
+            it.updateDate(dateEvent, 1)
             updateData()
         }
     }
+
     private fun updateData() {
 
         transactionDateFilter?.let { transactionDateFilter ->
@@ -79,18 +96,17 @@ class StatisticViewModel @Inject constructor(
                     transactions.toPieChart().filter {
                         it.transactionType == ss.statisticType.getTransactionType()
                     },
-                    totalIncome = transactions.sumOf { if (it.transactionType == TransactionType.INCOME) it.amount else 0 }
-                        .formatAsDisplayNormalize(),
-                    totalExpense = transactions.sumOf { if (it.transactionType == TransactionType.EXPENSE) it.amount else 0 }
-                        .formatAsDisplayNormalize()
-                ,
+                    totalIncome = currentCurrency!!.formatAsDisplayNormalize(transactions.sumOf { if (it.transactionType == TransactionType.INCOME) it.amount else 0 }
+                        .toBigDecimal()),
+                    totalExpense = currentCurrency!!.formatAsDisplayNormalize(transactions.sumOf { if (it.transactionType == TransactionType.EXPENSE) it.amount else 0 }
+                        .toBigDecimal()),
                     formatDate = transactionDateFilter.getDateFilterText()
                 )
             }
         }
     }
 
-   private fun changeTransactionType(statisticType: StatisticType) {
+    private fun changeTransactionType(statisticType: StatisticType) {
         transactionDateFilter?.let { transactionDateFilter ->
             _statisticState.update { ss ->
                 ss.copy(
@@ -107,9 +123,9 @@ class StatisticViewModel @Inject constructor(
 
 }
 
-sealed class StatisticEvent{
-    class StatisticTypeChangeEvent(val statisticType: StatisticType):StatisticEvent()
-    class DateTypeEvent(val dateType: DateType):StatisticEvent()
+sealed class StatisticEvent {
+    class StatisticTypeChangeEvent(val statisticType: StatisticType) : StatisticEvent()
+    class DateTypeEvent(val dateType: DateType) : StatisticEvent()
 }
 
 

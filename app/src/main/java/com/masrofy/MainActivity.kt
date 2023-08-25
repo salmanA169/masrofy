@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -32,6 +33,7 @@ import com.masrofy.screens.transactionScreen.transactionScreenNavigation
 import com.masrofy.ui.theme.MasrofyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.masrofy.screens.mainScreen.mainScreenNavigation
+import com.masrofy.screens.onboarding.onBoardingDest
 import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
 import com.masrofy.screens.transactions_details.transactionsDetailsDest
 import com.masrofy.ui.theme.SurfaceColor
@@ -46,10 +48,11 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         viewModel.checkCategories()
+        viewModel.checkOnboarding()
         setContent {
             MasrofyTheme {
                 // A surface container using the 'background' color from the theme
-                SetNavigationScreen()
+                SetNavigationScreen(viewModel)
             }
         }
     }
@@ -60,10 +63,26 @@ class MainActivity : ComponentActivity() {
     ExperimentalComposeUiApi::class
 )
 @Composable
-fun SetNavigationScreen() {
+fun SetNavigationScreen(mainViewModel: MainViewModel) {
     val navController = rememberNavController()
     val backStackEntries by navController.currentBackStackEntryAsState()
+    val effect by mainViewModel.showOnboarding.collectAsStateWithLifecycle()
 
+    LaunchedEffect(key1 = effect ){
+        when(effect){
+            is MainEffect.Navigate -> {
+                navController.navigate((effect as MainEffect.Navigate).route){
+                    popUpTo(Screens.MainScreen.route){
+                        inclusive = true
+                    }
+                }
+                mainViewModel.resetOnboardingValue()
+            }
+            null -> {
+
+            }
+        }
+    }
     var showBottom by remember {
         mutableStateOf(true)
     }
@@ -119,13 +138,10 @@ fun SetNavigationScreen() {
 
 
         ) {
-
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics {
-                    testTagsAsResourceId = true
-                },
+                ,
             navController = navController,
             startDestination = Screens.MainScreen.route
         ) {
@@ -136,6 +152,7 @@ fun SetNavigationScreen() {
             topTransactionsDetailsDest(navController)
             categoriesDest(navController)
             addEditCategoryDest(navController)
+            onBoardingDest(navController)
         }
     }
 }

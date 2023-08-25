@@ -10,7 +10,6 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -50,7 +49,7 @@ class ExampleInstrumentedTest {
     @Test
     fun testMigrationCategory(){
         runTest(StandardTestDispatcher()) {
-            val data = TransactionCategory.values().map { CategoryEntity(0,it.name,it.type.name,true) }
+            val data = TransactionCategory.values().map { CategoryEntity(0,it.name,it.type.name,true,0) }
             val getCategories = database.categoryDao.getCategories()
             Truth.assertThat(getCategories).isEqualTo(data)
         }
@@ -58,7 +57,7 @@ class ExampleInstrumentedTest {
     @Test
     fun testIfAccountAvailable(){
         runTest {
-            val accounts = database.transactionDao.getAccounts()
+            val accounts = database.transactionDao.observeAccounts()
             val account = accounts.first()
             Truth.assertThat(account.hasDefaultAccount()).isTrue()
         }
@@ -67,11 +66,11 @@ class ExampleInstrumentedTest {
     @Test
     fun test_account_with_transactions(){
         runTest {
-            val getDefaultAccount = database.transactionDao.getAccounts().first().find {
+            val getDefaultAccount = database.transactionDao.observeAccounts().first().find {
                 it.name == "Cash"
             }!!
-            val newAccount = AccountEntity(0,"Salman",CategoryAccount.CASH,0, LocalDateTime.now())
-            database.transactionDao.addAccount(newAccount)
+            val newAccount = AccountEntity(0,"Salman",CategoryAccount.CASH,0, LocalDateTime.now(),"","")
+            database.transactionDao.upsertAccount(newAccount)
             for (i in 1..10){
                 database.transactionDao.insertTransaction(
                         TransactionEntity.createTransaction(
@@ -79,7 +78,7 @@ class ExampleInstrumentedTest {
                             transactionType = TransactionType.EXPENSE,
                             amount = i * 2L,
                             category = TransactionCategory.FOOD.nameCategory,
-                            comment = ""
+                            comment = "", currencyCode = "", countryCode = ""
                     )
                 )
             }
@@ -90,7 +89,8 @@ class ExampleInstrumentedTest {
                         transactionType = TransactionType.EXPENSE,
                         amount = i * 2L,
                         category = TransactionCategory.FOOD.nameCategory,
-                        comment = ""
+                        comment = "",
+                        currencyCode = "", countryCode = ""
                     )
                 )
             }

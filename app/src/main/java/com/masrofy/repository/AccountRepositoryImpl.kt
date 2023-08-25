@@ -14,7 +14,7 @@ class AccountRepositoryImpl @Inject constructor(
 ):AccountRepository {
     private val transactionDao = db.transactionDao
     override suspend fun saveAccount(accountEntity: AccountEntity) {
-        transactionDao.addAccount(accountEntity)
+        transactionDao.upsertAccount(accountEntity)
     }
 
     override fun getAccountsWithTransactions(): Flow<List<AccountWithTransactions>> {

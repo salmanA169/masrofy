@@ -21,6 +21,7 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.masrofy.currency.Currency
 import com.masrofy.formatter.ScaleAmountFormatter
 import com.masrofy.model.PieChartData
 import com.masrofy.ui.theme.MasrofyTheme
@@ -43,7 +44,8 @@ data class TransactionEntry(
     val transactionCategory: String,
     val color: Color,
     val percentage: String,
-    val amount: Long
+    val amount: Long,
+    val currency: Currency
 )
 
 val decimalFormat = DecimalFormat("###,###,##0.0")
@@ -76,7 +78,7 @@ fun PieChart(
         }
     }, update = {
         val pieEntry = data.map {
-            PieEntry(it.value, it.nameCategory)
+            PieEntry(it.value, it.nameCategory,it.currency)
         }
 
         val ds = PieDataSet(pieEntry, "")
@@ -116,7 +118,8 @@ fun PieChart(
                     it.label,
                     Color(color),
                     decimalFormat.format(percentage).plus("%"),
-                    it.value.toLong()
+                    it.value.toLong(),
+                    it.data as Currency
                 )
             )
         }

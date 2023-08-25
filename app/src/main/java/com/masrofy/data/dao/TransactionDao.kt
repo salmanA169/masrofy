@@ -28,13 +28,16 @@ interface TransactionDao {
 
 
     @Query("SELECT * FROM accountentity")
-    fun getAccounts():Flow<List<AccountEntity>>
+    fun observeAccounts():Flow<List<AccountEntity>>
+
+    @Query("SELECT * FROM accountentity")
+    suspend fun getAccounts():List<AccountEntity>
 
     @Query("SELECT * FROM accountentity WHERE accountId= :id")
     suspend fun getAccountById(id: Int):AccountEntity
 
-    @Insert
-    suspend fun addAccount(account: AccountEntity)
+    @Upsert
+    suspend fun upsertAccount(account: AccountEntity)
 
     @Delete()
     suspend fun deleteTransaction(transactionEntity: TransactionEntity)

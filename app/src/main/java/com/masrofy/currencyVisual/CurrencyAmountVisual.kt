@@ -4,11 +4,14 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import com.masrofy.currency.Currency
+import com.masrofy.currency.CurrencyData
 import com.masrofy.utils.formatAsDisplayNormalize
 import java.math.BigDecimal
 import kotlin.math.max
 
 class CurrencyAmountInputVisualTransformation(
+    private val currencyData: Currency
 ) : VisualTransformation {
 
     private fun String.formattedAmount(): BigDecimal {
@@ -29,7 +32,7 @@ class CurrencyAmountInputVisualTransformation(
         val formattedText = text.text.formattedAmount()
 
         val newText = AnnotatedString(
-            text = formatAsDisplayNormalize(formattedText,true),
+            text = currencyData.formatAsDisplayNormalize(formattedText,true),
             spanStyles = text.spanStyles,
             paragraphStyles = text.paragraphStyles
         )
