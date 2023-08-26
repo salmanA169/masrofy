@@ -14,6 +14,10 @@ const val ONBOARDING_SCREENS_ARGS = "onboarding_screens"
 sealed class Screens(val route: String) {
     abstract val args: List<NamedNavArgument>
 
+    object Settings:Screens("settings-route"){
+        override val args: List<NamedNavArgument>
+            get() = listOf()
+    }
 
     object OnboardingScreen:Screens("currency_screen"){
         val formatRoute = "$route/{$ONBOARDING_SCREENS_ARGS}/{$ONBOARDING_IS_FIRST_TIME}"

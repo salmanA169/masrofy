@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -22,6 +23,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -34,6 +36,7 @@ import com.masrofy.ui.theme.MasrofyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.masrofy.screens.mainScreen.mainScreenNavigation
 import com.masrofy.screens.onboarding.onBoardingDest
+import com.masrofy.screens.settings.settingsDest
 import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
 import com.masrofy.screens.transactions_details.transactionsDetailsDest
 import com.masrofy.ui.theme.SurfaceColor
@@ -106,6 +109,19 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
                             navController.navigate(Screens.StatisticsScreen.route)
                         }
                     }
+                    val rememberSettingClick = remember{
+                        {
+                            navController.navigate(Screens.Settings.route)
+                        }
+                    }
+//                    IconButton(onClick = rememberSettingClick) {
+//                        Icon(
+//                            rememberVectorPainter(image = Icons.Filled.Settings),
+//                            contentDescription = "",
+//                            modifier = Modifier.size(20.dp),
+//                            tint = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
                     IconButton(onClick = rememberClick) {
                         Icon(
                             rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.statistic_icon1)),
@@ -153,6 +169,7 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
             categoriesDest(navController)
             addEditCategoryDest(navController)
             onBoardingDest(navController)
+            settingsDest(navController)
         }
     }
 }
@@ -161,6 +178,6 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
 @Composable
 fun DefaultPreview() {
     MasrofyTheme {
-//        SetNavigationScreen()
+        SetNavigationScreen(hiltViewModel())
     }
 }

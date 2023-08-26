@@ -70,37 +70,37 @@ class MainViewModel @Inject constructor(
     }
 
     fun checkOnboarding() {
-//        viewModelScope.launch(dispatcherProvider.io) {
-//            _showOnboarding.update {
-//                val isFirstTime = dataStore.getOnboardingIsFirstTime()
-//                if (isFirstTime) {
-//                    MainEffect.Navigate(
-//                        Screens.OnboardingScreen.navigateToOnboardingWithArg(
-//                            isFirstTime = true
-//                        )
-//                    )
-//                } else {
-//                    val filterList = OnboardingScreensConst.values().filter { onboarding ->
-//                        dataStore.data.map {
-//                            if (onboarding.keyStore == null) false else it[onboarding.keyStore]
-//                                ?: true
-//                        }.first()
-//                    }.map {
-//                        it.type
-//                    }
-//                    if (filterList.isNotEmpty()) {
-//                        MainEffect.Navigate(
-//                            Screens.OnboardingScreen.navigateToOnboardingWithArg(
-//                                filterList,
-//                                false
-//                            )
-//                        )
-//                    }else {
-//                        null
-//                    }
-//                }
-//            }
-//        }
+        viewModelScope.launch(dispatcherProvider.io) {
+            _showOnboarding.update {
+                val isFirstTime = dataStore.getOnboardingIsFirstTime()
+                if (isFirstTime) {
+                    MainEffect.Navigate(
+                        Screens.OnboardingScreen.navigateToOnboardingWithArg(
+                            isFirstTime = true
+                        )
+                    )
+                } else {
+                    val filterList = OnboardingScreensConst.values().filter { onboarding ->
+                        dataStore.data.map {
+                            if (onboarding.keyStore == null) false else it[onboarding.keyStore]
+                                ?: true
+                        }.first()
+                    }.map {
+                        it.type
+                    }
+                    if (filterList.isNotEmpty()) {
+                        MainEffect.Navigate(
+                            Screens.OnboardingScreen.navigateToOnboardingWithArg(
+                                filterList,
+                                false
+                            )
+                        )
+                    }else {
+                        null
+                    }
+                }
+            }
+        }
     }
 
     fun resetOnboardingValue() {

@@ -19,9 +19,9 @@ data class AccountEntity(
     val type: CategoryAccount,
     val totalAmount: Long,
     val createdAt: LocalDateTime,
-    @ColumnInfo(defaultValue = " ")
+    @ColumnInfo(defaultValue = "USD",name = "currency-code")
     val currencyCode: String,
-    @ColumnInfo(defaultValue = " ")
+    @ColumnInfo(defaultValue = "US", name = "country-code")
     val countryCode:String
 )
 

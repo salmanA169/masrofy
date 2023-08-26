@@ -17,7 +17,7 @@ import com.masrofy.data.entity.CategoryEntity
 import com.masrofy.data.entity.TransactionEntity
 
 @Database(
-    version = 4,
+    version = 5,
     entities = [TransactionEntity::class, AccountEntity::class, CategoryEntity::class],
     autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(
         from = 2,
@@ -25,7 +25,11 @@ import com.masrofy.data.entity.TransactionEntity
         MasrofyDatabase.Migration2To3RenameColumn::class
     ),
 
-    AutoMigration(from = 3 , to = 4)
+        AutoMigration(
+            from = 3,
+            to = 4,
+            MasrofyDatabase.Migration3To4RenameColumn::class
+        )
     ],
     exportSchema = true
 )
@@ -37,6 +41,10 @@ abstract class MasrofyDatabase : RoomDatabase() {
     @DeleteColumn("CategoryEntity", columnName = "position")
     @DeleteColumn("CategoryEntity", columnName = "id")
     class Migration2To3RenameColumn() : AutoMigrationSpec
+
+    @DeleteColumn("AccountEntity", columnName = "currencyCode")
+    @DeleteColumn("AccountEntity", columnName = "countryCode")
+    class Migration3To4RenameColumn() : AutoMigrationSpec
 
 }
 

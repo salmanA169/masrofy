@@ -140,7 +140,8 @@ fun OnBoardingScreen(
                     with(localDensity) {
                         padding = it.height.toDp()
                     }
-                },
+
+                }.padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
         ) {
@@ -183,10 +184,10 @@ fun CurrencyList(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-private inline fun LazyListScope.CurrencyCell(
+private fun LazyListScope.CurrencyCell(
     data: Map<String, List<CurrencyItem>>,
     selectedCurrency: Currency?,
-    noinline onItemClick: (CurrencyItem) -> Unit,
+    onItemClick: (CurrencyItem) -> Unit,
 ) {
 
     data.forEach { (title, currencies) ->
@@ -195,7 +196,7 @@ private inline fun LazyListScope.CurrencyCell(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = MaterialTheme.colorScheme.surface)
+//                        .background(color = MaterialTheme.colorScheme.surface)
                 ) {
                     Text(
                         style = MaterialTheme.typography.titleSmall.copy(
