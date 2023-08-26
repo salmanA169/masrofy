@@ -4,7 +4,6 @@ import com.masrofy.AdsChecker
 
 class AdsManagerTest {
 
-    private val adsChecker = AdsChecker()
 
 
 }

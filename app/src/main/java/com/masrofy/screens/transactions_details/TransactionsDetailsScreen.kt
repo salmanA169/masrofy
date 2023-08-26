@@ -167,7 +167,7 @@ fun TransactionsDetailsScreen(
                     TransactionItemDetails(
                         transactionId = it.transactionId,
                         category = it.category,
-                        amount = formatAsDisplayNormalize(it.amount, true),
+                        amount = it.currency.formatAsDisplayNormalize(it.amount, true),
                         date = it.createdAt.formatShortDate(),
                         color = it.transactionType.getColor(),
                         backgroundColor = SurfaceColor.surfaces.surfaceContainerHigh,

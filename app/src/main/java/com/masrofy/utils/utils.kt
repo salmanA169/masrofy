@@ -12,6 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.masrofy.R
+import com.masrofy.currency.COUNTRY_DATA
+import com.masrofy.currency.CURRENCY_DATA
+import com.masrofy.currency.Currency
+import com.masrofy.currency.CurrencyData
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -88,31 +92,43 @@ fun LocalDateTime.isEqualCurrentMonth(localDateTime: LocalDateTime = LocalDateTi
 fun LocalDate.isEqualCurrentMonth(localDateTime: LocalDate = LocalDate.now()): Boolean =
     monthValue == localDateTime.monthValue
 
-fun Long.formatAsDisplayNormalize(): String {
-    return formatAsDisplayNormalize(BigDecimal(this))
-}
 
-fun formatAsDisplayNormalize(
+fun Currency.formatAsDisplayNormalize(
     amount: BigDecimal,
     withSymbol: Boolean = false
 ): String {
-
-    val amountNormalize = amount.setScale(2) / getAmountMultiplier(2)
+    val scale = getScale()
+    val amountNormalize = amount.setScale(scale) / getAmountMultiplier(scale)
     return formatAsDisplay(amountNormalize, withSymbol)
 }
+fun Currency.getSymbol(): String {
+    return CURRENCY_DATA[currencyCode]?.symbol ?: throw RuntimeException("$this not found!")
+}
 
+fun Currency.getScale(): Int {
+    return CURRENCY_DATA[currencyCode]?.scale ?: throw RuntimeException("$this not found!")
+}
 
-private fun formatAsDisplay(
+fun Currency.getLocale(): Locale {
+    val lang = COUNTRY_DATA[countryCode]?.lang
+
+    return if (lang != null) {
+        Locale(lang, countryCode)
+    } else {
+        Locale("en", countryCode)
+    }
+}
+
+private fun Currency.formatAsDisplay(
     amount: BigDecimal,
-    withSymbol: Boolean = false
+    withSymbol: Boolean = false,
 ): String {
-    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("En", "sa"))
-
+    val currencyFormat = NumberFormat.getCurrencyInstance(getLocale())
+    val amountCurrency = java.util.Currency.getInstance(currencyCode)
     runCatching {
         val decimalFormatSymbols = (currencyFormat as DecimalFormat).decimalFormatSymbols
-
-        decimalFormatSymbols.currencySymbol =
-            if (withSymbol) currencyFormat.currency?.symbol else ""
+        decimalFormatSymbols.currency = amountCurrency
+        decimalFormatSymbols.currencySymbol = if (withSymbol) getSymbol() else ""
         currencyFormat.minimumFractionDigits = amount.scale()
         currencyFormat.decimalFormatSymbols = decimalFormatSymbols
     }

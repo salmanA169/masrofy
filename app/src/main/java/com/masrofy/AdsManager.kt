@@ -40,7 +40,6 @@ class AdsChecker(private val conditionTimes: Int = 5,context: Context) {
             dataStore.getCurrentCountFlow().collect{
                 currentTimes = it
                 shouldShowAds = it == 1
-                Log.d("AdsChecker", "count ads: current count is $it, condition count is : $conditionTimes")
             }
         }
     }

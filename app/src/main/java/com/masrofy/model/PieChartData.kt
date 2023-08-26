@@ -2,17 +2,19 @@ package com.masrofy.model
 
 import androidx.compose.material3.TextField
 import androidx.compose.ui.platform.LocalTextInputService
+import com.masrofy.currency.Currency
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.utils.isEqualCurrentMonth
 
 data class PieChartData(
     val nameCategory: String,
     val value: Float,
-    val transactionType: TransactionType
+    val transactionType: TransactionType,
+    val currency: Currency
 )
 
 fun List<TransactionEntity>.toPieChart(): List<PieChartData> {
-    val transactionCategories = map { it.category to it.transactionType }.distinct()
+    val transactionCategories = map { Triple(it.category,it.transactionType,Currency(it.currencyCode,it.countryCode))  }.distinct()
     val pieChartData = mutableListOf<PieChartData>()
 
     transactionCategories.forEach { transactionCategories ->
@@ -30,7 +32,8 @@ fun List<TransactionEntity>.toPieChart(): List<PieChartData> {
             PieChartData(
                 transactionCategories.first.toString(),
                 amount.toFloat(),
-                transactionCategories.second
+                transactionCategories.second,
+                transactionCategories.third
             )
         )
     }

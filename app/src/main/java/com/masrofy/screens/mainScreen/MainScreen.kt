@@ -1,6 +1,7 @@
 package com.masrofy.screens.mainScreen
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -67,9 +68,11 @@ import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.getColor
+import com.masrofy.overview_interface.MonthlyTransactionWithCurrency
 import com.masrofy.overview_interface.MonthlyTransactionsOverview
 import com.masrofy.overview_interface.OverviewInterface
 import com.masrofy.overview_interface.OverviewWeek
+import com.masrofy.overview_interface.WeeklyTransactionWithCurrency
 import com.masrofy.ui.theme.LocalSurfaceColors
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.ui.theme.SurfaceColor
@@ -288,7 +291,7 @@ fun Transactions(
                 TransactionItem(
                     transactionId = it.transactionId,
                     category = it.category.toString(),
-                    amount = formatAsDisplayNormalize(it.amount, true),
+                    amount = it.currency.formatAsDisplayNormalize(it.amount, true),
                     date = it.createdAt.formatShortDate(),
                     color = it.transactionType.getColor(),
                     comment = it.comment,
@@ -331,10 +334,7 @@ fun OverviewScreens(
     onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
-    val fling = PagerDefaults.flingBehavior(
-        state = pagerState,
-        pagerSnapDistance = PagerSnapDistance.atMost(10)
-    )
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -344,7 +344,6 @@ fun OverviewScreens(
             )
     ) {
         HorizontalPager(
-            flingBehavior = fling,
             state = pagerState,
             pageCount = overViews.size, modifier = Modifier
                 .height(250.dp)
@@ -534,10 +533,17 @@ fun MainScreen(
         OverviewScreens(
             overViews = listOf(
                 OverviewWeek(
-                    mainState.weeklyTransactions
+                    WeeklyTransactionWithCurrency(
+                        mainState.weeklyTransactions,
+                        mainState.currency
+                    )
                 ),
                 MonthlyTransactionsOverview(
-                    mainState.monthlyTransactions
+                    MonthlyTransactionWithCurrency(
+                        mainState.monthlyTransactions,
+                        mainState.currency
+                    )
+
                 ).apply {
                     onEventUiChange = onEvent
                 }

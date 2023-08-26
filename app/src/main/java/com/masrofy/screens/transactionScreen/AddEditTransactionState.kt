@@ -2,6 +2,8 @@ package com.masrofy.screens.transactionScreen
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.TextFieldValue
+import com.masrofy.currency.Currency
+import com.masrofy.currency.CurrencyData
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.Account
 import com.masrofy.model.Category
@@ -22,7 +24,8 @@ data class AddEditTransactionState(
     val date: LocalDateTime = LocalDateTime.now(),
     val comment: String? = null,
     val transactionCategories:List<Category> = listOf(),
-    var isEdit: Boolean = false
+    var isEdit: Boolean = false,
+    val currency: Currency ? = null
 ) {
     fun isValidToSave(): Boolean {
         return totalAmount.isNotEmpty() && !totalAmount.contentEquals("0") && selectedAccount != null
@@ -36,7 +39,8 @@ fun AddEditTransactionState.toTransactionEntity() = TransactionEntity.createTran
     date,
     totalAmount.toLong(),
     comment,
-    transactionCategory!!
+    transactionCategory!!,
+    currency!!.currencyCode, currency.countryCode
 )
 
 fun AddEditTransactionState.toTransactionEntityWithId() = TransactionEntity.createTransactionWithId(
@@ -46,5 +50,6 @@ fun AddEditTransactionState.toTransactionEntityWithId() = TransactionEntity.crea
     date,
     totalAmount.toLong(),
     comment,
-    transactionCategory!!
+    transactionCategory!!,
+    currency!!.currencyCode, currency.countryCode
 )

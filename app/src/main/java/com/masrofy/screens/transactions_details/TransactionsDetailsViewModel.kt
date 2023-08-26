@@ -3,6 +3,8 @@ package com.masrofy.screens.transactions_details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.coroutine.DispatcherProvider
+import com.masrofy.currency.Currency
+import com.masrofy.data.entity.defaultAccount
 import com.masrofy.data.entity.toTransactionGroup
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.TransactionGroup
@@ -41,6 +43,7 @@ class TransactionsDetailsViewModel @Inject constructor(
     private val _effect = MutableStateFlow<TransactionDetailsEvent>(TransactionDetailsEvent.None)
     val effect = _effect.asStateFlow()
 
+    private var currency :Currency? = null
     fun onEvent(onEvent: TransactionDetailsEventUI) {
         when (onEvent) {
             is TransactionDetailsEventUI.OnDateChange -> {
@@ -48,7 +51,7 @@ class TransactionsDetailsViewModel @Inject constructor(
                     DateEvent.PLUS -> currentDate = currentDate.plusMonths(1)
                     DateEvent.MIN -> currentDate = currentDate.minusMonths(1)
                 }
-                updateTransactions()
+                updateTransactions(currency!!)
             }
 
             is TransactionDetailsEventUI.OnNavigateToTransactionWithId -> {
@@ -66,16 +69,20 @@ class TransactionsDetailsViewModel @Inject constructor(
     }
 
     init {
-        updateTransactions()
+        viewModelScope.launch(dispatcherProvider.io) {
+            val getAccount = transactionsRepository.getAccount().find { it.name == defaultAccount().name }!!
+            updateTransactions(getAccount.currency)
+            currency = getAccount.currency
+        }
     }
 
-    private fun updateTransactions() {
+    private fun updateTransactions(currency: Currency) {
         viewModelScope.launch(dispatcherProvider.io) {
              transactionsRepository.getTransactionsFlow()
                 .map { it.filter { it.createdAt.month.value == currentDate.monthValue } }.collect {transactions->
                     _state.update {
                         it.copy(
-                            transactions.toTransactionGroup(),
+                            transactions.toTransactionGroup(currency),
                             currentMonthName = currentDate.month.name,
                             currentMonth = currentDate.monthValue
                         )

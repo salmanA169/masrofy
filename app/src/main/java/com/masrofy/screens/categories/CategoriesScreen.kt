@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -111,7 +112,7 @@ fun CategoriesScreen(
                     },
                     menuItem = listOf(
                         MenuItem(
-                            TranslatableString.PlainString(""),
+                            TranslatableString.PlainString("add category"),
                             com.masrofy.component.Icons.VectorIcon(Icons.Default.Add),
                             onClick = {
                                 onEvent(CategoryEvent.NavigateToAddEditCategory(-1))
@@ -127,6 +128,7 @@ fun CategoriesScreen(
                     .fillMaxSize()
                     .padding(it)
                     .reorderable(state)
+                    .testTag("list categories")
 
             ) {
                 items(
@@ -211,14 +213,14 @@ fun CategoryItem(
             IconButton(onClick = { deleteId = categoryId }) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
-                    contentDescription = null,
+                    contentDescription = title,
                     tint = MaterialTheme.colorScheme.error
                 )
             }
         }
         Icon(
             imageVector = Icons.Outlined.Menu,
-            contentDescription = null,
+            contentDescription = null ,
             modifier = Modifier.detectReorderAfterLongPress(state)
         )
 

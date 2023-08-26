@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.data.entity.getCategoryWithAmount
+import com.masrofy.data.entity.toAccount
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.TransactionType
@@ -91,6 +92,7 @@ class MainViewModel @Inject constructor(
             accountRepository.getAccountsWithTransactions().collect {
                 val getElement = it.firstOrNull() ?: return@collect
                 val transactions = getElement.transactions
+                val accountCurrency = getElement.account.toAccount().currency
                 var totalIncome = 0f
                 var totalExpense = 0f
                 var totalValue = 0f
@@ -104,19 +106,20 @@ class MainViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         balance = BalanceManager(
-                            formatAsDisplayNormalize((totalIncome - totalExpense).toBigDecimal()),
-                            formatAsDisplayNormalize(totalIncome.toBigDecimal()),
-                            formatAsDisplayNormalize(totalExpense.toBigDecimal())
+                            accountCurrency.formatAsDisplayNormalize((totalIncome - totalExpense).toBigDecimal()),
+                            accountCurrency.formatAsDisplayNormalize(totalIncome.toBigDecimal()),
+                            accountCurrency.formatAsDisplayNormalize(totalExpense.toBigDecimal())
                         ),
                         transactions = transactions.toTransactions()
                             .sortedByDescending { it.createdAt }.take(10),
                         month = currentDateFlow.month.name,
                         topTransactions = calculateTopTransactions(
                             totalValue,
-                            categoryWithAmount
+                            categoryWithAmount,accountCurrency
                         ).sortedByDescending { it.percent }.take(5),
                         weeklyTransactions = toTransactions.getWeeklyTransaction(),
-                        monthlyTransactions = toTransactions.getMonthlyTransactions(currentTransactionTypeMonthly)
+                        monthlyTransactions = toTransactions.getMonthlyTransactions(currentTransactionTypeMonthly),
+                        currency = accountCurrency
                     )
                 }
             }

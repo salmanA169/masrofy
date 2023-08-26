@@ -3,6 +3,7 @@ package com.masrofy.data.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.masrofy.currency.Currency
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionCategory
@@ -25,7 +26,11 @@ data class TransactionEntity(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val amount: Long,
     val comment: String? = null,
-    val category: String
+    val category: String,
+    @ColumnInfo(defaultValue = "USD",name = "currencyCode")
+    val currencyCode: String,
+    @ColumnInfo(defaultValue = "US",name = "countryCode")
+    val countryCode: String,
 ) {
     companion object {
         fun createTransaction(
@@ -34,11 +39,14 @@ data class TransactionEntity(
             createdAt: LocalDateTime = LocalDateTime.now(),
             amount: Long,
             comment: String?,
-            category: String
+            category: String,
+            currencyCode: String,
+            countryCode: String
         ) = TransactionEntity(
             0,
             accountId,
-            transactionType, createdAt, amount, comment, category
+            transactionType, createdAt, amount, comment, category,
+            currencyCode,countryCode
         )
 
         fun createTransactionWithId(
@@ -48,11 +56,14 @@ data class TransactionEntity(
             createdAt: LocalDateTime = LocalDateTime.now(),
             amount: Long,
             comment: String?,
-            category: String
+            category: String,
+            currencyCode: String,
+            countryCode: String
         ) = TransactionEntity(
             transactionId,
             accountId,
-            transactionType, createdAt, amount, comment, category
+            transactionType, createdAt, amount, comment, category,
+            currencyCode,countryCode
         )
     }
 }
@@ -75,7 +86,7 @@ fun List<Transaction>.getCategoryWithAmount(): List<CategoryWithAmount> {
     return list
 }
 
-fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
+fun List<TransactionEntity>.toTransactionGroup(currency:Currency): List<TransactionGroup> {
     val getDates = map {
         LocalDateTime.ofEpochSecond(it.createdAt.toMillis(), 0, ZoneOffset.UTC).toLocalDate()
     }.toSet()
@@ -100,8 +111,8 @@ fun List<TransactionEntity>.toTransactionGroup(): List<TransactionGroup> {
                     it.createdAt
                 }),
                 it,
-                formatAsDisplayNormalize(income.toBigDecimal()),
-                formatAsDisplayNormalize(expenve.toBigDecimal())
+                currency.formatAsDisplayNormalize(income.toBigDecimal()),
+                currency.formatAsDisplayNormalize(expenve.toBigDecimal())
 
             )
         )

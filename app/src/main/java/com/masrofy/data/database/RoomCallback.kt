@@ -3,9 +3,7 @@ package com.masrofy.data.database
 import android.content.Context
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.masrofy.data.entity.CategoryEntity
 import com.masrofy.data.entity.defaultAccount
-import com.masrofy.model.TransactionCategory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,10 +18,10 @@ class RoomCallback @Inject constructor(
 ):RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
-        val defaultAccount = defaultAccount()
-        val database = this.db.get()
-        CoroutineScope(Job()+Dispatchers.IO).launch {
-            database.transactionDao.addAccount(defaultAccount)
-        }
+//        val defaultAccount = defaultAccount()
+//        val database = this.db.get()
+//        CoroutineScope(Job()+Dispatchers.IO).launch {
+//            database.transactionDao.upsertAccount(defaultAccount)
+//        }
     }
 }

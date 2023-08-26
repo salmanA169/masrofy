@@ -1,5 +1,6 @@
 package com.masrofy.component
 
+import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,7 +14,9 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
+import com.masrofy.currency.Currency
 import com.masrofy.overview_interface.MonthlyTransaction
+import com.masrofy.overview_interface.MonthlyTransactionWithCurrency
 import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.localizeToString
 
@@ -21,7 +24,7 @@ import com.masrofy.utils.localizeToString
 @Composable
 fun LineChart(
     modifier: Modifier = Modifier,
-    data: List<MonthlyTransaction>,
+    data: MonthlyTransactionWithCurrency,
 ) {
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
     val resource = LocalContext.current
@@ -31,7 +34,7 @@ fun LineChart(
             isDoubleTapToZoomEnabled = false
         }
     }, update = {
-        val mapValues = data.mapIndexed { index, monthlyTransaction ->
+        val mapValues = data.transactions.mapIndexed { index, monthlyTransaction ->
             Entry(index.toFloat(), monthlyTransaction.amount)
         }
         val barDataSet = LineDataSet(mapValues, "www").apply {
@@ -48,7 +51,7 @@ fun LineChart(
             valueTextColor = colorOnBackground.toArgb()
             valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
-                    return formatAsDisplayNormalize(value.toBigDecimal())
+                    return data.currency.formatAsDisplayNormalize(value.toBigDecimal())
                 }
             }
         }
@@ -60,7 +63,7 @@ fun LineChart(
             this.textColor = colorOnBackground.toArgb()
             valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                 override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                    return resource.getString(data[value.toInt()].monthOfYear.localizeToString())
+                    return resource.getString(data.transactions[value.toInt()].monthOfYear.localizeToString())
                 }
             }
         labelCount = 12
@@ -72,7 +75,7 @@ fun LineChart(
             this.textColor = colorOnBackground.toArgb()
             valueFormatter =  object : com.github.mikephil.charting.formatter.ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                return formatAsDisplayNormalize(value.toLong().toBigDecimal())
+                return data.currency.formatAsDisplayNormalize(value.toLong().toBigDecimal())
             }
         }
         }

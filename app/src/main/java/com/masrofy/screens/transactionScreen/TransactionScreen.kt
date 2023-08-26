@@ -52,11 +52,13 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,6 +75,8 @@ import com.masrofy.component.CategoryDataEntryImpl
 import com.masrofy.component.InputData
 import com.masrofy.component.InputType
 import com.masrofy.component.LabelEditTextBox
+import com.masrofy.currency.Currency
+import com.masrofy.currency.CurrencyData
 import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
@@ -166,8 +170,8 @@ fun TransactionScreen(
 
         }
     }
-    val rememberInput = remember{
-        {inputType:InputType->
+    val rememberInput = remember {
+        { inputType: InputType ->
             if (currentInput == InputType.KEYBOARD && inputType == InputType.KEYBOARD) {
                 focusManager.clearFocus()
                 currentPaddingInputs = 0.dp
@@ -176,7 +180,7 @@ fun TransactionScreen(
                 currentInput = inputType
             }
         }
-        }
+    }
 
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -233,15 +237,19 @@ fun TransactionScreen(
                 }
                 InputsTransactions(
                     currentDateTime = transactionState.date.formatShortDate(),
-                    currentAccount = transactionState.selectedAccount?.name?:"Cash",
-                    currentCategory = transactionState.transactionCategory?:"",
+                    currentAccount = transactionState.selectedAccount?.name ?: "Cash",
+                    currentCategory = transactionState.transactionCategory ?: "",
                     currentAmount = transactionState.totalAmount,
                     currentNote = transactionState.comment ?: "",
                     onInputChange = rememberInput,
                     onEvent = onEvent,
+                    currecny = transactionState.currency
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = { onEvent(AddEditTransactionEvent.Save) }, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { onEvent(AddEditTransactionEvent.Save) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     Text(text = stringResource(id = R.string.save))
                 }
             }
@@ -253,6 +261,7 @@ fun TransactionScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag("tag-inputs")
                 ) {
                     if (currentInput == InputType.DATE_INPUT) {
                         DatePickerDialog(onDismissRequest = {
@@ -269,7 +278,11 @@ fun TransactionScreen(
                             DatePicker(state = dateState)
                         }
                     } else {
-                        val inputData = remember(currentInput,transactionState.transactionType,transactionState.transactionCategories) {
+                        val inputData = remember(
+                            currentInput,
+                            transactionState.transactionType,
+                            transactionState.transactionCategories
+                        ) {
                             when (currentInput) {
                                 InputType.KEYBOARD -> null
                                 InputType.ACCOUNT_INPUT -> InputData(
@@ -280,9 +293,10 @@ fun TransactionScreen(
 
                                 InputType.DATE_INPUT -> null
                                 InputType.CATEGORY_INPUT -> {
-                                    val getDataByTransactionType = transactionState.transactionCategories
-                                        .filter { it.type == transactionState.transactionType.name }
-                                        .map { it.nameCategory }
+                                    val getDataByTransactionType =
+                                        transactionState.transactionCategories
+                                            .filter { it.type == transactionState.transactionType.name }
+                                            .map { it.nameCategory }
                                     InputData(
                                         "Category",
                                         getDataByTransactionType.map { CategoryDataEntryImpl(it) },
@@ -295,6 +309,7 @@ fun TransactionScreen(
                         }
                         if (inputData != null) {
                             Inputs(inputData = inputData, onEvent = onEvent, modifier = Modifier
+                                .testTag(inputData.labels)
                                 .requiredHeightIn(min = 300.dp, 400.dp)
                                 .onSizeChanged {
                                     with(localDensity) {
@@ -340,7 +355,7 @@ fun Inputs(
     inputData: InputData,
     onEvent: (AddEditTransactionEvent) -> Unit = {},
     onHide: () -> Unit = {},
-    focusManager:FocusManager = LocalFocusManager.current,
+    focusManager: FocusManager = LocalFocusManager.current,
 ) {
     Column(
         modifier = modifier
@@ -366,11 +381,11 @@ fun Inputs(
                     .padding(horizontal = 8.dp)
                     .weight(1f)
             )
-            if (inputData.inputType == InputType.CATEGORY_INPUT){
+            if (inputData.inputType == InputType.CATEGORY_INPUT) {
                 IconButton(modifier = Modifier, onClick = {
                     onEvent(AddEditTransactionEvent.NavigateTo(inputData.inputType))
                 }) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "")
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "add category screen")
                 }
             }
             IconButton(modifier = Modifier, onClick = { onHide() }) {
@@ -411,7 +426,7 @@ fun Inputs(
                 ) {
                     Text(
                         text = it.getDataEntry(), textAlign = TextAlign.Center, modifier = Modifier
-                            .align(Center),color = MaterialTheme.colorScheme.onSecondaryContainer
+                            .align(Center), color = MaterialTheme.colorScheme.onSecondaryContainer
 
                     )
                 }
@@ -429,20 +444,20 @@ fun InputsTransactions(
     currentCategory: String,
     currentAmount: String,
     currentNote: String,
+    currecny: Currency?
 ) {
-    val focusRequester = remember{
+    val focusRequester = remember {
         FocusRequester()
     }
-    LaunchedEffect(key1 = true ){
-            focusRequester.requestFocus()
+    LaunchedEffect(key1 = true) {
+        focusRequester.requestFocus()
     }
     LabelEditTextBox(
         label = stringResource(id = R.string.date),
         value = currentDateTime,
         inputType = InputType.DATE_INPUT,
         onShowInput = onInputChange,
-
-    )
+        )
     Spacer(modifier = Modifier.height(8.dp))
     LabelEditTextBox(
         label = stringResource(id = R.string.account),
@@ -462,14 +477,17 @@ fun InputsTransactions(
     Spacer(modifier = Modifier.height(8.dp))
 
     LabelEditTextBox(
+        modifier = Modifier.testTag("edit-amount"),
         label = stringResource(id = R.string.amount),
         value = currentAmount,
         inputType = InputType.KEYBOARD,
         onShowInput = onInputChange,
         onValueChange = { onEvent(AddEditTransactionEvent.AmountChange(it)) },
         keyboardType = KeyboardType.Number,
-        visualTransformation = CurrencyAmountInputVisualTransformation()
-        )
+        visualTransformation = if (currecny != null) CurrencyAmountInputVisualTransformation(
+            currecny
+        ) else VisualTransformation.None
+    )
     Spacer(modifier = Modifier.height(8.dp))
 
     LabelEditTextBox(
@@ -483,49 +501,6 @@ fun InputsTransactions(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditTextTransactionSection(
-    value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
-    textColor: Color,
-    isEdit: Boolean
-) {
-    val focusRequester = remember {
-        FocusRequester()
-    }
-    val focusManager = LocalFocusManager.current
-    LaunchedEffect(key1 = isEdit) {
-        if (isEdit.not()) {
-            focusRequester.requestFocus()
-        } else {
-            focusManager.clearFocus()
-        }
-    }
-    OutlinedTextField(value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-            .focusRequester(focusRequester), shape = MaterialTheme.shapes.medium,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                focusManager.clearFocus()
-            }
-        ),
-        visualTransformation = CurrencyAmountInputVisualTransformation(),
-        label = {
-            Text(text = stringResource(id = R.string.amount))
-        },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-//            text = textColor
-        )
-    )
-}
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
@@ -568,11 +543,11 @@ fun TransactionType(
                     )
                 },
                 colors = FilterChipDefaults.elevatedFilterChipColors(
-                    selectedLabelColor = if (selectedType == TransactionType.EXPENSE)Orange else it.getColor(),
+                    selectedLabelColor = if (selectedType == TransactionType.EXPENSE) Orange else it.getColor(),
                     selectedContainerColor = SurfaceColor.surfaces.surfaceContainer
                 ),
                 border = FilterChipDefaults.filterChipBorder(
-                    selectedBorderColor = if (selectedType == TransactionType.EXPENSE)Orange else it.getColor(),
+                    selectedBorderColor = if (selectedType == TransactionType.EXPENSE) Orange else it.getColor(),
                     selectedBorderWidth = 1.dp
                 ),
             )

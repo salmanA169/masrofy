@@ -119,7 +119,7 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
     implementation "androidx.profileinstaller:profileinstaller:1.3.1"
-    def room_version = "2.5.1"
+    def room_version = "2.5.2"
 
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
@@ -143,6 +143,7 @@ dependencies {
     def nav_version = "2.6.0"
 
     implementation "androidx.navigation:navigation-compose:$nav_version"
+    androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
     // date picker
 //    implementation("com.marosseleng.android:compose-material3-datetime-pickers:0.7.2")
 
@@ -158,7 +159,6 @@ dependencies {
     androidTestImplementation "com.google.truth:truth:1.1.4"
     testImplementation 'app.cash.turbine:turbine:1.0.0'
 
-    implementation "com.patrykandpatrick.vico:compose-m3:1.6.5"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation 'org.burnoutcrew.composereorderable:reorderable:0.9.6'
 }

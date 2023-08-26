@@ -1,5 +1,6 @@
 package com.masrofy.utils
 
+import com.masrofy.currency.Currency
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionCategory
@@ -24,7 +25,8 @@ fun generateTransactions(): List<Transaction1> {
             TransactionType.INCOME,
             LocalDateTime.of(LocalDate.of(2023, 6, randomDays.random()), LocalTime.now()),
             it.toBigDecimal(),
-            category = "FOOD"
+            category = "FOOD",
+            currency = Currency("USD","US")
         )
     }
 }
@@ -44,7 +46,9 @@ fun List<Transaction>.getWeeklyTransaction():List<WeeklyTransactions>{
             if (getCurrentDay != null ){
                 val getIndex = indexOfFirst { it.nameOfDay == getCurrentDay.nameOfDay }
                 val getElement = get(getIndex)
-                getElement.amount += it.amount.toFloat()
+                getElement.apply {
+                    amount += it.amount.toFloat()
+                }
             }
         }
     }.sortedWith(comparator = compareBy { it.nameOfDay.sortIndex()})
@@ -57,7 +61,7 @@ fun List<Transaction>.getMonthlyTransactions(transactionType: TransactionType = 
     }
     return buildList {
         Month.values().forEach {
-            add(MonthlyTransaction(it,0f))
+            add(MonthlyTransaction(it,0f, Currency("USD","US")))
         }
         this@getMonthlyTransactions.filter {transactions->
             transactions.createdAt.year == currentDate.year && transactions.transactionType == transactionType
@@ -65,7 +69,9 @@ fun List<Transaction>.getMonthlyTransactions(transactionType: TransactionType = 
             val getIndex = indexOfFirst { it.monthOfYear == transactoin.createdAt.month }
             get(getIndex).apply {
                 amount += transactoin.amount.toFloat()
+                currency = transactoin.currency
             }
+
         }
     }
 }
@@ -131,7 +137,8 @@ fun generateTransactionsEntity(): List<TransactionEntity> {
             TransactionType.INCOME,
             LocalDateTime.of(LocalDate.of(2023, 6, randomDays.random()), LocalTime.now()),
             500,
-            category = TransactionCategory.values().random().name
+            category = TransactionCategory.values().random().name,
+            currencyCode = "SA", countryCode = "SA"
         )
     }
 }

@@ -6,6 +6,7 @@ import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.data.entity.getCategoryWithAmount
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.calculateTopTransactions
+import com.masrofy.model.getDefaultAccount
 import com.masrofy.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,17 +17,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TopTransactionDetailsViewModel @Inject constructor(
-    private val transaction : TransactionRepository,
+    private val transaction: TransactionRepository,
     private val dispatcherProvider: DispatcherProvider
-) :ViewModel(){
+) : ViewModel() {
     private val _state = MutableStateFlow(TopTransactionDetailsState())
     val state = _state.asStateFlow()
+
     init {
         viewModelScope.launch(dispatcherProvider.io) {
             val transactions = transaction.getTransactions()
+            val getAccount = transaction.getAccount().getDefaultAccount()
             val categoryWithAmount = transactions.toTransactions().getCategoryWithAmount()
             val total = transactions.sumOf { it.amount }
-            val calculateTopTransaction = calculateTopTransactions(total.toFloat(),categoryWithAmount).sortedByDescending { it.percent }
+            val calculateTopTransaction = calculateTopTransactions(
+                total.toFloat(),
+                categoryWithAmount,
+                getAccount!!.currency
+            ).sortedByDescending { it.percent }
             _state.update {
                 it.copy(
                     calculateTopTransaction

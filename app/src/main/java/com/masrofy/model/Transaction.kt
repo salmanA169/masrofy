@@ -1,5 +1,6 @@
 package com.masrofy.model
 
+import com.masrofy.currency.Currency
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -10,5 +11,6 @@ data class Transaction(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val amount: BigDecimal,
     val comment: String? = null,
-    val category: String
+    val category: String,
+    val currency :Currency
 )

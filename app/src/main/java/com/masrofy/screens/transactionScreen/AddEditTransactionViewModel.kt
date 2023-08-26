@@ -9,6 +9,8 @@ import com.masrofy.Screens
 import com.masrofy.TRANSACTION_ID
 import com.masrofy.component.InputType
 import com.masrofy.coroutine.DispatcherProvider
+import com.masrofy.currency.CURRENCY_DATA
+import com.masrofy.data.entity.defaultAccount
 import com.masrofy.data.entity.toAccount
 import com.masrofy.model.TransactionType
 import com.masrofy.model.getDefaultAccount
@@ -45,6 +47,22 @@ class AddEditTransactionViewModel @Inject constructor(
     }
 
     init {
+
+        viewModelScope.launch(dispatcherProvider.io) {
+            val accounts = transactionRepository.getAccount()
+            val getDefaultAccount = accounts.find {
+                it.name == defaultAccount().name
+            }
+            _transactionDetailState.update {
+                it.copy(
+                    currency = getDefaultAccount!!.currency
+                )
+            }
+        }
+//        viewModelScope.launch(dispatcherProvider.io) {
+//            val accounts = transactionRepository.getAccount()
+//            val getDefaultAccount = accounts.find { it.name == defaultAccount().name }
+//        }
         viewModelScope.launch(dispatcherProvider.io) {
             categoryRepository.observeCategories().collect { categories ->
                 _transactionDetailState.update {

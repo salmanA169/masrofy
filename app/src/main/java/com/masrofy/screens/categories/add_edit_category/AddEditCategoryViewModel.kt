@@ -123,7 +123,8 @@ class AddEditCategoryViewModel @Inject constructor(
                 it.createdAt,
                 it.amount,
                 it.comment,
-                newCategory
+                newCategory,
+                it.currencyCode,it.countryCode
             )
         }.forEach {
          transactionRepository.updateTransaction(it)
