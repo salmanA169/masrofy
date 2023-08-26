@@ -4,6 +4,11 @@
     </kbd>
 </div>
 
+# (3.6.0)
+- Add new feature choose currency
+
+<img src="https://github.com/salmanA169/masrofy/assets/40442174/e7eb3024-c6bd-4004-8817-98390676b37c" width="260"> <img src="https://github.com/salmanA169/masrofy/assets/40442174/93d1717b-ccaf-4455-9a7e-a6373a4e7fc3" width="260"> 
+
 # (3.5.0)
 - Implement custom category add , edit ,delete and reorder list
 
