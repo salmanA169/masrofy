@@ -1,8 +1,25 @@
 <div align="center">
-<kbd>
-    <img width="200" height="200" style="display: block; border: 1px solid #f5f5f5; border-radius: 9999px;" src="https://user-images.githubusercontent.com/40442174/219127385-5d1d7561-c532-48db-851a-b41535542b9c.png" >
-    </kbd>
+</br>
+<img src="https://github.com/salmanA169/masrofy/blob/master/app/src/main/ic_launcher-playstore.png" width="200" />
+
 </div>
+
+<h1 align="center">Masrofy</h1>
+</br>
+<p align="center">
+  <img alt="Static Badge" src="https://img.shields.io/badge/API%20%2B28%20-%20green?style=for-the-badge&logo=android">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-a503fc?logo=kotlin&logoColor=white&style=for-the-badge"/></a>
+  <img alt="Jetpack Compose" src="https://img.shields.io/static/v1?style=for-the-badge&message=Jetpack+Compose&color=4285F4&logo=Jetpack+Compose&logoColor=FFFFFF&label="/></a> 
+  <img alt="material" src="https://custom-icon-badges.demolab.com/badge/material%20you-lightblue?style=for-the-badge&logoColor=333&logo=material-you"/></a>  </br>
+  </br>
+  <a href="https://github.com/aritra-tech/Notify/actions">
+    <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/aritra-tech/notify/ci_build.yml?label=Build&style=for-the-badge"/></a>
+  <img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/t/salmanA169/masrofy?style=for-the-badge">
+  <a href="https://github.com/aritra-tech/Notify/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/salmanA169/masrofy?style=for-the-badge&color=ffff00">
+</a>
+  <a href="https://hits.sh/github.com/aritra-tech/Notify/"><img alt="Hits" src="https://hits.sh/github.com/salman/masrofy.svg?style=for-the-badge&label=Views&extraCount=10&color=54856b"/>
+  </br>
+</p>
 
 # (3.6.0)
 - Add new feature choose currency
