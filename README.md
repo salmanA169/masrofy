@@ -15,9 +15,9 @@
   <a href="https://github.com/aritra-tech/Notify/actions">
     <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/aritra-tech/notify/ci_build.yml?label=Build&style=for-the-badge"/></a>
   <img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/t/salmanA169/masrofy?style=for-the-badge">
-  <a href="https://github.com/aritra-tech/Notify/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/salmanA169/masrofy?style=for-the-badge&color=ffff00">
+ <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/salmanA169/masrofy?style=for-the-badge&color=ffff00">
 </a>
-  <a href="https://hits.sh/github.com/aritra-tech/Notify/"><img alt="Hits" src="https://hits.sh/github.com/salman/masrofy.svg?style=for-the-badge&label=Views&extraCount=10&color=54856b"/>
+  <img alt="Hits" src="https://hits.sh/github.com/salman/masrofy.svg?style=for-the-badge&label=Views&extraCount=10&color=54856b"/>
   </br>
 </p>
 
