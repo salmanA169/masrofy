@@ -6,6 +6,7 @@ import com.masrofy.mapper.toAccountEntity
 import com.masrofy.mapper.toAccounts
 import com.masrofy.model.Account
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class TransactionRepositoryImpl @Inject constructor(
@@ -39,6 +40,10 @@ class TransactionRepositoryImpl @Inject constructor(
 
     override suspend fun getAccount(): List<Account> {
         return transactionDao.getAccounts().toAccounts()
+    }
+
+    override suspend fun getAccountFlow(): Flow<List<Account>> {
+        return transactionDao.observeAccounts().map { it.toAccounts() }
     }
 
     override suspend fun upsertAccount(account: Account) {

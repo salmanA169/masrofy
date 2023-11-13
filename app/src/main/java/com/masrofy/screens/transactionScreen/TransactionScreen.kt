@@ -6,8 +6,12 @@ import android.util.Log
 import android.widget.Space
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -256,7 +260,9 @@ fun TransactionScreen(
 
             AnimatedVisibility(
                 visible = currentInput != null && currentInput != InputType.KEYBOARD,
-                modifier = Modifier.align(BottomStart)
+                modifier = Modifier.align(BottomStart),
+                enter = fadeIn(animationSpec = tween( easing = LinearOutSlowInEasing)),
+                exit = fadeOut(animationSpec = tween( easing = LinearOutSlowInEasing))
             ) {
                 Box(
                     modifier = Modifier
@@ -268,7 +274,7 @@ fun TransactionScreen(
                             currentInput = null
                             focusManager.clearFocus()
                         }, confirmButton = {
-                            Button(onClick = {
+                            TextButton(onClick = {
                                 currentInput = null
                                 focusManager.clearFocus()
                             }) {

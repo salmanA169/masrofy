@@ -16,6 +16,16 @@ val Context.datastore : DataStore<Preferences> by preferencesDataStore(name = "s
 val currentCountAds = intPreferencesKey("current_count")
 val currencyOnBoardingEdited = booleanPreferencesKey("currency_onboarding")
 val onBoardingScreenIsFirstTime = booleanPreferencesKey("onboarding_first_time")
+val isDarkMode = booleanPreferencesKey("dark_mode")
+
+
+suspend fun DataStore<Preferences>.editDarkMode(darkMode:Boolean) {
+    edit {
+        it[isDarkMode] = darkMode
+    }
+}
+
+fun DataStore<Preferences>.getDarkModeFlow() = data.map { it[isDarkMode]?:false }
 
 
 suspend fun DataStore<Preferences>.getOnboardingIsFirstTime() = data.map {

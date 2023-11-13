@@ -42,4 +42,15 @@
     <string name="cancel">cancel</string>
     <string name="sure_delete_category">Are you sure to Delete?</string>
     <string name="delete_category">Delete category?</string>
+    <string name="icon">icon</string>
+    <string name="settings">Settings</string>
+    <string name="app_settings">App Settings</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="currency">Currency</string>
+    <string name="back_up">Back up</string>
+    <string name="import_">Import</string>
+    <string name="import_export"><![CDATA[Import & Export]]></string>
+    <string name="change_currency">Change Currency</string>
+    <string name="are_you_sure">are you sure ?</string>
+
 </resources>

@@ -5,8 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,6 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.masrofy.screens.categories.add_edit_category.addEditCategoryDest
 import com.masrofy.screens.categories.categoriesDest
+import com.masrofy.screens.currency.currencyScreen
 import com.masrofy.screens.statisticsScreen.statisticsScreen
 import com.masrofy.screens.transactionScreen.transactionScreenNavigation
 import com.masrofy.ui.theme.MasrofyTheme
@@ -53,7 +56,8 @@ class MainActivity : ComponentActivity() {
         viewModel.checkCategories()
         viewModel.checkOnboarding()
         setContent {
-            MasrofyTheme {
+            val darkMode by viewModel.isDarkMode.collectAsStateWithLifecycle(initialValue = false)
+            MasrofyTheme (darkTheme = darkMode){
                 // A surface container using the 'background' color from the theme
                 SetNavigationScreen(viewModel)
             }
@@ -84,6 +88,8 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
             null -> {
 
             }
+
+            else -> {}
         }
     }
     var showBottom by remember {
@@ -114,14 +120,14 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
                             navController.navigate(Screens.Settings.route)
                         }
                     }
-//                    IconButton(onClick = rememberSettingClick) {
-//                        Icon(
-//                            rememberVectorPainter(image = Icons.Filled.Settings),
-//                            contentDescription = "",
-//                            modifier = Modifier.size(20.dp),
-//                            tint = MaterialTheme.colorScheme.primary
-//                        )
-//                    }
+                    IconButton(onClick = rememberSettingClick) {
+                        Icon(
+                            rememberVectorPainter(image = Icons.Filled.Settings),
+                            contentDescription = "",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     IconButton(onClick = rememberClick) {
                         Icon(
                             rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.statistic_icon1)),
@@ -159,7 +165,29 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
                 .fillMaxSize()
                 ,
             navController = navController,
-            startDestination = Screens.MainScreen.route
+            startDestination = Screens.MainScreen.route,
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(220, delayMillis = 90)
+                ) + scaleIn(
+                    initialScale = 0.92f,
+                    animationSpec = tween(220, delayMillis = 90)
+                )
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(90))
+            },
+            popEnterTransition = {
+                fadeIn(
+                    animationSpec = tween(220, delayMillis = 90)
+                ) + scaleIn(
+                    initialScale = 0.92f,
+                    animationSpec = tween(220, delayMillis = 90)
+                )
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(90))
+            }
         ) {
             mainScreenNavigation(navController, it)
             transactionScreenNavigation(navController)
@@ -170,6 +198,7 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
             addEditCategoryDest(navController)
             onBoardingDest(navController)
             settingsDest(navController)
+            currencyScreen(navController)
         }
     }
 }

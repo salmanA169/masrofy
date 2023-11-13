@@ -4,7 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import com.masrofy.currency.COUNTRY_DATA
+import com.masrofy.currency.CURRENCY_DATA
 import com.masrofy.currency.Currency
+import com.masrofy.emoji.EmojiData
 import com.masrofy.onboarding.BaseOnBoardingScreen
 
 @Immutable
@@ -26,7 +29,25 @@ data class CurrencyItem(
     val countryCode: String,
     val currency: Currency
 )
+fun initialCurrencyItems(): List<CurrencyItem> {
+    return CURRENCY_DATA.flatMap { (key, value) ->
+        value.countryCodes.map {
+            val countryName = COUNTRY_DATA[it]?.name.orEmpty()
+            val flagKey = countryName.lowercase().replace(" ", "_")
+            val flag = EmojiData.DATA[flagKey] ?: "🏳️"
 
+            CurrencyItem(
+                currencySymbol = value.symbol,
+                flag = flag,
+                countryName = countryName,
+                countryCode = it,
+                Currency(
+                    key,it
+                )
+            )
+        }
+    }.sortedBy { it.countryName }
+}
 @Composable
 fun OnboardingState.rememberGroupedCurrencyItems() = remember(currencyItems) {
     derivedStateOf {

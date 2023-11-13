@@ -55,7 +55,7 @@ class OnboardingViewModel @Inject constructor(
             OnboardingEvent.Back -> back()
             is OnboardingEvent.CurrencyData -> {
                 onboardingManager.setCurrentCurrencyOnboardingData(
-                    event.currency.currencyCode
+                    event.currency
                 )
                 _onboardingState.update {
                     it.copy(
@@ -112,25 +112,7 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun initialCurrencyItems(): List<CurrencyItem> {
-        return CURRENCY_DATA.flatMap { (key, value) ->
-            value.countryCodes.map {
-                val countryName = COUNTRY_DATA[it]?.name.orEmpty()
-                val flagKey = countryName.lowercase().replace(" ", "_")
-                val flag = EmojiData.DATA[flagKey] ?: "🏳️"
 
-                CurrencyItem(
-                    currencySymbol = value.symbol,
-                    flag = flag,
-                    countryName = countryName,
-                    countryCode = it,
-                    Currency(
-                        key,it
-                    )
-                )
-            }
-        }.sortedBy { it.countryName }
-    }
 }
 
 sealed class OnboardingEvent {

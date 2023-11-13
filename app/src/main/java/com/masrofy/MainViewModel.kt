@@ -15,6 +15,7 @@ import com.masrofy.model.TransactionType
 import com.masrofy.onboarding.OnboardingScreensConst
 import com.masrofy.repository.TransactionRepository
 import com.masrofy.repository.category_repository.CategoryRepository
+import com.masrofy.utils.getDarkModeFlow
 import com.masrofy.utils.getOnboardingIsFirstTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +38,7 @@ class MainViewModel @Inject constructor(
     private val _showOnboarding = MutableStateFlow<MainEffect?>(null)
     val showOnboarding = _showOnboarding.asStateFlow()
 
+    val isDarkMode = dataStore.getDarkModeFlow()
     private fun checkIfDefaultAccount() {
         viewModelScope.launch(dispatcherProvider.io) {
             val defaultAccount = defaultAccount()

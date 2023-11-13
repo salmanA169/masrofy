@@ -4,8 +4,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,18 +13,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,17 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +58,7 @@ import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.ui.theme.SurfaceColor
 import com.masrofy.utils.cellShape
 import com.masrofy.utils.shouldShowDivider
+import kotlin.random.Random
 
 fun NavGraphBuilder.onBoardingDest(navController: NavController) {
     composable(
@@ -78,13 +69,14 @@ fun NavGraphBuilder.onBoardingDest(navController: NavController) {
         val onboardingScreen by onboardingViewModel.onboardingState.collectAsStateWithLifecycle()
         val onboardingScreenEffect by onboardingViewModel.effect.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = onboardingScreenEffect ){
-            when(onboardingScreenEffect){
-                OnboardingEffect.Close -> navController.navigate(Screens.MainScreen.route){
-                    popUpTo(Screens.OnboardingScreen.formatRoute){
+        LaunchedEffect(key1 = onboardingScreenEffect) {
+            when (onboardingScreenEffect) {
+                OnboardingEffect.Close -> navController.navigate(Screens.MainScreen.route) {
+                    popUpTo(Screens.OnboardingScreen.formatRoute) {
                         inclusive = true
                     }
                 }
+
                 null -> Unit
             }
         }
@@ -98,7 +90,7 @@ fun OnBoardingScreen(
     onboardingState: OnboardingState,
     onEvent: (OnboardingEvent) -> Unit = {},
 ) {
-    val rememberPageState = rememberPagerState()
+    val rememberPageState = rememberPagerState(0) { onboardingState.screens.size }
     LaunchedEffect(key1 = onboardingState.currentIndex) {
         rememberPageState.animateScrollToPage(onboardingState.currentIndex)
     }
@@ -117,8 +109,8 @@ fun OnBoardingScreen(
         HorizontalPager(
             userScrollEnabled = false,
             state = rememberPageState,
-            pageCount = onboardingState.screens.size,
-            modifier = Modifier.padding(bottom = padding)
+            modifier = Modifier.padding(bottom = padding),
+            key = { it },
         ) {
             when (onboardingState.screens[it].screenType) {
                 WELCOME_SCREEN_TYPE -> {
@@ -141,7 +133,8 @@ fun OnBoardingScreen(
                         padding = it.height.toDp()
                     }
 
-                }.padding(bottom = 24.dp),
+                }
+                .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
         ) {
@@ -150,7 +143,6 @@ fun OnBoardingScreen(
                     onEvent(OnboardingEvent.Back)
                 }) {
                     Text(text = "Back")
-
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -184,7 +176,7 @@ fun CurrencyList(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.CurrencyCell(
+ fun LazyListScope.CurrencyCell(
     data: Map<String, List<CurrencyItem>>,
     selectedCurrency: Currency?,
     onItemClick: (CurrencyItem) -> Unit,
@@ -213,7 +205,8 @@ private fun LazyListScope.CurrencyCell(
         val size = currencies.size
         itemsIndexed(
             items = currencies,
-            key = { index, item -> item.hashCode() }
+            // TODO: fix it very important
+            key = { index, item -> item.hashCode() + Random.nextInt()  }
         ) { index, item ->
             CurrencyItemCell(
                 currencySymbol = item.currencySymbol,
