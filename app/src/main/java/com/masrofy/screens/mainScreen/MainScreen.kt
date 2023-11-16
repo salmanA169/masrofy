@@ -232,6 +232,7 @@ fun BalanceItem(
         )
     }
 }
+
 @Preview
 @Composable
 fun PreviewTransactionsd() {
@@ -239,6 +240,7 @@ fun PreviewTransactionsd() {
         Transactions(transactions = emptyList(), onEvent = {})
     }
 }
+
 @Composable
 fun Transactions(
     modifier: Modifier = Modifier,
@@ -314,13 +316,15 @@ fun NoTransactionsImage(modifier: Modifier = Modifier) {
     ) {
         Icon(
             painter = painterResource(id = R.drawable.wallet_icon),
-            contentDescription = "",modifier = Modifier.fillMaxSize(0.5f),
+            contentDescription = "", modifier = Modifier.fillMaxSize(0.5f),
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
             text = stringResource(id = R.string.no_transactions),
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis
         )
     }
@@ -333,7 +337,7 @@ fun OverviewScreens(
     overViews: List<OverviewInterface<*>> = listOf(),
     onEvent: (MainScreenEventUI) -> Unit = {}
 ) {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState() { overViews.size }
 
     Column(
         modifier = modifier
@@ -344,10 +348,8 @@ fun OverviewScreens(
             )
     ) {
         HorizontalPager(
-            state = pagerState,
-            pageCount = overViews.size, modifier = Modifier
+            state = pagerState, modifier = Modifier
                 .height(250.dp)
-
         ) {
             overViews[it].GetContent(
                 modifier = Modifier.fillMaxSize(),
@@ -362,7 +364,7 @@ fun OverviewScreens(
         ) {
             repeat(overViews.size) { iteration ->
                 val color =
-                    if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant
+                    if (pagerState.currentPage != iteration) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
@@ -551,6 +553,6 @@ fun MainScreen(
             onEvent = onEvent
         )
         Spacer(modifier = Modifier.height(16.dp))
-        AdmobCompose()
+//        AdmobCompose()
     }
 }

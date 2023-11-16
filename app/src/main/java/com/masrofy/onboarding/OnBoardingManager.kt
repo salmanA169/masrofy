@@ -3,6 +3,7 @@ package com.masrofy.onboarding
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.masrofy.currency.Currency
 import com.masrofy.data.database.MasrofyDatabase
 import com.masrofy.utils.updateOnboardingFirstTime
 import com.masrofy.utils.updateOnboardingScreens
@@ -75,7 +76,7 @@ class OnBoardingManager @Inject constructor(
         currentIndex--
     }
 
-    fun setCurrentCurrencyOnboardingData(data: String) {
+    fun setCurrentCurrencyOnboardingData(data: Currency) {
         val getCurrencyOnboarding = screens[currentIndex] as CurrencyOnboardingScreen
         getCurrencyOnboarding.data = data
     }

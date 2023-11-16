@@ -69,6 +69,7 @@ class MainViewModel @Inject constructor(
 
                 if (event.transactionType != currentTransactionTypeMonthly){
                     val getTransactions = _state.value.transactions
+                    // TODO: fix here issue
                     _state.update {
                         it.copy(
                             monthlyTransactions = getTransactions.getMonthlyTransactions(event.transactionType)

@@ -113,7 +113,7 @@ fun Currency.getLocale(): Locale {
     val lang = COUNTRY_DATA[countryCode]?.lang
 
     return if (lang != null) {
-        Locale(lang, countryCode)
+        Locale("en", "US")
     } else {
         Locale("en", countryCode)
     }

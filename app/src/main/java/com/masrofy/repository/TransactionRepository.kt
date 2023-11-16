@@ -15,5 +15,6 @@ interface TransactionRepository {
 
     suspend fun getAccount():List<Account>
 
+    suspend fun getAccountFlow():Flow<List<Account>>
     suspend fun upsertAccount(account: Account)
 }

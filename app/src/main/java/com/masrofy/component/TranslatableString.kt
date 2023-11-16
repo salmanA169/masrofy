@@ -17,6 +17,12 @@ sealed class TranslatableString {
     }
 }
 
+fun translatablePlain(text:String):TranslatableString{
+    return TranslatableString.PlainString(text)
+}
+fun translatableRes(@StringRes  id: Int,  vararg formatArgs: Any):TranslatableString{
+    return TranslatableString.ResString(id, formatArgs)
+}
 interface WithTranslatableTitle {
     val title: TranslatableString
 }

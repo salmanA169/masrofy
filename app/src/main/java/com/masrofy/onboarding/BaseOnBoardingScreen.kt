@@ -1,21 +1,19 @@
 package com.masrofy.onboarding
 
 import android.util.Log
+import com.masrofy.currency.Currency
 import com.masrofy.data.database.MasrofyDatabase
 
 const val CURRENCY_SCREEN_TYPE = "CurrencyScreen"
 const val WELCOME_SCREEN_TYPE = "welcomeScreen"
 
 interface BaseOnBoardingScreen<D> {
-
     var data: D?
     var isEdited: Boolean
     val shouldShow: Boolean
     val canSkip: Boolean
     val screenType: String
     suspend fun save(): Boolean
-
-
 }
 
 class WelcomeOnboardingScreen : BaseOnBoardingScreen<Any> {
@@ -39,8 +37,8 @@ class WelcomeOnboardingScreen : BaseOnBoardingScreen<Any> {
 }
 
 class CurrencyOnboardingScreen(private val db: MasrofyDatabase) :
-    BaseOnBoardingScreen<String> {
-    override var data: String? = null
+    BaseOnBoardingScreen<Currency> {
+    override var data: Currency? = null
     override var isEdited: Boolean = false
     override val shouldShow: Boolean
         get() = true
@@ -51,8 +49,9 @@ class CurrencyOnboardingScreen(private val db: MasrofyDatabase) :
 
 
     override suspend fun save(): Boolean {
+        Log.d("CurrencyOnboarding", "save: $data")
        db.transactionDao.getAccounts().forEach {
-            db.transactionDao.upsertAccount(it.copy(currencyCode = data!!))
+            db.transactionDao.upsertAccount(it.copy(currencyCode = data!!.currencyCode, countryCode = data!!.countryCode))
         }
         return false
     }
