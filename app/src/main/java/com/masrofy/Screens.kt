@@ -14,11 +14,19 @@ const val ONBOARDING_SCREENS_ARGS = "onboarding_screens"
 sealed class Screens(val route: String) {
     abstract val args: List<NamedNavArgument>
 
+    data object DriveBackupScreen:Screens("drive-backup-screen"){
+        override val args: List<NamedNavArgument>
+            get() = emptyList()
+    }
     data object Settings:Screens("settings-route"){
         override val args: List<NamedNavArgument>
             get() = listOf()
     }
 
+    data object BackupScreens:Screens("backups-route"){
+        override val args: List<NamedNavArgument>
+            get() = emptyList()
+    }
     data object CurrencyScreen:Screens("currency_route"){
         override val args: List<NamedNavArgument>
             get() = emptyList()

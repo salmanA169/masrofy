@@ -33,6 +33,8 @@ import com.masrofy.screens.categories.categoriesDest
 import com.masrofy.screens.currency.currencyScreen
 import com.masrofy.screens.mainScreen.mainScreenNavigation
 import com.masrofy.screens.onboarding.onBoardingDest
+import com.masrofy.screens.settings.backups.backupScreens
+import com.masrofy.screens.settings.backups.drive_backup.driveBackupDest
 import com.masrofy.screens.settings.settingsDest
 import com.masrofy.screens.statisticsScreen.statisticsScreen
 import com.masrofy.screens.top_transactions_details.topTransactionsDetailsDest
@@ -199,6 +201,8 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
             onBoardingDest(navController)
             settingsDest(navController)
             currencyScreen(navController)
+            backupScreens(navController)
+            driveBackupDest(navController)
         }
     }
 }

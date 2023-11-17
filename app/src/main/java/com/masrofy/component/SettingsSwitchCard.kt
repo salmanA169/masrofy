@@ -13,6 +13,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,8 +74,9 @@ fun SettingsSwitchCard(
 fun SettingsComponent(
     modifier: Modifier = Modifier,
     settingHeaderText: String,
-    label:String? = null ,
+    label:String? = null,
     painterResourceID: Painter,
+    endLabelColor: Color = LocalContentColor.current,
     clickable: () -> Unit,
 ) {
     Card(
@@ -108,7 +111,7 @@ fun SettingsComponent(
             }
             label?.let { 
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = it, style = MaterialTheme.typography.labelSmall)
+                Text(text = it, style = MaterialTheme.typography.labelSmall,color = endLabelColor)
             }
         }
     }

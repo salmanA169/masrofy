@@ -102,17 +102,10 @@ fun SettingsScreen(state: SettingsState, onEvent: (SettingsEvent) -> Unit) {
                         id = R.drawable.backup_icon
                     )
                 ) {
+                    onEvent(SettingsEvent.NavigateTo(Screens.BackupScreens.route))
 
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-                SettingsComponent(
-                    settingHeaderText = stringResource(id = R.string.import_),
-                    painterResourceID = painterResource(
-                        id = R.drawable.import_icon
-                    )
-                ) {
 
-                }
             }
         }
     }
