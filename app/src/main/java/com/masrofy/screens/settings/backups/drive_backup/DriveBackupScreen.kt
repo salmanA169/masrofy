@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +46,11 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.services.drive.Drive
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.AppBar
@@ -74,7 +80,6 @@ fun DriveBackupScreen(
             )
         })
     }) {
-
         Card(modifier = Modifier.padding(it)) {
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
@@ -85,6 +90,8 @@ fun DriveBackupScreen(
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(6.dp))
+
+
                 Row {
                     Text(
                         text = "Backup file to google drive you can" +
