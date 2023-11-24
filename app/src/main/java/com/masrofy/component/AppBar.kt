@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,6 +21,30 @@ data class MenuItem(
     val onClick: () -> Unit = {}
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppBarTextButtonMenu(
+    title:TranslatableString? = null,
+    navigationIcon: @Composable (() -> Unit) = {},
+    menuItem: List<MenuItem> = listOf(),
+) {
+    val titleComposable: @Composable () -> Unit = {
+        title?.let {
+            H2(text = it.getString())
+        }
+    }
+    TopAppBar(
+        title = titleComposable,
+        navigationIcon = navigationIcon,
+        actions = {
+            menuItem.forEach {menuItem->
+                TextButton(onClick = menuItem.onClick) {
+                    Text(text = menuItem.title.getString())
+                }
+            }
+        }
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(

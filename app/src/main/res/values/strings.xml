@@ -1,4 +1,5 @@
 <resources>
+    <string name="web_client" translatable="false">606677120108-bh0fgmhrf66okjfkg3lr657p9re9iutl.apps.googleusercontent.com</string>
     <string name="app_name">masrofy</string>
     <string name="expense">Expense</string>
     <string name="income">Income</string>

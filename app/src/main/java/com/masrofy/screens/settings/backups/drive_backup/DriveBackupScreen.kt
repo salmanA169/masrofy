@@ -1,6 +1,11 @@
 package com.masrofy.screens.settings.backups.drive_backup
 
 import android.content.res.Configuration
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
@@ -25,9 +30,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -43,42 +51,95 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.google.android.gms.auth.api.identity.AuthorizationRequest
+import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.Drive
+import com.google.api.services.drive.DriveScopes
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.AppBar
+import com.masrofy.component.AppBarTextButtonMenu
+import com.masrofy.component.MenuItem
 import com.masrofy.component.TextCheckBox
 import com.masrofy.component.TextRadioButton
+import com.masrofy.component.translatablePlain
 import com.masrofy.component.translatableRes
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.utils.formatShortDate
 import com.masrofy.utils.toLocalDateTime
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlin.math.log
 
 fun NavGraphBuilder.driveBackupDest(navController: NavController) {
 
     composable(Screens.DriveBackupScreen.route) {
-        DriveBackupScreen(DriveBackupState("test@gmail.com ", isAutoDriveBackup = true))
+
+        val driveBackupViewModel = hiltViewModel<DriveBackupViewModel>()
+        val state by driveBackupViewModel.state.collectAsStateWithLifecycle()
+        val effect by driveBackupViewModel.effect.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+        val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()){
+            driveBackupViewModel.onEvent(DriveBackupEvent.OnSignInResult(it.data?: return@rememberLauncherForActivityResult))
+        }
+
+        val launcherAuthorize = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()){
+            driveBackupViewModel.onEvent(DriveBackupEvent.OnAuthorize(it.data?: return@rememberLauncherForActivityResult))
+        }
+        LaunchedEffect(key1 = effect ){
+
+            when(effect){
+                is DriveBackupEffect.Error -> {
+                    Toast.makeText(context, (effect as DriveBackupEffect.Error).message, Toast.LENGTH_SHORT).show()
+                    driveBackupViewModel.resetEffect()
+                }
+                is DriveBackupEffect.LaunchResult -> {
+                    launcher.launch(IntentSenderRequest.Builder((effect as DriveBackupEffect.LaunchResult).intentSender).build())
+                    driveBackupViewModel.resetEffect()
+                }
+                null -> {
+
+                }
+
+                is DriveBackupEffect.LaunchAuthorize ->{
+                    launcherAuthorize.launch(IntentSenderRequest.Builder((effect as DriveBackupEffect.LaunchAuthorize).intentSender).build())
+                    driveBackupViewModel.resetEffect()
+                }
+            }
+        }
+        DriveBackupScreen(state,driveBackupViewModel::onEvent)
     }
 }
 
 @Composable
 fun DriveBackupScreen(
-    driveBackupState: DriveBackupState
+    driveBackupState: DriveBackupState,
+    onEvent : (DriveBackupEvent)-> Unit
 ) {
+    val rememberListMenu = remember(driveBackupState.email){
+        if (driveBackupState.email == null ){
+            listOf()
+        }else{
+            listOf(MenuItem(translatablePlain("SignOut"), onClick = {onEvent(DriveBackupEvent.SignOut)}))
+        }
+    }
     Scaffold(topBar = {
-        AppBar(translatableRes(R.string.google_drive_backup), {
+        AppBarTextButtonMenu(translatableRes(R.string.google_drive_backup), {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back"
             )
-        })
+        }, menuItem = rememberListMenu )
     }) {
         Card(modifier = Modifier.padding(it)) {
             Column(modifier = Modifier.padding(10.dp)) {
@@ -139,7 +200,7 @@ fun DriveBackupScreen(
             ) {
                 when (it) {
                     null -> {
-                        Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+                        Button(onClick = { onEvent(DriveBackupEvent.OnSignIn) }, modifier = Modifier.fillMaxWidth()) {
                             Text(text = "Connect")
                         }
                     }
@@ -153,7 +214,7 @@ fun DriveBackupScreen(
                                 onlyWiFi = driveBackupState.onlyWiFi
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            BackupAndRestoreButton(onBackupNowClick = { /*TODO*/ }) {
+                            BackupAndRestoreButton(onBackupNowClick = { onEvent(DriveBackupEvent.OnBackUpNow) }) {
 
                             }
                         }
@@ -173,7 +234,9 @@ fun BackupOptions(
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(0f)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -211,7 +274,9 @@ fun BackupAndRestoreButton(
     onRestoreClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -248,6 +313,6 @@ fun DriveBackupPreview() {
                 email = "Salman alamoudi@gmail.com",
                 isAutoDriveBackup = true
             )
-        )
+        ){}
     }
 }
