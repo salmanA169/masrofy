@@ -5,7 +5,8 @@ data class DriveBackupState(
     val lastBackupTime:Long = 0,
     val isAutoDriveBackup :Boolean = false,
     val periodSchedule:PeriodSchedule = PeriodSchedule.DALLY,
-    val onlyWiFi :Boolean = false
+    val onlyWiFi :Boolean = false,
+    val showProgress :Boolean = false
 )
 
 enum class PeriodSchedule{

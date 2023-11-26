@@ -8,7 +8,6 @@ import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.Scope
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -25,7 +24,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @ActivityRetainedScoped
-class GoogleDriveManager @Inject constructor(
+class GoogleSigningAuthManager @Inject constructor(
     @ApplicationContext context: Context
 ) {
 
@@ -47,7 +46,7 @@ class GoogleDriveManager @Inject constructor(
 
     private val firebaseAuth = Firebase.auth
 
-    val credential = GoogleAccountCredential.usingOAuth2(context, listOf(DriveScopes.DRIVE_FILE))
+    private val credential = GoogleAccountCredential.usingOAuth2(context, listOf(DriveScopes.DRIVE_FILE))
 
     suspend fun authorizeGoogleDrive():Result<AuthorizationResult>{
         return try {
@@ -94,7 +93,7 @@ class GoogleDriveManager @Inject constructor(
         }
     }
 
-    suspend fun getDrive(): Drive? {
+     fun getDrive(): Drive? {
         val authUser = firebaseAuth.currentUser
         return if (authUser != null) {
             credential.selectedAccount = Account(authUser.email, "com.google")

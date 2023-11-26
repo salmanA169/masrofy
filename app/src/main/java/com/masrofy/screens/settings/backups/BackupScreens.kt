@@ -8,12 +8,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -26,8 +30,9 @@ import com.masrofy.screens.settings.SettingsEvent
 
 fun NavGraphBuilder.backupScreens(navController: NavController) {
     composable(Screens.BackupScreens.route) {
-
-        BackupScreens(backupStates = BackupStates()){
+        val backupViewModel = hiltViewModel<BackupViewModel>()
+        val state by backupViewModel.state.collectAsStateWithLifecycle()
+        BackupScreens(backupStates = state){
             navController.navigate(Screens.DriveBackupScreen.route)
         }
     }
@@ -44,7 +49,9 @@ fun BackupScreens(
         AppBar(
             translatableRes(R.string.back_up),
             {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                }
             }
         )
     }) {
