@@ -11,7 +11,7 @@ class BackupExternalStorage(
         TODO("Not yet implemented")
     }
 
-    override suspend fun import(file: BackupDataModel) {
+    override suspend fun import(file: String) {
         TODO("Not yet implemented")
     }
 

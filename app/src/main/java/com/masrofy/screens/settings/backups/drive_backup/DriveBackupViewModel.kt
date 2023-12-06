@@ -9,6 +9,7 @@ import com.masrofy.core.backup.AbstractBackupData
 import com.masrofy.core.backup.BackupEventListener
 import com.masrofy.core.backup.BackupManager
 import com.masrofy.core.backup.DriveBackupDataImpl
+import com.masrofy.core.backup.ProgressBackupInfo
 import com.masrofy.core.drive.GoogleSigningAuthManager
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.coroutine.DispatcherProviderImpl
@@ -34,11 +35,23 @@ class DriveBackupViewModel @Inject constructor(
     private val _effect = MutableStateFlow<DriveBackupEffect?>(null)
     val effect = _effect.asStateFlow()
 
+    private val driveBackupDate = DriveBackupDataImpl(
+        this,
+        database
+    )
 
     override fun onBackup() {
         _state.update {
             it.copy(
                 showProgress = true
+            )
+        }
+    }
+
+    override fun progressBackup(progressBackupInfo: ProgressBackupInfo) {
+        _state.update {
+            it.copy(
+                backupProgressBackupInfo = progressBackupInfo
             )
         }
     }
@@ -60,6 +73,11 @@ class DriveBackupViewModel @Inject constructor(
     }
 
     init {
+        viewModelScope.launch(dispatcherProvider.io) {
+         if (driveManager.getSignInInfo()!= null ){
+             driveBackupDate.setDrive(driveManager.getDrive())
+         }
+        }
         viewModelScope.launch(dispatcherProvider.io) {
             val getSignedIn = driveManager.getSignInInfo()
             getSignedIn?.let { result ->
@@ -111,17 +129,25 @@ class DriveBackupViewModel @Inject constructor(
             is DriveBackupEvent.OnBackUpNow -> {
                 // TODO: check if authorize first
                 backupManager.startBackup(
-                    DriveBackupDataImpl(
-                        this,
-                        driveManager.getDrive()!!,
-                        database
-                    ),
+                    driveBackupDate
                 )
             }
 
             DriveBackupEvent.Close -> {
                 _effect.update {
                     DriveBackupEffect.Close
+                }
+            }
+
+            DriveBackupEvent.Restore -> {
+                viewModelScope.launch(dispatcherProvider.io) {
+                    val getFiles = backupManager.getImportFiles(driveBackupDate)
+                    // TODO: improve it
+                    _state.update {
+                        it.copy(
+                            driveBackupFiles = getFiles
+                        )
+                    }
                 }
             }
         }
@@ -162,13 +188,14 @@ class DriveBackupViewModel @Inject constructor(
     }
 
     private suspend fun signResult(intent: Intent) {
-        val getResult = driveManager.getSignInGoogleResult(intent)
+         driveManager.getSignInGoogleResult(intent)
             .onSuccess { result ->
                 _state.update {
                     it.copy(
                         result.email, isAutoDriveBackup = true
                     )
                 }
+                driveBackupDate.setDrive(driveManager.getDrive())
                 authorizeDrive()
 
             }.onFailure { result ->
@@ -194,4 +221,5 @@ sealed class DriveBackupEvent {
     class OnAuthorize(val intent: Intent) : DriveBackupEvent()
     data object OnBackUpNow : DriveBackupEvent()
     data object Close : DriveBackupEvent()
+    data object Restore:DriveBackupEvent()
 }

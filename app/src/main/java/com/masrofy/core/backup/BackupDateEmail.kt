@@ -9,7 +9,7 @@ class BackupDateEmail(
     private val context: Context
 ):AbstractBackupData(eventListener) {
 
-    override suspend fun backup(file: File) {
+    override suspend fun backup() {
         context.startActivity(
             Intent(Intent.ACTION_SEND).apply {
 
@@ -17,7 +17,7 @@ class BackupDateEmail(
         )
     }
 
-    override suspend fun import(file: BackupDataModel) {
+    override suspend fun import(file: String) {
         TODO("Not yet implemented")
     }
 

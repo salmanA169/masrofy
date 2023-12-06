@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -27,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -42,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -71,13 +74,16 @@ import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.AppBar
 import com.masrofy.component.AppBarTextButtonMenu
+import com.masrofy.component.ImportFilesDialog
 import com.masrofy.component.MenuItem
 import com.masrofy.component.TextCheckBox
 import com.masrofy.component.TextRadioButton
 import com.masrofy.component.translatablePlain
 import com.masrofy.component.translatableRes
+import com.masrofy.core.backup.ProgressState
 import com.masrofy.ui.theme.MasrofyTheme
 import com.masrofy.utils.formatShortDate
+import com.masrofy.utils.getFileSize
 import com.masrofy.utils.toLocalDateTime
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -91,30 +97,52 @@ fun NavGraphBuilder.driveBackupDest(navController: NavController) {
         val state by driveBackupViewModel.state.collectAsStateWithLifecycle()
         val effect by driveBackupViewModel.effect.collectAsStateWithLifecycle()
         val context = LocalContext.current
-        val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()){
-            driveBackupViewModel.onEvent(DriveBackupEvent.OnSignInResult(it.data?: return@rememberLauncherForActivityResult))
-        }
+        val launcher =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) {
+                driveBackupViewModel.onEvent(
+                    DriveBackupEvent.OnSignInResult(
+                        it.data ?: return@rememberLauncherForActivityResult
+                    )
+                )
+            }
 
-        val launcherAuthorize = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()){
-            driveBackupViewModel.onEvent(DriveBackupEvent.OnAuthorize(it.data?: return@rememberLauncherForActivityResult))
-        }
-        LaunchedEffect(key1 = effect ){
+        val launcherAuthorize =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) {
+                driveBackupViewModel.onEvent(
+                    DriveBackupEvent.OnAuthorize(
+                        it.data ?: return@rememberLauncherForActivityResult
+                    )
+                )
+            }
+        LaunchedEffect(key1 = effect) {
 
-            when(effect){
+            when (effect) {
                 is DriveBackupEffect.Error -> {
-                    Toast.makeText(context, (effect as DriveBackupEffect.Error).message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        (effect as DriveBackupEffect.Error).message,
+                        Toast.LENGTH_SHORT
+                    ).show()
                     driveBackupViewModel.resetEffect()
                 }
+
                 is DriveBackupEffect.LaunchResult -> {
-                    launcher.launch(IntentSenderRequest.Builder((effect as DriveBackupEffect.LaunchResult).intentSender).build())
+                    launcher.launch(
+                        IntentSenderRequest.Builder((effect as DriveBackupEffect.LaunchResult).intentSender)
+                            .build()
+                    )
                     driveBackupViewModel.resetEffect()
                 }
+
                 null -> {
 
                 }
 
-                is DriveBackupEffect.LaunchAuthorize ->{
-                    launcherAuthorize.launch(IntentSenderRequest.Builder((effect as DriveBackupEffect.LaunchAuthorize).intentSender).build())
+                is DriveBackupEffect.LaunchAuthorize -> {
+                    launcherAuthorize.launch(
+                        IntentSenderRequest.Builder((effect as DriveBackupEffect.LaunchAuthorize).intentSender)
+                            .build()
+                    )
                     driveBackupViewModel.resetEffect()
                 }
 
@@ -123,34 +151,45 @@ fun NavGraphBuilder.driveBackupDest(navController: NavController) {
                 }
             }
         }
-        DriveBackupScreen(state,driveBackupViewModel::onEvent)
+        DriveBackupScreen(state, driveBackupViewModel::onEvent)
     }
 }
 
 @Composable
 fun DriveBackupScreen(
     driveBackupState: DriveBackupState,
-    onEvent : (DriveBackupEvent)-> Unit
+    onEvent: (DriveBackupEvent) -> Unit
 ) {
-    val rememberListMenu = remember(driveBackupState.email){
-        if (driveBackupState.email == null ){
+    val rememberListMenu = remember(driveBackupState.email) {
+        if (driveBackupState.email == null) {
             listOf()
-        }else{
-            listOf(MenuItem(translatablePlain("SignOut"), onClick = {onEvent(DriveBackupEvent.SignOut)}))
+        } else {
+            listOf(
+                MenuItem(
+                    translatablePlain("SignOut"),
+                    onClick = { onEvent(DriveBackupEvent.SignOut) })
+            )
+        }
+    }
+
+    // TODO: improve it
+    if (driveBackupState.driveBackupFiles.isNotEmpty()) {
+        ImportFilesDialog(files = driveBackupState.driveBackupFiles, onClickFile = {
+
+        }) {
+
         }
     }
     Scaffold(topBar = {
         AppBarTextButtonMenu(translatableRes(R.string.google_drive_backup), {
-            IconButton(onClick = {onEvent(DriveBackupEvent.Close)},){
+            IconButton(onClick = { onEvent(DriveBackupEvent.Close) }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
             }
-        }, menuItem = rememberListMenu )
+        }, menuItem = rememberListMenu)
     }) {
         Card(modifier = Modifier.padding(it)) {
             Column(modifier = Modifier.padding(10.dp)) {
-                if (driveBackupState.showProgress){
-                    CircularProgressIndicator()
-                }
+
                 Text(
                     text = "Google Drive Automated Backup",
                     fontSize = 17.sp,
@@ -208,7 +247,10 @@ fun DriveBackupScreen(
             ) {
                 when (it) {
                     null -> {
-                        Button(onClick = { onEvent(DriveBackupEvent.OnSignIn) }, modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = { onEvent(DriveBackupEvent.OnSignIn) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Text(text = "Connect")
                         }
                     }
@@ -223,11 +265,51 @@ fun DriveBackupScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             BackupAndRestoreButton(onBackupNowClick = { onEvent(DriveBackupEvent.OnBackUpNow) }) {
-
+                                onEvent(DriveBackupEvent.Restore)
                             }
                         }
                     }
                 }
+            }
+
+            AnimatedVisibility(
+                visible = driveBackupState.showProgress || driveBackupState.backupProgressBackupInfo.progressState != ProgressState.NOT_STARTED,
+                modifier = Modifier.padding(6.dp)
+            ) {
+                when (driveBackupState.backupProgressBackupInfo.progressState) {
+                    ProgressState.NOT_STARTED -> {}
+                    ProgressState.INITIATION_STARTED -> {
+                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "Calculate file info...")
+                        }
+                    }
+
+                    ProgressState.STARTED -> {
+                        Column(modifier = Modifier.padding(6.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = getFileSize(driveBackupState.backupProgressBackupInfo.currentByte))
+                                Text(text = getFileSize(driveBackupState.backupProgressBackupInfo.allSize))
+                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            LinearProgressIndicator(
+                                driveBackupState.backupProgressBackupInfo.progress.toFloat() / 100,
+                                modifier = Modifier.fillMaxWidth(),
+                                trackColor = Color.Gray.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+
+                    ProgressState.COMPLETE -> {
+                        Column(modifier= Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "Successfully Backed up")
+                        }
+                    }
+                }
+
+
             }
         }
     }
@@ -321,6 +403,6 @@ fun DriveBackupPreview() {
                 email = "Salman alamoudi@gmail.com",
                 isAutoDriveBackup = true
             )
-        ){}
+        ) {}
     }
 }

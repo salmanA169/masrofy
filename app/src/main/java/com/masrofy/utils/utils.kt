@@ -15,7 +15,6 @@ import com.masrofy.R
 import com.masrofy.currency.COUNTRY_DATA
 import com.masrofy.currency.CURRENCY_DATA
 import com.masrofy.currency.Currency
-import com.masrofy.currency.CurrencyData
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -24,9 +23,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
-
+fun getFileSize(size: Long): String {
+    if (size <= 0) return "0"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
+    return DecimalFormat("#,##0.#").format(
+        size / Math.pow(
+            1024.0,
+            digitGroups.toDouble()
+        )
+    ) + " " + units[digitGroups]
+}
 fun Int.getShapeByIndex(isLastIndex: Boolean = false): Shape {
     return if (this == 0) {
         RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)

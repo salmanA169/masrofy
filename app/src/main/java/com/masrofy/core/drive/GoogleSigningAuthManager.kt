@@ -75,6 +75,7 @@ class GoogleSigningAuthManager @Inject constructor(
     suspend fun signOut() {
         oneTap.signOut().await()
         firebaseAuth.signOut()
+
     }
 
     suspend fun getSignInGoogleResult(intent: Intent): Result<UserInfo> {

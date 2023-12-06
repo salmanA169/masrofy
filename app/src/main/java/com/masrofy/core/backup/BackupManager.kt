@@ -17,7 +17,7 @@ class BackupManager(
             abstractBackupData.backup()
         }
     }
-    fun startImport(abstractBackupData: AbstractBackupData,file: BackupDataModel){
+    fun startImport(abstractBackupData: AbstractBackupData,file: String){
         scope.launch(dispatcherProvider.io) {
             abstractBackupData.import(file)
         }
