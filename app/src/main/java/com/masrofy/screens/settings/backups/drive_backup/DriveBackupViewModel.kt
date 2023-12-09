@@ -5,21 +5,22 @@ import android.content.IntentSender
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.masrofy.core.backup.AbstractBackupData
+import com.masrofy.component.ProgressDownloadState
 import com.masrofy.core.backup.BackupEventListener
 import com.masrofy.core.backup.BackupManager
 import com.masrofy.core.backup.DriveBackupDataImpl
 import com.masrofy.core.backup.ProgressBackupInfo
+import com.masrofy.core.backup.ProgressState
 import com.masrofy.core.drive.GoogleSigningAuthManager
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.coroutine.DispatcherProviderImpl
 import com.masrofy.data.database.MasrofyDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -74,9 +75,9 @@ class DriveBackupViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatcherProvider.io) {
-         if (driveManager.getSignInInfo()!= null ){
-             driveBackupDate.setDrive(driveManager.getDrive())
-         }
+            if (driveManager.getSignInInfo() != null) {
+                driveBackupDate.setDrive(driveManager.getDrive())
+            }
         }
         viewModelScope.launch(dispatcherProvider.io) {
             val getSignedIn = driveManager.getSignInInfo()
@@ -113,6 +114,7 @@ class DriveBackupViewModel @Inject constructor(
             }
 
 
+
             is DriveBackupEvent.OnSignInResult -> {
                 viewModelScope.launch(dispatcherProvider.io) {
                     signResult(backupEvent.intent)
@@ -139,7 +141,14 @@ class DriveBackupViewModel @Inject constructor(
                 }
             }
 
-            DriveBackupEvent.Restore -> {
+            is DriveBackupEvent.Restore -> {
+                viewModelScope.launch(Dispatchers.IO){
+                    backupManager.startImport(driveBackupDate,backupEvent.fileId)
+
+                }
+            }
+
+            DriveBackupEvent.GetImportFiles -> {
                 viewModelScope.launch(dispatcherProvider.io) {
                     val getFiles = backupManager.getImportFiles(driveBackupDate)
                     // TODO: improve it
@@ -150,6 +159,24 @@ class DriveBackupViewModel @Inject constructor(
                     }
                 }
             }
+
+            DriveBackupEvent.ResetState -> {
+                _state.update {
+                    it.copy(
+                        progressDownloadState = ProgressDownloadState()
+                    )
+                }
+            }
+        }
+    }
+
+    override fun progressDownloadFile(progressState: ProgressBackupInfo) {
+        _state.update {
+            it.copy(
+                progressDownloadState = ProgressDownloadState(
+                    progressState.progressState,progressState.fileId,progressState.progress.toFloat()
+                )
+            )
         }
     }
 
@@ -188,7 +215,7 @@ class DriveBackupViewModel @Inject constructor(
     }
 
     private suspend fun signResult(intent: Intent) {
-         driveManager.getSignInGoogleResult(intent)
+        driveManager.getSignInGoogleResult(intent)
             .onSuccess { result ->
                 _state.update {
                     it.copy(
@@ -221,5 +248,7 @@ sealed class DriveBackupEvent {
     class OnAuthorize(val intent: Intent) : DriveBackupEvent()
     data object OnBackUpNow : DriveBackupEvent()
     data object Close : DriveBackupEvent()
-    data object Restore:DriveBackupEvent()
+    data class Restore(val fileId:String) : DriveBackupEvent()
+    data object GetImportFiles:DriveBackupEvent()
+    data object ResetState:DriveBackupEvent()
 }

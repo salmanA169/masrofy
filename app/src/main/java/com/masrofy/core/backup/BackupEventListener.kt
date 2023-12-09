@@ -5,10 +5,12 @@ interface BackupEventListener {
     fun onImport()
     fun onFinish()
     fun progressBackup(progressBackupInfo: ProgressBackupInfo)
+    fun progressDownloadFile(progressState: ProgressBackupInfo)
 }
 
 data class ProgressBackupInfo(
     val progressState:ProgressState,
+    val fileId:String = "",
     val nameFile:String,
     val allSize:Long,
     val currentByte:Long,

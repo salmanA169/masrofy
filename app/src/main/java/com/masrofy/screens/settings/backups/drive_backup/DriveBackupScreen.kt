@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -171,13 +172,19 @@ fun DriveBackupScreen(
             )
         }
     }
+    var showImportFiles by rememberSaveable {
+        mutableStateOf(false)
+    }
 
-    // TODO: improve it
-    if (driveBackupState.driveBackupFiles.isNotEmpty()) {
-        ImportFilesDialog(files = driveBackupState.driveBackupFiles, onClickFile = {
-
+    if (showImportFiles) {
+        LaunchedEffect(key1 = true ){
+            onEvent(DriveBackupEvent.GetImportFiles)
+        }
+        ImportFilesDialog(files = driveBackupState.driveBackupFiles, progressDownloadState = driveBackupState.progressDownloadState, onClickFile = {
+            onEvent(DriveBackupEvent.Restore(it))
         }) {
-
+            showImportFiles = false
+            onEvent(DriveBackupEvent.ResetState)
         }
     }
     Scaffold(topBar = {
@@ -265,7 +272,7 @@ fun DriveBackupScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             BackupAndRestoreButton(onBackupNowClick = { onEvent(DriveBackupEvent.OnBackUpNow) }) {
-                                onEvent(DriveBackupEvent.Restore)
+                                showImportFiles = true
                             }
                         }
                     }

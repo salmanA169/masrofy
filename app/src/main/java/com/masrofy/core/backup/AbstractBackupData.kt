@@ -35,4 +35,5 @@ abstract class AbstractBackupData(backupEventListener: BackupEventListener) {
 data class BackUpDataFileInfo(
     val idFile: String,
     val fileName: String,
+    val size:String
 )

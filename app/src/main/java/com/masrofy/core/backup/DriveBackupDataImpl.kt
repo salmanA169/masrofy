@@ -1,13 +1,18 @@
 package com.masrofy.core.backup
 
+import android.graphics.BitmapFactory
 import android.util.Log
+import com.google.api.client.googleapis.media.MediaHttpDownloader
+import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener
 import com.google.api.services.drive.Drive
+import com.google.gson.Gson
 import com.masrofy.core.drive.DriveFileInfo
 import com.masrofy.core.drive.backupDrive
 import com.masrofy.core.drive.getAllBackupFiles
 import com.masrofy.core.drive.getBackupFolder
+import com.masrofy.core.drive.getFileById
 import com.masrofy.currency.Currency
 import com.masrofy.data.database.MasrofyDatabase
 import com.masrofy.data.entity.toAccount
@@ -21,61 +26,89 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 class DriveBackupDataImpl(
     private val eventListener: BackupEventListener,
-
     private val database: MasrofyDatabase
-) : AbstractBackupData(eventListener), MediaHttpUploaderProgressListener {
-    private var currentProgressState = ProgressBackupInfo(ProgressState.NOT_STARTED, "", 0, 0)
+) : AbstractBackupData(eventListener), MediaHttpUploaderProgressListener,
+    MediaHttpDownloaderProgressListener {
+    private var currentProgressState = ProgressBackupInfo(ProgressState.NOT_STARTED, "", "",0, 0)
+    private var currentDownloadProgressState = ProgressBackupInfo(ProgressState.NOT_STARTED, "", "",0, 0)
     private var fileSize = 0L
-    private var drive :Drive? = null
+    private var drive: Drive? = null
     override suspend fun backup() {
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             eventListener.onBackup()
             val getAccount = async { database.transactionDao.getAccounts().first() }
-            val transactions =async { database.transactionDao.getTransactions() }
-            val tempList = mutableListOf<Transaction>()
+            val transactions = async {
+                database.transactionDao.getTransactions().map { it.toTransactionBackupData() }
+            }
             eventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
-              repeat(150000) {
-                  tempList.add(
-                      Transaction(
-                          0,
-                          1,
-                          TransactionType.INCOME,
-                          amount = 5.toBigDecimal(),
-                          category = "",
-                          currency = Currency.DEFAULT_CURRENCY
-                      )
-                  )
-              }
-            val backupModel = BackupDataModel(getAccount.await().toAccount(), tempList)
-            val file = async {  writeDateToFile(backupModel) }
+            val backupModel = BackupDataModel(getAccount.await().toAccount(), transactions.await())
+            val file = async { writeDateToFile(backupModel) }
             fileSize = file.await().length()
 
-
-            val insertFile = backupDrive(drive!!, file.await(), getFileName()).apply {
+            backupDrive(drive!!, file.await(), getFileName()).apply {
                 mediaHttpUploader.progressListener = this@DriveBackupDataImpl
                 mediaHttpUploader.setDirectUploadEnabled(false)
                 launch {
                     execute()
                 }
             }
-//        eventListener.onFinish()
-            Log.d("DriveBackup", "backup: called initiation")
-
         }
     }
 
-    fun setDrive(drive: Drive?){
+    fun setDrive(drive: Drive?) {
         this.drive = drive
     }
 
     override suspend fun import(fileId: String) {
+        withContext(Dispatchers.IO) {
+            eventListener.onImport()
+            val getFromDrive = getFileById(drive!!, fileId)
+            val downloader = getFromDrive.mediaHttpDownloader
+            downloader.setProgressListener(this@DriveBackupDataImpl)
+            // todo for test now
+            downloader.setChunkSize(0x100000 * 2)
+            val byteArrayOutputStream = ByteArrayOutputStream()
 
+            currentDownloadProgressState = currentDownloadProgressState.copy(fileId = fileId)
+            eventListener.progressDownloadFile(currentDownloadProgressState.copy(progressState = ProgressState.INITIATION_STARTED, fileId = fileId))
+            try {
+                getFromDrive.executeMediaAndDownloadTo(byteArrayOutputStream)
+                val parseToBackupModel = async { parseByteToJsonString(byteArrayOutputStream) }
+                Log.d("DriveBackup", "get Import file : ${parseToBackupModel.await()}")
+            }catch (e:Exception){
+                // improve later
+                Log.e(javaClass.simpleName, "import: called", e)
+            }
+
+        }
+    }
+
+    private fun parseByteToJsonString(byteArrayOutputStream: ByteArrayOutputStream): BackupDataModel {
+        val string = String(byteArrayOutputStream.toByteArray())
+        val toJson = Gson().fromJson(string, BackupDataModel::class.java)
+        return toJson
+    }
+
+    override fun progressChanged(downloader: MediaHttpDownloader) {
+        when(downloader.downloadState) {
+            MediaHttpDownloader.DownloadState.NOT_STARTED -> {
+                eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.INITIATION_STARTED))
+            }
+            MediaHttpDownloader.DownloadState.MEDIA_IN_PROGRESS -> {
+                eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.STARTED, progress = downloader.progress ))
+            }
+            MediaHttpDownloader.DownloadState.MEDIA_COMPLETE -> {
+                eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.COMPLETE, progress = downloader.progress ))
+                eventListener.onFinish()
+            }
+        }
     }
 
     override fun progressChanged(uploader: MediaHttpUploader) {
@@ -97,7 +130,12 @@ class DriveBackupDataImpl(
             }
 
             MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
-                eventListener.progressBackup(currentProgressState.copy(ProgressState.COMPLETE, progress = 100.0))
+                eventListener.progressBackup(
+                    currentProgressState.copy(
+                        ProgressState.COMPLETE,
+                        progress = 100.0
+                    )
+                )
                 eventListener.onFinish()
             }
 
@@ -108,14 +146,20 @@ class DriveBackupDataImpl(
             }
 
             MediaHttpUploader.UploadState.INITIATION_COMPLETE -> {
-                eventListener.progressBackup(currentProgressState.copy(ProgressState.STARTED, allSize = fileSize))
+                eventListener.progressBackup(
+                    currentProgressState.copy(
+                        ProgressState.STARTED,
+                        allSize = fileSize
+                    )
+                )
 
             }
+
             else -> {}
         }
     }
 
     override suspend fun getImportFiles(): List<BackUpDataFileInfo> {
-        return getAllBackupFiles(drive!!).map { BackUpDataFileInfo(it.id, it.nameFile) }
+        return getAllBackupFiles(drive!!).map { BackUpDataFileInfo(it.id, it.nameFile,it.size) }
     }
 }
