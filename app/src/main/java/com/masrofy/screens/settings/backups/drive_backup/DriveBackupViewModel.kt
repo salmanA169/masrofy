@@ -219,7 +219,7 @@ class DriveBackupViewModel @Inject constructor(
             .onSuccess { result ->
                 _state.update {
                     it.copy(
-                        result.email, isAutoDriveBackup = true
+                        result.email
                     )
                 }
                 driveBackupDate.setDrive(driveManager.getDrive())

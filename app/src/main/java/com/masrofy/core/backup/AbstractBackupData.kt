@@ -4,6 +4,7 @@ import android.content.ContentResolver.MimeTypeInfo
 import android.webkit.MimeTypeMap
 import com.google.gson.Gson
 import com.masrofy.core.drive.DRIVE_BACKUP_FILENAME
+import com.masrofy.screens.settings.backups.drive_backup.PeriodSchedule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -11,6 +12,25 @@ import java.io.OutputStream
 
 abstract class AbstractBackupData(backupEventListener: BackupEventListener) {
 
+    companion object{
+        val defaultEventListener = object :BackupEventListener{
+            override fun onBackup() {
+
+            }
+
+            override fun onImport() {
+            }
+
+            override fun onFinish() {
+            }
+
+            override fun progressBackup(progressBackupInfo: ProgressBackupInfo) {
+            }
+
+            override fun progressDownloadFile(progressState: ProgressBackupInfo) {
+            }
+        }
+    }
     abstract suspend fun backup()
     abstract suspend fun import(fileId:String)
     abstract suspend fun getImportFiles(): List<BackUpDataFileInfo>

@@ -38,7 +38,6 @@ suspend fun backupDrive(drive: Drive, file: java.io.File, filename: String):Crea
 suspend fun getAllBackupFiles(drive: Drive): List<DriveFileInfo> {
     val files = mutableListOf<DriveFileInfo>()
     return withContext(Dispatchers.IO) {
-        // TODO: fix it to search in specific folder
         do {
             var token: String? = null
             val result =

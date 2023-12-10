@@ -48,7 +48,7 @@ class DriveBackupDataImpl(
                 database.transactionDao.getTransactions().map { it.toTransactionBackupData() }
             }
             eventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
-            val backupModel = BackupDataModel(getAccount.await().toAccount(), transactions.await())
+            val backupModel = BackupDataModel(getAccount.await().toAccountBackupData(), transactions.await())
             val file = async { writeDateToFile(backupModel) }
             fileSize = file.await().length()
 
@@ -72,8 +72,6 @@ class DriveBackupDataImpl(
             val getFromDrive = getFileById(drive!!, fileId)
             val downloader = getFromDrive.mediaHttpDownloader
             downloader.setProgressListener(this@DriveBackupDataImpl)
-            // todo for test now
-            downloader.setChunkSize(0x100000 * 2)
             val byteArrayOutputStream = ByteArrayOutputStream()
 
             currentDownloadProgressState = currentDownloadProgressState.copy(fileId = fileId)
@@ -81,7 +79,7 @@ class DriveBackupDataImpl(
             try {
                 getFromDrive.executeMediaAndDownloadTo(byteArrayOutputStream)
                 val parseToBackupModel = async { parseByteToJsonString(byteArrayOutputStream) }
-                Log.d("DriveBackup", "get Import file : ${parseToBackupModel.await()}")
+                saveDataToDatabase(parseToBackupModel.await())
             }catch (e:Exception){
                 // improve later
                 Log.e(javaClass.simpleName, "import: called", e)
@@ -90,6 +88,13 @@ class DriveBackupDataImpl(
         }
     }
 
+    private suspend fun saveDataToDatabase(backupDataModel:BackupDataModel){
+        val getTransactionDao = database.transactionDao
+        getTransactionDao.upsertAccount(backupDataModel.account.toAccountEntity())
+        backupDataModel.transactions.forEach {
+            getTransactionDao.insertTransaction(it.toTransactionEntity())
+        }
+    }
     private fun parseByteToJsonString(byteArrayOutputStream: ByteArrayOutputStream): BackupDataModel {
         val string = String(byteArrayOutputStream.toByteArray())
         val toJson = Gson().fromJson(string, BackupDataModel::class.java)

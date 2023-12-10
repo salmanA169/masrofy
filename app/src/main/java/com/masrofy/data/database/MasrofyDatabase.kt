@@ -10,15 +10,17 @@ import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.masrofy.data.converter.ConverterDate
+import com.masrofy.data.dao.AutomatedBackupDao
 import com.masrofy.data.dao.CategoryDao
 import com.masrofy.data.dao.TransactionDao
 import com.masrofy.data.entity.AccountEntity
+import com.masrofy.data.entity.AutomatedBackupEntity
 import com.masrofy.data.entity.CategoryEntity
 import com.masrofy.data.entity.TransactionEntity
 
 @Database(
     version = 5,
-    entities = [TransactionEntity::class, AccountEntity::class, CategoryEntity::class],
+    entities = [TransactionEntity::class, AccountEntity::class, CategoryEntity::class,AutomatedBackupEntity::class],
     autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(
         from = 2,
         to = 3,
@@ -37,6 +39,7 @@ import com.masrofy.data.entity.TransactionEntity
 abstract class MasrofyDatabase : RoomDatabase() {
     abstract val transactionDao: TransactionDao
     abstract val categoryDao: CategoryDao
+    abstract val automatedBackupDao:AutomatedBackupDao
 
     @DeleteColumn("CategoryEntity", columnName = "position")
     @DeleteColumn("CategoryEntity", columnName = "id")
