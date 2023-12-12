@@ -11,12 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.masrofy.screens.settings.backups.drive_backup.PeriodSchedule
 
 @Composable
 fun TextRadioButton(
-    text:String,
+    text:PeriodSchedule,
     isSelected:Boolean,
-    onClick:()->Unit
+    onClick:(PeriodSchedule)->Unit
 ) {
     Row(
         Modifier
@@ -26,10 +27,12 @@ fun TextRadioButton(
     ) {
         RadioButton(
             selected = isSelected,
-            onClick = onClick
+            onClick = {
+                onClick(text)
+            }
         )
         Text(
-            text = text,
+            text = text.toString(),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = 8.dp)
         )

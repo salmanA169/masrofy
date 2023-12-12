@@ -9,9 +9,9 @@ import java.time.LocalDateTime
 data class AutomatedBackupEntity(
     @PrimaryKey
     val id:String,
-    val nameModel: BackupModelName ,
+    val nameModel: BackupModelName,
     val isAutoAutomated:Boolean ,
-    val lastBackup:LocalDateTime,
+    val lastBackup:Long,
     val periodSchedule: PeriodSchedule,
     val shouldOnlyUsingWifi:Boolean
 )

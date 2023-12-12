@@ -15,12 +15,16 @@ import com.masrofy.core.drive.GoogleSigningAuthManager
 import com.masrofy.coroutine.DispatcherProvider
 import com.masrofy.coroutine.DispatcherProviderImpl
 import com.masrofy.data.database.MasrofyDatabase
+import com.masrofy.data.entity.AutomatedBackupEntity
+import com.masrofy.data.entity.BackupModelName
+import com.masrofy.utils.toMillis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,11 +39,37 @@ class DriveBackupViewModel @Inject constructor(
     private val backupManager = BackupManager(viewModelScope, DispatcherProviderImpl())
     private val _effect = MutableStateFlow<DriveBackupEffect?>(null)
     val effect = _effect.asStateFlow()
-
+    private val automatedDao = database.automatedBackupDao
+    private var automatedBackupEntity = AutomatedBackupEntity(
+        BackupModelName.DRIVE.toString(),
+        BackupModelName.DRIVE,
+        false,
+        lastBackup = 0,
+        PeriodSchedule.DALLY,
+        false
+    )
     private val driveBackupDate = DriveBackupDataImpl(
         this,
         database
     )
+
+    init {
+        viewModelScope.launch(dispatcherProvider.io) {
+            val getDriveAutomated =
+                automatedDao.getAutomatedBackup().find { it.nameModel == BackupModelName.DRIVE }
+            getDriveAutomated?.let { automated ->
+                automatedBackupEntity = automated
+                _state.update {
+                    it.copy(
+                        lastBackupTime = automated.lastBackup,
+                        isAutoDriveBackup = automated.isAutoAutomated,
+                        onlyWiFi = automated.shouldOnlyUsingWifi,
+                        periodSchedule = automated.periodSchedule
+                    )
+                }
+            }
+        }
+    }
 
     override fun onBackup() {
         _state.update {
@@ -54,6 +84,17 @@ class DriveBackupViewModel @Inject constructor(
             it.copy(
                 backupProgressBackupInfo = progressBackupInfo
             )
+        }
+        if (progressBackupInfo.progressState == ProgressState.COMPLETE) {
+            viewModelScope.launch(dispatcherProvider.io) {
+                automatedBackupEntity = automatedBackupEntity.copy(lastBackup = LocalDateTime.now().toMillis())
+                automatedDao.upsertAutomatedBackup(automatedBackupEntity)
+                _state.update {
+                    it.copy(
+                        lastBackupTime = automatedBackupEntity.lastBackup
+                    )
+                }
+            }
         }
     }
 
@@ -109,10 +150,10 @@ class DriveBackupViewModel @Inject constructor(
                 }
             }
 
+
             DriveBackupEvent.SignOut -> {
                 signOut()
             }
-
 
 
             is DriveBackupEvent.OnSignInResult -> {
@@ -142,16 +183,14 @@ class DriveBackupViewModel @Inject constructor(
             }
 
             is DriveBackupEvent.Restore -> {
-                viewModelScope.launch(Dispatchers.IO){
-                    backupManager.startImport(driveBackupDate,backupEvent.fileId)
-
+                viewModelScope.launch(Dispatchers.IO) {
+                    backupManager.startImport(driveBackupDate, backupEvent.fileId)
                 }
             }
 
             DriveBackupEvent.GetImportFiles -> {
                 viewModelScope.launch(dispatcherProvider.io) {
                     val getFiles = backupManager.getImportFiles(driveBackupDate)
-                    // TODO: improve it
                     _state.update {
                         it.copy(
                             driveBackupFiles = getFiles
@@ -167,6 +206,45 @@ class DriveBackupViewModel @Inject constructor(
                     )
                 }
             }
+
+            is DriveBackupEvent.AutomatedEvent -> {
+                viewModelScope.launch(dispatcherProvider.io) {
+                    automatedBackupEntity =
+                        automatedBackupEntity.copy(isAutoAutomated = backupEvent.isAutomated)
+                    automatedDao.upsertAutomatedBackup(automatedBackupEntity)
+                    _state.update {
+                        it.copy(
+                            isAutoDriveBackup = backupEvent.isAutomated
+                        )
+                    }
+                }
+            }
+
+            is DriveBackupEvent.PeriodicEvent -> {
+                viewModelScope.launch(dispatcherProvider.io) {
+                    automatedBackupEntity =
+                        automatedBackupEntity.copy(periodSchedule = backupEvent.periodic)
+                    automatedDao.upsertAutomatedBackup(automatedBackupEntity)
+                    _state.update {
+                        it.copy(
+                            periodSchedule = backupEvent.periodic
+                        )
+                    }
+                }
+            }
+
+            is DriveBackupEvent.WifiEvent -> {
+                viewModelScope.launch(dispatcherProvider.io) {
+                    automatedBackupEntity =
+                        automatedBackupEntity.copy(shouldOnlyUsingWifi = backupEvent.onlyWifi)
+                    automatedDao.upsertAutomatedBackup(automatedBackupEntity)
+                    _state.update {
+                        it.copy(
+                            onlyWiFi = backupEvent.onlyWifi
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -174,10 +252,14 @@ class DriveBackupViewModel @Inject constructor(
         _state.update {
             it.copy(
                 progressDownloadState = ProgressDownloadState(
-                    progressState.progressState,progressState.fileId,progressState.progress.toFloat()
+                    progressState.progressState,
+                    progressState.fileId,
+                    progressState.progress.toFloat()
                 )
             )
         }
+
+
     }
 
     private fun signOut() {
@@ -248,7 +330,10 @@ sealed class DriveBackupEvent {
     class OnAuthorize(val intent: Intent) : DriveBackupEvent()
     data object OnBackUpNow : DriveBackupEvent()
     data object Close : DriveBackupEvent()
-    data class Restore(val fileId:String) : DriveBackupEvent()
-    data object GetImportFiles:DriveBackupEvent()
-    data object ResetState:DriveBackupEvent()
+    data class Restore(val fileId: String) : DriveBackupEvent()
+    data object GetImportFiles : DriveBackupEvent()
+    data object ResetState : DriveBackupEvent()
+    data class AutomatedEvent(val isAutomated: Boolean) : DriveBackupEvent()
+    data class PeriodicEvent(val periodic: PeriodSchedule) : DriveBackupEvent()
+    data class WifiEvent(val onlyWifi: Boolean) : DriveBackupEvent()
 }

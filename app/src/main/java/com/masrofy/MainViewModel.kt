@@ -48,6 +48,7 @@ class MainViewModel @Inject constructor(
                 transactionRepository.upsertAccount(defaultAccount.toAccount())
             }
 
+
         }
 
     }
@@ -100,7 +101,7 @@ class MainViewModel @Inject constructor(
                                 false
                             )
                         )
-                    }else {
+                    } else {
                         null
                     }
                 }

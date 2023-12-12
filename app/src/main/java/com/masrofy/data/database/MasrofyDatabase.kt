@@ -19,7 +19,7 @@ import com.masrofy.data.entity.CategoryEntity
 import com.masrofy.data.entity.TransactionEntity
 
 @Database(
-    version = 5,
+    version = 6,
     entities = [TransactionEntity::class, AccountEntity::class, CategoryEntity::class,AutomatedBackupEntity::class],
     autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(
         from = 2,

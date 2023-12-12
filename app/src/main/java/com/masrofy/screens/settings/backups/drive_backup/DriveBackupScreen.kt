@@ -234,7 +234,7 @@ fun DriveBackupScreen(
                     ) {
                         LabelText(
                             label = "LastBackup",
-                            endLabel = driveBackupState.lastBackupTime.toLocalDateTime()
+                            endLabel = if (driveBackupState.lastBackupTime == 0L) "------" else driveBackupState.lastBackupTime.toLocalDateTime()
                                 .formatShortDate()
                         )
                         driveBackupState.email?.let {
@@ -266,9 +266,14 @@ fun DriveBackupScreen(
                         Column {
                             BackupOptions(
                                 isAuto = driveBackupState.isAutoDriveBackup,
-                                onAutoBackupChange = {},
+                                onAutoBackupChange = {onEvent(DriveBackupEvent.AutomatedEvent(it))},
                                 periodSchedule = driveBackupState.periodSchedule,
-                                onlyWiFi = driveBackupState.onlyWiFi
+                                onlyWiFi = driveBackupState.onlyWiFi, onPeriodChange = {
+                                    onEvent(DriveBackupEvent.PeriodicEvent(it))
+                                },
+                                onWifiChange = {
+                                    onEvent(DriveBackupEvent.WifiEvent(it))
+                                }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             BackupAndRestoreButton(onBackupNowClick = { onEvent(DriveBackupEvent.OnBackUpNow) }) {
@@ -327,7 +332,9 @@ fun BackupOptions(
     isAuto: Boolean,
     onAutoBackupChange: (Boolean) -> Unit,
     periodSchedule: PeriodSchedule,
-    onlyWiFi: Boolean
+    onPeriodChange:(PeriodSchedule)->Unit ,
+    onlyWiFi: Boolean,
+    onWifiChange:(Boolean)->Unit
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(0f)) {
         Row(
@@ -351,15 +358,15 @@ fun BackupOptions(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     periodScheduleList.forEach {
-                        TextRadioButton(text = it.name, isSelected = it == periodSchedule) {
-
+                        TextRadioButton(text = it, isSelected = it == periodSchedule) {
+                            onPeriodChange(it)
                         }
                     }
                 }
                 TextCheckBox(
                     isChecked = onlyWiFi,
                     text = "Automatic Backup only works on Wifi",
-                    onCheckChange = {})
+                    onCheckChange = onWifiChange)
             }
         }
     }
