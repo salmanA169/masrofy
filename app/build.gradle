@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-
+    id 'com.google.gms.google-services'
 }
 secrets {
     // Optionally specify a different file name containing your secrets.
@@ -97,6 +97,15 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            exclude("META-INF/DEPENDENCIES")
+            exclude("META-INF/LICENSE")
+            exclude("META-INF/LICENSE.txt")
+            exclude("META-INF/license.txt")
+            exclude("META-INF/NOTICE")
+            exclude("META-INF/NOTICE.txt")
+            exclude("META-INF/notice.txt")
+            exclude("META-INF/ASL2.0")
+            exclude("META-INF/*.kotlin_module")
         }
     }
 
@@ -111,6 +120,7 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.compose.material3:material3:1.1.2'
+
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -162,4 +172,19 @@ dependencies {
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation 'org.burnoutcrew.composereorderable:reorderable:0.9.6'
+
+    // firebase
+    implementation platform('com.google.firebase:firebase-bom:32.6.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0'
+    implementation 'com.google.api-client:google-api-client:2.0.0'
+    implementation 'com.google.api-client:google-api-client-android:1.32.1'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
+
+    // gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+
 }

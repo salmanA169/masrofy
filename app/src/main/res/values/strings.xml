@@ -1,4 +1,5 @@
 <resources>
+    <string name="web_client" translatable="false">606677120108-bh0fgmhrf66okjfkg3lr657p9re9iutl.apps.googleusercontent.com</string>
     <string name="app_name">masrofy</string>
     <string name="expense">Expense</string>
     <string name="income">Income</string>
@@ -52,5 +53,9 @@
     <string name="import_export"><![CDATA[Import & Export]]></string>
     <string name="change_currency">Change Currency</string>
     <string name="are_you_sure">are you sure ?</string>
+    <string name="goole_drive_backup">Google Drive Backup</string>
+    <string name="backup_device">Backup/Restore on device</string>
+    <string name="export_email">Export backup files to e-mail</string>
+    <string name="google_drive_backup">Google Drive Backup</string>
 
 </resources>

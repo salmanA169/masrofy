@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 
@@ -46,7 +47,10 @@ class MainViewModel @Inject constructor(
             if (accounts.find { it.name == defaultAccount.name } == null) {
                 transactionRepository.upsertAccount(defaultAccount.toAccount())
             }
+
+
         }
+
     }
 
     init {
@@ -97,7 +101,7 @@ class MainViewModel @Inject constructor(
                                 false
                             )
                         )
-                    }else {
+                    } else {
                         null
                     }
                 }
