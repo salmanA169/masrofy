@@ -52,8 +52,6 @@ fun ImportFilesDialog(
                             .fillMaxWidth()
                             .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Icon(painter = painterResource(id = R.drawable.backup_icon), contentDescription = "")
-                            // TODO: fix here not show progress
-
                             Text(text = "${it.fileName} ", fontSize = 17.sp, maxLines = 1)
                             if (progressDownloadState.fileId == it.idFile){
                                 if (progressDownloadState.state == ProgressState.INITIATION_STARTED){

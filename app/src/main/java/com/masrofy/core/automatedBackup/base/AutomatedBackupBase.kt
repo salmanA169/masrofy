@@ -105,7 +105,7 @@ class AutomatedBackupManager @Inject constructor(
                     }
                 }
 
-                BackupModelName.EXTERNAL_FILE_STORAGE -> TODO()
+                BackupModelName.EXTERNAL_FILE_STORAGE -> Unit
             }
         }
     }
