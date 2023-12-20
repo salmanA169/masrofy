@@ -45,13 +45,9 @@ class DriveBackupDataImpl(
     override suspend fun backup() {
         withContext(Dispatchers.IO) {
             eventListener.onBackup()
-            val getAccount = async { database.transactionDao.getAccounts().first() }
-            val transactions = async {
-                database.transactionDao.getTransactions().map { it.toTransactionBackupData() }
-            }
+            val backupModel = async { getBackupModel(database) }
             eventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
-            val backupModel = BackupDataModel(getAccount.await().toAccountBackupData(), transactions.await())
-            val file = async { writeDateToFile(backupModel) }
+            val file = async { writeDateToFile(backupModel.await()) }
             fileSize = file.await().length()
 
             backupDrive(drive!!, file.await(), getFileName()).apply {
@@ -70,6 +66,7 @@ class DriveBackupDataImpl(
 
     override suspend fun import(fileId: String) {
         withContext(Dispatchers.IO) {
+            // TODO: move to work manager it cancel when back screen
             eventListener.onImport()
             val getFromDrive = getFileById(drive!!, fileId)
             val downloader = getFromDrive.mediaHttpDownloader
@@ -79,9 +76,10 @@ class DriveBackupDataImpl(
             currentDownloadProgressState = currentDownloadProgressState.copy(fileId = fileId)
             eventListener.progressDownloadFile(currentDownloadProgressState.copy(progressState = ProgressState.INITIATION_STARTED, fileId = fileId))
             try {
+
                 getFromDrive.executeMediaAndDownloadTo(byteArrayOutputStream)
                 val parseToBackupModel = async { parseByteToJsonString(byteArrayOutputStream) }
-                saveDataToDatabase(parseToBackupModel.await())
+                saveDataToDatabase(parseToBackupModel.await(),database)
             }catch (e:Exception){
                 // improve later
                 Log.e(javaClass.simpleName, "import: called", e)
@@ -90,13 +88,7 @@ class DriveBackupDataImpl(
         }
     }
 
-    private suspend fun saveDataToDatabase(backupDataModel:BackupDataModel){
-        val getTransactionDao = database.transactionDao
-        getTransactionDao.upsertAccount(backupDataModel.account.toAccountEntity())
-        backupDataModel.transactions.forEach {
-            getTransactionDao.insertTransaction(it.toTransactionEntity())
-        }
-    }
+
     private fun parseByteToJsonString(byteArrayOutputStream: ByteArrayOutputStream): BackupDataModel {
         val string = String(byteArrayOutputStream.toByteArray())
         val toJson = Gson().fromJson(string, BackupDataModel::class.java)
@@ -114,7 +106,6 @@ class DriveBackupDataImpl(
             MediaHttpDownloader.DownloadState.MEDIA_COMPLETE -> {
                 eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.COMPLETE, progress = downloader.progress ))
                 eventListener.onFinish()
-
             }
         }
     }

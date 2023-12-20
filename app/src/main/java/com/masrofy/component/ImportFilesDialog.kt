@@ -38,7 +38,7 @@ import com.masrofy.ui.theme.MasrofyTheme
 @Composable
 fun ImportFilesDialog(
     files:List<BackUpDataFileInfo>,
-    progressDownloadState: ProgressDownloadState,
+    progressDownloadState: ProgressDownloadState?,
     onClickFile:(String)->Unit,
     onDismiss:()->Unit
 ) {
@@ -53,7 +53,7 @@ fun ImportFilesDialog(
                             .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Icon(painter = painterResource(id = R.drawable.backup_icon), contentDescription = "")
                             Text(text = "${it.fileName} ", fontSize = 17.sp, maxLines = 1)
-                            if (progressDownloadState.fileId == it.idFile){
+                            if (progressDownloadState?.fileId == it.idFile){
                                 if (progressDownloadState.state == ProgressState.INITIATION_STARTED){
                                     CircularProgressIndicator()
                                 }else if (progressDownloadState.state == ProgressState.STARTED){

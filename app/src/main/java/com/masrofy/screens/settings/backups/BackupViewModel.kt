@@ -19,6 +19,22 @@ class BackupViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(BackupStates())
     val state = _state.asStateFlow()
+    private val _effect = MutableStateFlow<BackupSettingEffect?>(null)
+    val effect = _effect.asStateFlow()
+    fun onEvent(backupSettingEvent: BackupSettingEvent){
+        when(backupSettingEvent){
+            is BackupSettingEvent.Navigate -> {
+                _effect.update {
+                    BackupSettingEffect.OnNavigate(backupSettingEvent.route)
+                }
+            }
+        }
+    }
+    fun resetEffect(){
+        _effect.update {
+            null
+        }
+    }
     init {
         viewModelScope.launch(dispatcherProvider.io) {
             googleSigningAuthManager.getSignInInfo()?.let{
@@ -28,4 +44,10 @@ class BackupViewModel @Inject constructor(
             }
         }
     }
+}
+sealed class BackupSettingEffect{
+    data class OnNavigate(val route:String):BackupSettingEffect()
+}
+sealed class BackupSettingEvent{
+    data class Navigate(val route:String):BackupSettingEvent()
 }
