@@ -38,6 +38,7 @@ import com.masrofy.screens.currency.currencyScreen
 import com.masrofy.screens.mainScreen.mainScreenNavigation
 import com.masrofy.screens.onboarding.onBoardingDest
 import com.masrofy.screens.settings.backups.backupScreens
+import com.masrofy.screens.settings.backups.device_backup.deviceBackupDest
 import com.masrofy.screens.settings.backups.drive_backup.driveBackupDest
 import com.masrofy.screens.settings.settingsDest
 import com.masrofy.screens.statisticsScreen.statisticsScreen
@@ -59,12 +60,16 @@ class MainActivity : ComponentActivity() {
         viewModel.checkCategories()
         viewModel.checkOnboarding()
         val permissionLauncher = registerForActivityResult(
-             ActivityResultContracts.RequestPermission(),
+             ActivityResultContracts.RequestMultiplePermissions(),
         ){
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            permissionLauncher.launch(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_MEDIA_LOCATION)
+            )
         }
 
         setContent {
@@ -215,6 +220,7 @@ fun SetNavigationScreen(mainViewModel: MainViewModel) {
             currencyScreen(navController)
             backupScreens(navController)
             driveBackupDest(navController)
+            deviceBackupDest(navController)
         }
     }
 }

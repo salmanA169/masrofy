@@ -23,7 +23,6 @@ data class AccountBackupData(
     val type: CategoryAccount,
     val totalAmount: Long,
     val createdAt: Long,
-
     val currency: Currency
 )
 

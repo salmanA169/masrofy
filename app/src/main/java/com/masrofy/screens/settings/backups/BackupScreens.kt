@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,9 +33,18 @@ fun NavGraphBuilder.backupScreens(navController: NavController) {
     composable(Screens.BackupScreens.route) {
         val backupViewModel = hiltViewModel<BackupViewModel>()
         val state by backupViewModel.state.collectAsStateWithLifecycle()
-        BackupScreens(backupStates = state){
-            navController.navigate(Screens.DriveBackupScreen.route)
+        val effect by backupViewModel.effect.collectAsStateWithLifecycle()
+
+        LaunchedEffect(key1 = effect){
+            when(effect){
+                is BackupSettingEffect.OnNavigate -> {
+                    navController.navigate((effect as BackupSettingEffect.OnNavigate).route)
+                    backupViewModel.resetEffect()
+                }
+                null -> Unit
+            }
         }
+        BackupScreens(backupStates = state,backupViewModel::onEvent)
     }
 }
 
@@ -42,8 +52,7 @@ fun NavGraphBuilder.backupScreens(navController: NavController) {
 @Composable
 fun BackupScreens(
     backupStates: BackupStates,
-    // for test now
-    onNavigate:() -> Unit
+    onEvent:(BackupSettingEvent)->Unit
 ) {
     Scaffold(topBar = {
         AppBar(
@@ -70,7 +79,8 @@ fun BackupScreens(
                     ),
                     endLabelColor = backupStates.getLabelColor()
                 ) {
-                    onNavigate()
+                    onEvent(BackupSettingEvent.Navigate(Screens.DriveBackupScreen.route))
+
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 SettingsComponent(
@@ -79,17 +89,17 @@ fun BackupScreens(
                         id = R.drawable.device_icon
                     ),
                 ) {
-
+                    onEvent(BackupSettingEvent.Navigate(Screens.DeviceBackup.route))
                 }
                 Spacer(modifier = Modifier.height(6.dp))
-                SettingsComponent(
-                    settingHeaderText = stringResource(id = R.string.export_email),
-                    painterResourceID = painterResource(
-                        id = R.drawable.email_icon
-                    ),
-                ) {
-
-                }
+//                SettingsComponent(
+//                    settingHeaderText = stringResource(id = R.string.export_email),
+//                    painterResourceID = painterResource(
+//                        id = R.drawable.email_icon
+//                    ),
+//                ) {
+//
+//                }
             }
         }
     }
