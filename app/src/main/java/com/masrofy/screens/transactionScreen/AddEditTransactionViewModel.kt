@@ -214,6 +214,7 @@ class AddEditTransactionViewModel @Inject constructor(
 
                     InputType.KEYBOARD -> Unit
                     InputType.DATE_INPUT -> Unit
+                    InputType.NONE -> Unit
                 }
             }
         }

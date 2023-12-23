@@ -2,69 +2,44 @@ package com.masrofy.screens.transactionScreen
 
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.util.Log
-import android.widget.Space
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusTarget
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,11 +51,11 @@ import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.AccountDataEntryImplement
 import com.masrofy.component.CategoryDataEntryImpl
+import com.masrofy.component.DateButton
 import com.masrofy.component.InputData
 import com.masrofy.component.InputType
-import com.masrofy.component.LabelEditTextBox
+import com.masrofy.component.TransactionCardInputItem
 import com.masrofy.currency.Currency
-import com.masrofy.currency.CurrencyData
 import com.masrofy.currencyVisual.CurrencyAmountInputVisualTransformation
 import com.masrofy.model.*
 import com.masrofy.ui.theme.MasrofyTheme
@@ -88,11 +63,8 @@ import com.masrofy.ui.theme.Orange
 import com.masrofy.ui.theme.SurfaceColor
 import com.masrofy.utils.findOwner
 import com.masrofy.utils.formatShortDate
-import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
 import java.util.*
 
@@ -155,31 +127,18 @@ fun TransactionScreen(
 
     val dateState = rememberDatePickerState()
     var currentInput by remember {
-        mutableStateOf<InputType?>(null)
+        mutableStateOf<InputType>(InputType.ACCOUNT_INPUT)
     }
     val localDensity = LocalDensity.current
     var currentPaddingInputs by remember {
         mutableStateOf(0.dp)
-    }
-    LaunchedEffect(key1 = dateState.selectedDateMillis) {
-        dateState.selectedDateMillis?.let {
-            onEvent(
-                AddEditTransactionEvent.DateTimeChanged(
-                    LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(dateState.selectedDateMillis!!),
-                        ZoneId.systemDefault()
-                    )
-                )
-            )
-
-        }
     }
     val rememberInput = remember {
         { inputType: InputType ->
             if (currentInput == InputType.KEYBOARD && inputType == InputType.KEYBOARD) {
                 focusManager.clearFocus()
                 currentPaddingInputs = 0.dp
-                currentInput = null
+                currentInput = InputType.NONE
             } else {
                 currentInput = inputType
             }
@@ -226,7 +185,7 @@ fun TransactionScreen(
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = {
-                                currentInput = null
+                                currentInput = InputType.NONE
                                 currentPaddingInputs = 0.dp
                                 focusManager.clearFocus()
                             }
@@ -247,7 +206,9 @@ fun TransactionScreen(
                     currentNote = transactionState.comment ?: "",
                     onInputChange = rememberInput,
                     onEvent = onEvent,
-                    currecny = transactionState.currency
+                    currecny = transactionState.currency,
+                    currentInputType = currentInput,
+                    transactionType = transactionState.transactionType
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
@@ -259,10 +220,10 @@ fun TransactionScreen(
             }
 
             AnimatedVisibility(
-                visible = currentInput != null && currentInput != InputType.KEYBOARD,
+                visible =  currentInput != InputType.KEYBOARD,
                 modifier = Modifier.align(BottomStart),
-                enter = fadeIn(animationSpec = tween( easing = LinearOutSlowInEasing)),
-                exit = fadeOut(animationSpec = tween( easing = LinearOutSlowInEasing))
+                enter = fadeIn(animationSpec = tween(easing = LinearOutSlowInEasing)),
+                exit = fadeOut(animationSpec = tween(easing = LinearOutSlowInEasing))
             ) {
                 Box(
                     modifier = Modifier
@@ -271,12 +232,23 @@ fun TransactionScreen(
                 ) {
                     if (currentInput == InputType.DATE_INPUT) {
                         DatePickerDialog(onDismissRequest = {
-                            currentInput = null
+                            currentInput = InputType.NONE
                             focusManager.clearFocus()
                         }, confirmButton = {
                             TextButton(onClick = {
-                                currentInput = null
+                                currentInput = InputType.NONE
                                 focusManager.clearFocus()
+                                dateState.selectedDateMillis?.let {
+                                    onEvent(
+                                        AddEditTransactionEvent.DateTimeChanged(
+                                            LocalDateTime.ofInstant(
+                                                Instant.ofEpochMilli(dateState.selectedDateMillis!!),
+                                                ZoneId.systemDefault()
+                                            )
+                                        )
+                                    )
+
+                                }
                             }) {
                                 Text(text = stringResource(id = R.string.confirm))
                             }
@@ -311,6 +283,7 @@ fun TransactionScreen(
                                 }
 
                                 null -> null
+                                InputType.NONE -> null
                             }
                         }
                         if (inputData != null) {
@@ -323,7 +296,7 @@ fun TransactionScreen(
                                     }
                                 }
                                 .navigationBarsPadding(), onHide = {
-                                currentInput = null
+                                currentInput = InputType.NONE
                                 currentPaddingInputs = 0.dp
                                 focusManager.clearFocus()
                             }, focusManager = focusManager
@@ -391,7 +364,10 @@ fun Inputs(
                 IconButton(modifier = Modifier, onClick = {
                     onEvent(AddEditTransactionEvent.NavigateTo(inputData.inputType))
                 }) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "add category screen")
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "add category screen"
+                    )
                 }
             }
             IconButton(modifier = Modifier, onClick = { onHide() }) {
@@ -426,6 +402,8 @@ fun Inputs(
                                 InputType.CATEGORY_INPUT -> {
                                     onEvent(AddEditTransactionEvent.CategorySelected(it.getDataEntry()))
                                 }
+
+                                else -> Unit
                             }
                             focusManager.moveFocus(FocusDirection.Down)
                         }
@@ -443,6 +421,7 @@ fun Inputs(
 
 @Composable
 fun InputsTransactions(
+    currentInputType: InputType,
     onInputChange: (InputType) -> Unit = {},
     onEvent: (AddEditTransactionEvent) -> Unit = {},
     currentDateTime: String,
@@ -450,39 +429,36 @@ fun InputsTransactions(
     currentCategory: String,
     currentAmount: String,
     currentNote: String,
-    currecny: Currency?
+    currecny: Currency?,
+    transactionType: TransactionType
 ) {
-    val focusRequester = remember {
-        FocusRequester()
-    }
-    LaunchedEffect(key1 = true) {
-        focusRequester.requestFocus()
-    }
-    LabelEditTextBox(
-        label = stringResource(id = R.string.date),
-        value = currentDateTime,
-        inputType = InputType.DATE_INPUT,
-        onShowInput = onInputChange,
-        )
+
+    DateButton(
+        onInputChange = onInputChange,
+        onIncrease = {},
+        onDecrease = {},
+        dateText = currentDateTime
+    )
     Spacer(modifier = Modifier.height(8.dp))
-    LabelEditTextBox(
+    TransactionCardInputItem(
         label = stringResource(id = R.string.account),
         value = currentAccount,
         inputType = InputType.ACCOUNT_INPUT,
         onShowInput = onInputChange,
-        modifier = Modifier.focusRequester(focusRequester)
+        isFocus = currentInputType == InputType.ACCOUNT_INPUT
     )
     Spacer(modifier = Modifier.height(8.dp))
 
-    LabelEditTextBox(
+    TransactionCardInputItem(
         label = stringResource(id = R.string.transaction_category),
         value = currentCategory,
         inputType = InputType.CATEGORY_INPUT,
-        onShowInput = onInputChange
+        onShowInput = onInputChange,
+        isFocus = currentInputType == InputType.CATEGORY_INPUT
     )
     Spacer(modifier = Modifier.height(8.dp))
 
-    LabelEditTextBox(
+    TransactionCardInputItem(
         modifier = Modifier.testTag("edit-amount"),
         label = stringResource(id = R.string.amount),
         value = currentAmount,
@@ -492,11 +468,13 @@ fun InputsTransactions(
         keyboardType = KeyboardType.Number,
         visualTransformation = if (currecny != null) CurrencyAmountInputVisualTransformation(
             currecny
-        ) else VisualTransformation.None
+        ) else VisualTransformation.None,
+        isFocus = currentInputType == InputType.KEYBOARD,
+        colorValue = transactionType.getColor()
     )
     Spacer(modifier = Modifier.height(8.dp))
 
-    LabelEditTextBox(
+    TransactionCardInputItem(
         label = stringResource(id = R.string.comment),
         value = currentNote,
         inputType = InputType.KEYBOARD,
@@ -504,9 +482,9 @@ fun InputsTransactions(
         onValueChange = {
             onEvent(AddEditTransactionEvent.CommentChange(it))
         },
+        isFocus = currentInputType == InputType.KEYBOARD
     )
 }
-
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
