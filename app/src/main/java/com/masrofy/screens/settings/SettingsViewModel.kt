@@ -62,6 +62,12 @@ class SettingsViewModel @Inject constructor(
                     SettingsEffect.Navigate(settingsEvent.route)
                 }
             }
+
+            SettingsEvent.Close ->{
+                _effect.update {
+                    SettingsEffect.Close
+                }
+            }
         }
     }
     fun resetEffect(){
@@ -73,9 +79,11 @@ class SettingsViewModel @Inject constructor(
 
 sealed class SettingsEffect {
     class Navigate(val route: String) : SettingsEffect()
+    data object Close:SettingsEffect()
 }
 
 sealed class SettingsEvent {
     class OnDarkModeChange(val darkMode: Boolean) : SettingsEvent()
     class NavigateTo(val route: String) : SettingsEvent()
+    data object Close:SettingsEvent()
 }

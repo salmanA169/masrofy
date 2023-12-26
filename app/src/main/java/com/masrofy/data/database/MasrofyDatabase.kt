@@ -26,12 +26,11 @@ import com.masrofy.data.entity.TransactionEntity
         to = 3,
         MasrofyDatabase.Migration2To3RenameColumn::class
     ),
-
         AutoMigration(
             from = 3,
             to = 4,
             MasrofyDatabase.Migration3To4RenameColumn::class
-        )
+        ),AutoMigration(from = 5 , to = 6)
     ],
     exportSchema = true
 )

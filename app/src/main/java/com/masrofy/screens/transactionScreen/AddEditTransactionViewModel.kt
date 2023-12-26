@@ -9,7 +9,6 @@ import com.masrofy.Screens
 import com.masrofy.TRANSACTION_ID
 import com.masrofy.component.InputType
 import com.masrofy.coroutine.DispatcherProvider
-import com.masrofy.currency.CURRENCY_DATA
 import com.masrofy.data.entity.defaultAccount
 import com.masrofy.data.entity.toAccount
 import com.masrofy.model.TransactionType
@@ -212,8 +211,24 @@ class AddEditTransactionViewModel @Inject constructor(
                         }
                     }
 
-                    InputType.KEYBOARD -> Unit
-                    InputType.DATE_INPUT -> Unit
+
+                    else -> Unit
+                }
+
+            }
+
+            AddEditTransactionEvent.DecreaseDate -> {
+                _transactionDetailState.update {
+                    it.copy(
+                        date = it.date.minusDays(1)
+                    )
+                }
+            }
+            AddEditTransactionEvent.IncreaseDate -> {
+                _transactionDetailState.update {
+                    it.copy(
+                        date = it.date.plusDays(1)
+                    )
                 }
             }
         }
@@ -241,7 +256,9 @@ sealed class AddEditTransactionEvent {
     class DateTimeChanged(val date: LocalDateTime) : AddEditTransactionEvent()
     class CommentChange(val comment: String) : AddEditTransactionEvent()
     class NavigateTo(val inputType: InputType) : AddEditTransactionEvent()
-    object Save : AddEditTransactionEvent()
-    object Delete : AddEditTransactionEvent()
-    object ClosePage : AddEditTransactionEvent()
+    data object Save : AddEditTransactionEvent()
+    data object Delete : AddEditTransactionEvent()
+    data object ClosePage : AddEditTransactionEvent()
+    data object IncreaseDate:AddEditTransactionEvent()
+    data object DecreaseDate:AddEditTransactionEvent()
 }

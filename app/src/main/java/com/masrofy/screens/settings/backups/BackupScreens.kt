@@ -41,7 +41,11 @@ fun NavGraphBuilder.backupScreens(navController: NavController) {
                     navController.navigate((effect as BackupSettingEffect.OnNavigate).route)
                     backupViewModel.resetEffect()
                 }
+
                 null -> Unit
+                BackupSettingEffect.Close -> {
+                    navController.popBackStack()
+                }
             }
         }
         BackupScreens(backupStates = state,backupViewModel::onEvent)
@@ -58,7 +62,7 @@ fun BackupScreens(
         AppBar(
             translatableRes(R.string.back_up),
             {
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = { onEvent(BackupSettingEvent.Close) }) {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             }

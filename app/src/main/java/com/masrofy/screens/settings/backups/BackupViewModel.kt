@@ -28,6 +28,10 @@ class BackupViewModel @Inject constructor(
                     BackupSettingEffect.OnNavigate(backupSettingEvent.route)
                 }
             }
+
+            BackupSettingEvent.Close -> _effect.update {
+                BackupSettingEffect.Close
+            }
         }
     }
     fun resetEffect(){
@@ -47,7 +51,10 @@ class BackupViewModel @Inject constructor(
 }
 sealed class BackupSettingEffect{
     data class OnNavigate(val route:String):BackupSettingEffect()
+    data object Close:BackupSettingEffect()
+
 }
 sealed class BackupSettingEvent{
     data class Navigate(val route:String):BackupSettingEvent()
+    data object Close:BackupSettingEvent()
 }

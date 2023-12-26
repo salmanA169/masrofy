@@ -34,7 +34,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 class DriveBackupDataImpl(
-    private val eventListener: BackupEventListener,
+    eventListener: BackupEventListener,
     private val database: MasrofyDatabase
 ) : AbstractBackupData(eventListener), MediaHttpUploaderProgressListener,
     MediaHttpDownloaderProgressListener {
@@ -44,9 +44,9 @@ class DriveBackupDataImpl(
     private var drive: Drive? = null
     override suspend fun backup() {
         withContext(Dispatchers.IO) {
-            eventListener.onBackup()
+            backupEventListener.onBackup()
             val backupModel = async { getBackupModel(database) }
-            eventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
+            backupEventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
             val file = async { writeDateToFile(backupModel.await()) }
             fileSize = file.await().length()
 
@@ -67,14 +67,14 @@ class DriveBackupDataImpl(
     override suspend fun import(fileId: String) {
         withContext(Dispatchers.IO) {
             // TODO: move to work manager it cancel when back screen
-            eventListener.onImport()
+            backupEventListener.onImport()
             val getFromDrive = getFileById(drive!!, fileId)
             val downloader = getFromDrive.mediaHttpDownloader
             downloader.setProgressListener(this@DriveBackupDataImpl)
             val byteArrayOutputStream = ByteArrayOutputStream()
 
             currentDownloadProgressState = currentDownloadProgressState.copy(fileId = fileId)
-            eventListener.progressDownloadFile(currentDownloadProgressState.copy(progressState = ProgressState.INITIATION_STARTED, fileId = fileId))
+            backupEventListener.progressDownloadFile(currentDownloadProgressState.copy(progressState = ProgressState.INITIATION_STARTED, fileId = fileId))
             try {
 
                 getFromDrive.executeMediaAndDownloadTo(byteArrayOutputStream)
@@ -98,14 +98,14 @@ class DriveBackupDataImpl(
     override fun progressChanged(downloader: MediaHttpDownloader) {
         when(downloader.downloadState) {
             MediaHttpDownloader.DownloadState.NOT_STARTED -> {
-                eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.INITIATION_STARTED))
+                backupEventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.INITIATION_STARTED))
             }
             MediaHttpDownloader.DownloadState.MEDIA_IN_PROGRESS -> {
-                eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.STARTED, progress = downloader.progress ))
+                backupEventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.STARTED, progress = downloader.progress ))
             }
             MediaHttpDownloader.DownloadState.MEDIA_COMPLETE -> {
-                eventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.COMPLETE, progress = downloader.progress ))
-                eventListener.onFinish()
+                backupEventListener.progressDownloadFile(currentDownloadProgressState.copy(ProgressState.COMPLETE, progress = downloader.progress ))
+                backupEventListener.onFinish()
             }
         }
     }
@@ -118,7 +118,7 @@ class DriveBackupDataImpl(
             }
 
             MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS -> {
-                eventListener.progressBackup(
+                backupEventListener.progressBackup(
                     currentProgressState.copy(
                         ProgressState.STARTED,
                         allSize = fileSize,
@@ -129,23 +129,23 @@ class DriveBackupDataImpl(
             }
 
             MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
-                eventListener.progressBackup(
+                backupEventListener.progressBackup(
                     currentProgressState.copy(
                         ProgressState.COMPLETE,
                         progress = 100.0
                     )
                 )
-                eventListener.onFinish()
+                backupEventListener.onFinish()
             }
 
 
             MediaHttpUploader.UploadState.INITIATION_STARTED -> {
-                eventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
+                backupEventListener.progressBackup(currentProgressState.copy(ProgressState.INITIATION_STARTED))
 
             }
 
             MediaHttpUploader.UploadState.INITIATION_COMPLETE -> {
-                eventListener.progressBackup(
+                backupEventListener.progressBackup(
                     currentProgressState.copy(
                         ProgressState.STARTED,
                         allSize = fileSize

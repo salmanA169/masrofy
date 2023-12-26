@@ -1,31 +1,42 @@
 package com.masrofy.component
 
-import androidx.compose.foundation.focusable
+import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusTarget
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masrofy.R
 import com.masrofy.model.Account
-import com.masrofy.model.TransactionType
+import com.masrofy.ui.theme.LocalSurfaceColors
 import com.masrofy.ui.theme.MasrofyTheme
 
 // name it user input user,  input selection
@@ -61,64 +72,157 @@ class CategoryDataEntryImpl(private val category: String) : InputDataEntry {
 }
 
 enum class InputType {
-    ACCOUNT_INPUT, CATEGORY_INPUT, KEYBOARD, DATE_INPUT;
+    NONE, ACCOUNT_INPUT, CATEGORY_INPUT, AMOUNT, DATE_INPUT, NOTE;
 
-    fun getNextInput(): InputType? {
+    fun getNextInput(): InputType {
         return when (this) {
             ACCOUNT_INPUT -> CATEGORY_INPUT
-            CATEGORY_INPUT -> KEYBOARD
-            KEYBOARD -> KEYBOARD
-            DATE_INPUT -> null
+            CATEGORY_INPUT -> AMOUNT
+            AMOUNT -> DATE_INPUT
+            DATE_INPUT -> NOTE
+            NONE -> NONE
+            NOTE -> NONE
         }
     }
 }
 
 @Composable
-fun LabelEditTextBox(
+fun DateButton(
+    onIncrease: () -> Unit = {},
+    onDecrease: () -> Unit = {},
+    dateText: String,
+    onInputChange: (InputType) -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            ,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+
+        ) {
+        OutlinedButton(
+            onClick = { onDecrease() },
+            modifier = Modifier,
+            shape = RoundedCornerShape(50, 0, 0, 50),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        ) {
+            Icon(painterResource(id = R.drawable.remove_icon), contentDescription = "")
+        }
+        OutlinedButton(
+            onClick = { onInputChange(InputType.DATE_INPUT) },
+            modifier = Modifier,
+            shape = RoundedCornerShape(0, 0, 0, 0), colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        ) {
+            Text(text = dateText)
+        }
+        OutlinedButton(
+            onClick = { onIncrease() },
+            modifier = Modifier,
+            shape = RoundedCornerShape(0, 50, 50, 0),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        ) {
+            Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransactionCardInputItem(
     modifier: Modifier = Modifier,
     label: String,
     value: String,
-    inputType: InputType,
     onValueChange: (String) -> Unit = {},
+    isFocus: Boolean,
     onShowInput: (InputType) -> Unit = {},
+    inputType: InputType,
+    colorValue: Color = MaterialTheme.colorScheme.onSurface,
     keyboardType: KeyboardType = KeyboardType.Text,
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
+    val surfacesColors = LocalSurfaceColors.current
+    val requestFocus = remember {
+        FocusRequester()
+    }
 
-    OutlinedTextField(
-        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-        value = value,
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        singleLine = true, maxLines = 1,
-        readOnly = inputType != InputType.KEYBOARD,
-        visualTransformation = visualTransformation,
-        prefix = {
-            Text(
-                text = label,
-                fontSize = 15.sp,
-                style = MaterialTheme.typography.labelSmall
-            )
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .onFocusChanged {
-                if (it.isFocused) {
-                    onShowInput(inputType)
-                }
-            },
-        keyboardActions = KeyboardActions(onDone = {
+    LaunchedEffect(key1 = isFocus) {
+        if (isFocus) {
+            if (inputType == InputType.AMOUNT || inputType == InputType.NOTE) {
+                requestFocus.requestFocus()
+            }
+        }
+    }
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFocus) MaterialTheme.colorScheme.primaryContainer else surfacesColors.surfaceContainerHighest,
+        ),
+        border = if (isFocus) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onPrimaryContainer
+        ) else null,
+        onClick = {
             onShowInput(inputType)
-        })
-    )
 
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = label, fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            BasicTextField(
+                value = value,
+                onValueChange,
+                readOnly = inputType != InputType.AMOUNT && inputType != InputType.NOTE,
+                textStyle = TextStyle.Default.copy(color = colorValue, fontSize = 17.sp),
+                visualTransformation = visualTransformation,
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                modifier = Modifier.focusRequester(requestFocus)
+            )
+        }
+    }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 fun Preview2() {
     MasrofyTheme(dynamicColor = false) {
-        LabelEditTextBox(label = "Date", value = "12.2", inputType = InputType.KEYBOARD)
+        TransactionCardInputItem(
+            label = "Account",
+            value = "12345",
+            isFocus = false,
+            inputType = InputType.DATE_INPUT
+        )
 
+    }
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+fun Preview23() {
+    MasrofyTheme(dynamicColor = false) {
+        DateButton(dateText = "2002-07-10")
     }
 }

@@ -44,6 +44,43 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:606677120108:android:c891a3398ed2d30a0d5449",
+        "android_client_info": {
+          "package_name": "com.masrofy.appReleaseCenter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "606677120108-ar1jhqf1penbkdmuk1nud9vhiedbp0in.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.masrofy.appReleaseCenter",
+            "certificate_hash": "8c381fc93ef1a773412cb33088a8b3d28f96e3bb"
+          }
+        },
+        {
+          "client_id": "606677120108-bh0fgmhrf66okjfkg3lr657p9re9iutl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKrryKm70-sp-ZGIPAvHmMC7Lc0ILGAJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "606677120108-bh0fgmhrf66okjfkg3lr657p9re9iutl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:606677120108:android:ba00fbe690fb9e920d5449",
         "android_client_info": {
           "package_name": "com.masrofy.debug"

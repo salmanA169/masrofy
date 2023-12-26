@@ -205,7 +205,6 @@ fun CurrencyList(
         val size = currencies.size
         itemsIndexed(
             items = currencies,
-            // TODO: fix it very important
             key = { index, item -> item.hashCode() + Random.nextInt()  }
         ) { index, item ->
             CurrencyItemCell(

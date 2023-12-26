@@ -29,6 +29,10 @@ class DeviceBackupViewModel @Inject constructor(
     private val _effect = MutableStateFlow<DeviceBackupEffect?>(null)
     val effect = _effect.asStateFlow()
 
+    override fun onError(message: String) {
+
+    }
+
     override fun onBackup() {
     }
 
@@ -74,7 +78,9 @@ class DeviceBackupViewModel @Inject constructor(
             }
 
             DeviceBackupEvent.Close -> {
-
+                _effect.update {
+                    DeviceBackupEffect.Close
+                }
             }
         }
     }

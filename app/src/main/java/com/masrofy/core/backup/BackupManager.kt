@@ -19,11 +19,13 @@ class BackupManager(
             // TODO: improve later
             scope.launch(dispatcherProvider.io + CoroutineExceptionHandler { coroutineContext, throwable ->
                 Log.e("BackupManager", "startBackup: unKnown error", throwable)
+                abstractBackupData.backupEventListener.onError("called with error")
             }) {
                 abstractBackupData.backup()
             }
         }catch (e:Exception){
             Log.e("BackupManager", "startBackup: unKnown error", e)
+            abstractBackupData.backupEventListener.onError("called with error")
         }
     }
     fun startImport(abstractBackupData: AbstractBackupData,file: String){
@@ -33,7 +35,6 @@ class BackupManager(
             }
         }catch (e:Exception){
             Log.e("BackupManager", "startBackup: unKnown error", e)
-
         }
     }
     suspend fun getImportFiles(abstractBackupData: AbstractBackupData):List<BackUpDataFileInfo>{
