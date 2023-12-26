@@ -3,6 +3,7 @@ package com.masrofy.screens.transactionScreen
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -25,9 +26,6 @@ import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -66,7 +64,6 @@ import com.masrofy.utils.formatShortDate
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.*
 
 fun NavGraphBuilder.transactionScreenNavigation(
     navController: NavController,
@@ -125,9 +122,22 @@ fun TransactionScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
+
     val dateState = rememberDatePickerState()
     var currentInput by remember {
         mutableStateOf<InputType>(InputType.ACCOUNT_INPUT)
+    }
+    BackHandler(true) {
+        if (currentInput != InputType.NONE){
+            currentInput = InputType.NONE
+        }else{
+            onEvent(AddEditTransactionEvent.ClosePage)
+        }
+    }
+    val rememberOnNext = remember{
+        {
+            currentInput = currentInput.getNextInput()
+        }
     }
     val localDensity = LocalDensity.current
     var currentPaddingInputs by remember {
@@ -135,12 +145,12 @@ fun TransactionScreen(
     }
     val rememberInput = remember {
         { inputType: InputType ->
-            if (currentInput == InputType.KEYBOARD && inputType == InputType.KEYBOARD) {
+            if (inputType == InputType.NONE) {
                 focusManager.clearFocus()
                 currentPaddingInputs = 0.dp
-                currentInput = InputType.NONE
             } else {
                 currentInput = inputType
+                focusManager.clearFocus()
             }
         }
     }
@@ -162,7 +172,6 @@ fun TransactionScreen(
             }
         }, actions = {
             if (transactionState.isEdit) {
-
                 TextButton(
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     onClick = {
@@ -220,7 +229,7 @@ fun TransactionScreen(
             }
 
             AnimatedVisibility(
-                visible =  currentInput != InputType.KEYBOARD,
+                visible =  currentInput != InputType.AMOUNT,
                 modifier = Modifier.align(BottomStart),
                 enter = fadeIn(animationSpec = tween(easing = LinearOutSlowInEasing)),
                 exit = fadeOut(animationSpec = tween(easing = LinearOutSlowInEasing))
@@ -262,7 +271,7 @@ fun TransactionScreen(
                             transactionState.transactionCategories
                         ) {
                             when (currentInput) {
-                                InputType.KEYBOARD -> null
+                                InputType.AMOUNT -> null
                                 InputType.ACCOUNT_INPUT -> InputData(
                                     "Account",
                                     transactionState.accounts.map { AccountDataEntryImplement(it) },
@@ -281,9 +290,7 @@ fun TransactionScreen(
                                         InputType.CATEGORY_INPUT
                                     )
                                 }
-
-                                null -> null
-                                InputType.NONE -> null
+                                else -> null
                             }
                         }
                         if (inputData != null) {
@@ -299,7 +306,7 @@ fun TransactionScreen(
                                 currentInput = InputType.NONE
                                 currentPaddingInputs = 0.dp
                                 focusManager.clearFocus()
-                            }, focusManager = focusManager
+                            }, onNext = rememberOnNext
                             )
                         }
                     }
@@ -321,7 +328,7 @@ fun InputsPreview() {
                 "Category",
                 data = list.map { it.nameCategory }.map { CategoryDataEntryImpl(it) },
                 InputType.CATEGORY_INPUT
-            )
+            ), onNext = {}
         )
     }
 }
@@ -334,7 +341,7 @@ fun Inputs(
     inputData: InputData,
     onEvent: (AddEditTransactionEvent) -> Unit = {},
     onHide: () -> Unit = {},
-    focusManager: FocusManager = LocalFocusManager.current,
+    onNext : () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -388,8 +395,9 @@ fun Inputs(
                         .height(70.dp)
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         .clickable {
+                            onNext()
                             when (inputData.inputType) {
-                                InputType.KEYBOARD -> Unit
+                                InputType.AMOUNT -> Unit
                                 InputType.ACCOUNT_INPUT -> {
                                     it
                                         .getTagId()
@@ -405,7 +413,7 @@ fun Inputs(
 
                                 else -> Unit
                             }
-                            focusManager.moveFocus(FocusDirection.Down)
+
                         }
                 ) {
                     Text(
@@ -433,12 +441,17 @@ fun InputsTransactions(
     transactionType: TransactionType
 ) {
 
-    DateButton(
-        onInputChange = onInputChange,
-        onIncrease = {},
-        onDecrease = {},
-        dateText = currentDateTime
-    )
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "Date")
+        DateButton(
+            onInputChange = onInputChange,
+            onIncrease = {onEvent(AddEditTransactionEvent.IncreaseDate)},
+            onDecrease = {onEvent(AddEditTransactionEvent.DecreaseDate)},
+            dateText = currentDateTime
+        )
+    }
     Spacer(modifier = Modifier.height(8.dp))
     TransactionCardInputItem(
         label = stringResource(id = R.string.account),
@@ -462,14 +475,14 @@ fun InputsTransactions(
         modifier = Modifier.testTag("edit-amount"),
         label = stringResource(id = R.string.amount),
         value = currentAmount,
-        inputType = InputType.KEYBOARD,
+        inputType = InputType.AMOUNT,
         onShowInput = onInputChange,
         onValueChange = { onEvent(AddEditTransactionEvent.AmountChange(it)) },
         keyboardType = KeyboardType.Number,
         visualTransformation = if (currecny != null) CurrencyAmountInputVisualTransformation(
             currecny
         ) else VisualTransformation.None,
-        isFocus = currentInputType == InputType.KEYBOARD,
+        isFocus = currentInputType == InputType.AMOUNT,
         colorValue = transactionType.getColor()
     )
     Spacer(modifier = Modifier.height(8.dp))
@@ -477,12 +490,12 @@ fun InputsTransactions(
     TransactionCardInputItem(
         label = stringResource(id = R.string.comment),
         value = currentNote,
-        inputType = InputType.KEYBOARD,
+        inputType = InputType.NOTE,
         onShowInput = onInputChange,
         onValueChange = {
             onEvent(AddEditTransactionEvent.CommentChange(it))
         },
-        isFocus = currentInputType == InputType.KEYBOARD
+        isFocus = currentInputType == InputType.NOTE
     )
 }
 

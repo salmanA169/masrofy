@@ -59,6 +59,10 @@ class AutomatedBackupManager @Inject constructor(
                     val getDrive = googleSignIn.getDrive()
                     if (getDrive != null) {
                         val drive = DriveBackupDataImpl(object : BackupEventListener{
+                            override fun onError(message: String) {
+                                // later
+                            }
+
                             override fun onBackup() {
 
                             }

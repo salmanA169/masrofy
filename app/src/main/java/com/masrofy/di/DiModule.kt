@@ -22,7 +22,6 @@ object DiModule {
         @ApplicationContext context: Context,
         roomCallback: RoomCallback
     ) = Room.databaseBuilder(context, MasrofyDatabase::class.java, Constants.DATABASE_NAME)
-        .fallbackToDestructiveMigration()
         .addCallback(roomCallback).build()
 
     @Provides

@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.OutputStream
 
-abstract class AbstractBackupData(backupEventListener: BackupEventListener) {
+abstract class AbstractBackupData(val backupEventListener: BackupEventListener) {
 
     companion object{
         val defaultEventListener = object :BackupEventListener{
@@ -30,6 +30,10 @@ abstract class AbstractBackupData(backupEventListener: BackupEventListener) {
             }
 
             override fun progressDownloadFile(progressState: ProgressBackupInfo) {
+            }
+
+            override fun onError(message: String) {
+
             }
         }
     }

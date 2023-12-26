@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +47,11 @@ fun NavGraphBuilder.settingsDest(navController: NavController) {
                     navController.navigate((effect as SettingsEffect.Navigate).route)
                     settingsViewModel.resetEffect()
                 }
+
                 null -> {}
+                SettingsEffect.Close -> {
+                    navController.popBackStack()
+                }
             }
         }
         SettingsScreen(state, settingsViewModel::onEvent)
@@ -60,10 +65,12 @@ fun SettingsScreen(state: SettingsState, onEvent: (SettingsEvent) -> Unit) {
             AppBar(
                 translatableRes(R.string.settings),
                 navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = ""
-                    )
+                    IconButton(onClick = { onEvent(SettingsEvent.Close) }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = ""
+                        )
+                    }
                 },
             )
         }

@@ -71,6 +71,10 @@ class DriveBackupViewModel @Inject constructor(
         }
     }
 
+    override fun onError(message: String) {
+        Log.d("DriveBackupViewModel", "onError: $message")
+    }
+
     override fun onBackup() {
         _state.update {
             it.copy(

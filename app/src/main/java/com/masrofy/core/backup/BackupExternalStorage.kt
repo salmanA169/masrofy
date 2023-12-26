@@ -19,9 +19,10 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import kotlin.math.log
 
 class BackupExternalStorage(
-    private val backupEventListener: BackupEventListener,
+     backupEventListener: BackupEventListener,
     private val context: Context,
     private val database: MasrofyDatabase
 ) : AbstractBackupData(backupEventListener) {
@@ -42,6 +43,7 @@ class BackupExternalStorage(
                 put(MediaStore.Downloads.MIME_TYPE, "application/json")
                 put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
             }
+            Log.d("BackupDevice",backupModel.await().toString())
             try {
                 val getFile = writeDateToFile(backupModel.await())
                 contentResolver.insert(collection, contentValues)?.also {

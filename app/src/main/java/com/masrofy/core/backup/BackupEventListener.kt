@@ -6,6 +6,7 @@ interface BackupEventListener {
     fun onFinish()
     fun progressBackup(progressBackupInfo: ProgressBackupInfo)
     fun progressDownloadFile(progressState: ProgressBackupInfo)
+    fun onError(message:String)
 }
 
 data class ProgressBackupInfo(

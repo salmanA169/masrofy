@@ -52,6 +52,14 @@ fun NavGraphBuilder.deviceBackupDest(navController: NavController) {
     composable(Screens.DeviceBackup.route) {
         val deviceViewModel = hiltViewModel<DeviceBackupViewModel>()
         val state by deviceViewModel.state.collectAsStateWithLifecycle()
+        val effect by deviceViewModel.effect.collectAsStateWithLifecycle()
+        
+        LaunchedEffect(key1 = effect ){
+            when(effect){
+                DeviceBackupEffect.Close -> {navController.popBackStack()}
+                null -> Unit
+            }
+        }
         DeviceBackupScreen(state, onEvent = deviceViewModel::onEvent)
     }
 }
