@@ -17,7 +17,6 @@ import java.time.LocalDate
 data class MainScreenState(
     val balance:BalanceManager = BalanceManager(),
     val transactions : List<Transaction> = listOf(),
-    val topTransactions:List<TopTransactions> = listOf(),
     val month :String = "",
     val weeklyTransactions:List<WeeklyTransactions> = emptyList(),
     val monthlyTransactions :List<MonthlyTransaction> = listOf(),

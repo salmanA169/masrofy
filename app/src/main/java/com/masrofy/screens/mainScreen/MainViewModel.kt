@@ -1,5 +1,6 @@
 package com.masrofy.screens.mainScreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masrofy.coroutine.DispatcherProvider
@@ -7,6 +8,7 @@ import com.masrofy.data.entity.getCategoryWithAmount
 import com.masrofy.data.entity.toAccount
 import com.masrofy.mapper.toTransactions
 import com.masrofy.model.BalanceManager
+import com.masrofy.model.Transaction
 import com.masrofy.model.TransactionType
 import com.masrofy.model.calculateTopTransactions
 import com.masrofy.repository.AccountRepository
@@ -22,12 +24,13 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.math.log
 
 sealed class MainScreenEventUI {
     class NavigateTransactionWithId(val transactionId: Int) : MainScreenEventUI()
-    object NavigateToTopTransaction:MainScreenEventUI()
-    object NavigateToTransactionsDetails:MainScreenEventUI()
-    class OnTransactionTypeMonthlyChange(val transactionType: TransactionType):MainScreenEventUI()
+    object NavigateToTopTransaction : MainScreenEventUI()
+    object NavigateToTransactionsDetails : MainScreenEventUI()
+    class OnTransactionTypeMonthlyChange(val transactionType: TransactionType) : MainScreenEventUI()
 }
 
 @HiltViewModel
@@ -44,8 +47,9 @@ class MainViewModel @Inject constructor(
 
     private val _effect = MutableStateFlow<MainScreenEvent>(MainScreenEvent.None)
     val effect = _effect.asStateFlow()
+    private var transactions = listOf<Transaction>()
     fun onEvent(event: MainScreenEventUI) {
-        when(event){
+        when (event) {
             is MainScreenEventUI.NavigateTransactionWithId -> {
                 _effect.update {
                     MainScreenEvent.OnNavigateTransactionWithId(event.transactionId)
@@ -67,9 +71,9 @@ class MainViewModel @Inject constructor(
 
             is MainScreenEventUI.OnTransactionTypeMonthlyChange -> {
 
-                if (event.transactionType != currentTransactionTypeMonthly){
-                    val getTransactions = _state.value.transactions
-                    // TODO: fix here issue
+                if (event.transactionType != currentTransactionTypeMonthly) {
+                    val getTransactions = transactions
+
                     _state.update {
                         it.copy(
                             monthlyTransactions = getTransactions.getMonthlyTransactions(event.transactionType)
@@ -83,11 +87,12 @@ class MainViewModel @Inject constructor(
 
     }
 
-    fun resetEffect(){
+    fun resetEffect() {
         _effect.update {
             MainScreenEvent.None
         }
     }
+
     init {
         viewModelScope.launch(dispatcherProvider.io) {
             accountRepository.getAccountsWithTransactions().collect {
@@ -103,7 +108,7 @@ class MainViewModel @Inject constructor(
                     if (transaction.transactionType == TransactionType.INCOME) totalIncome += transaction.amount else totalExpense += transaction.amount
                 }
                 val toTransactions = transactions.toTransactions()
-                val categoryWithAmount = toTransactions.getCategoryWithAmount()
+                this@MainViewModel.transactions = toTransactions
                 _state.update {
                     it.copy(
                         balance = BalanceManager(
@@ -111,15 +116,13 @@ class MainViewModel @Inject constructor(
                             accountCurrency.formatAsDisplayNormalize(totalIncome.toBigDecimal()),
                             accountCurrency.formatAsDisplayNormalize(totalExpense.toBigDecimal())
                         ),
-                        transactions = transactions.toTransactions()
+                        transactions = toTransactions
                             .sortedByDescending { it.createdAt }.take(10),
                         month = currentDateFlow.month.name,
-                        topTransactions = calculateTopTransactions(
-                            totalValue,
-                            categoryWithAmount,accountCurrency
-                        ).sortedByDescending { it.percent }.take(5),
                         weeklyTransactions = toTransactions.getWeeklyTransaction(),
-                        monthlyTransactions = toTransactions.getMonthlyTransactions(currentTransactionTypeMonthly),
+                        monthlyTransactions = toTransactions.getMonthlyTransactions(
+                            currentTransactionTypeMonthly
+                        ),
                         currency = accountCurrency
                     )
                 }
@@ -131,8 +134,8 @@ class MainViewModel @Inject constructor(
 
 sealed class MainScreenEvent {
     class OnNavigateTransactionWithId(val transactionId: Int) : MainScreenEvent()
-    object OnNavigateTopTransaction:MainScreenEvent()
-    object OnNavigateTransactionDetails:MainScreenEvent()
+    object OnNavigateTopTransaction : MainScreenEvent()
+    object OnNavigateTransactionDetails : MainScreenEvent()
     object None : MainScreenEvent()
 
 }

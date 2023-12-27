@@ -63,10 +63,11 @@ fun LineChart(
             this.textColor = colorOnBackground.toArgb()
             valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                 override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                    Log.d("Horizontal", "getAxisLabel: $value")
                     return resource.getString(data.transactions[value.toInt()].monthOfYear.localizeToString())
                 }
             }
-        labelCount = 12
+        labelCount = 11
         }
         it.axisRight.apply {
             isEnabled = false
