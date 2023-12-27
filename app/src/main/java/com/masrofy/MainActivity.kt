@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,6 +60,11 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         viewModel.checkCategories()
         viewModel.checkOnboarding()
+        installSplashScreen().apply { 
+            this.setKeepOnScreenCondition{
+                !viewModel.isReady
+            }
+        }
         val permissionLauncher = registerForActivityResult(
              ActivityResultContracts.RequestMultiplePermissions(),
         ){

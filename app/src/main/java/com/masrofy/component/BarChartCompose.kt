@@ -1,5 +1,6 @@
 package com.masrofy.component
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -39,6 +40,7 @@ fun BarChartCompose(
         val mapValues = data.weekly.mapIndexed { index, monthlyTransaction ->
             BarEntry(index.toFloat(), monthlyTransaction.amount)
         }
+        Log.d("BarChar", "BarChartCompose: called $data")
         val barDataSet = BarDataSet(mapValues, "www").apply {
             isHighlightEnabled = false
 
@@ -63,7 +65,7 @@ fun BarChartCompose(
                     return resource.getString(data.weekly[value.toInt()].nameOfDay.localizeToString())
                 }
             }
-            labelCount = 12
+            labelCount = 6
         }
         it.axisRight.apply {
             isEnabled = false

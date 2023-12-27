@@ -1,5 +1,6 @@
 package com.masrofy
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
@@ -18,6 +19,7 @@ import com.masrofy.repository.category_repository.CategoryRepository
 import com.masrofy.utils.getDarkModeFlow
 import com.masrofy.utils.getOnboardingIsFirstTime
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -39,6 +41,7 @@ class MainViewModel @Inject constructor(
     private val _showOnboarding = MutableStateFlow<MainEffect?>(null)
     val showOnboarding = _showOnboarding.asStateFlow()
 
+    var isReady = false
     val isDarkMode = dataStore.getDarkModeFlow()
     private fun checkIfDefaultAccount() {
         viewModelScope.launch(dispatcherProvider.io) {
@@ -48,12 +51,12 @@ class MainViewModel @Inject constructor(
                 transactionRepository.upsertAccount(defaultAccount.toAccount())
             }
 
-
         }
 
     }
 
     init {
+        Log.d("MainViewModel", "called init: called")
         checkIfDefaultAccount()
     }
 
@@ -106,6 +109,8 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
+            delay(1000)
+            isReady = true
         }
     }
 

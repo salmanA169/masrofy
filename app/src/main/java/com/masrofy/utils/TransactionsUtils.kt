@@ -1,5 +1,6 @@
 package com.masrofy.utils
 
+import android.util.Log
 import com.masrofy.currency.Currency
 import com.masrofy.data.entity.TransactionEntity
 import com.masrofy.model.Transaction
@@ -26,24 +27,29 @@ fun generateTransactions(): List<Transaction1> {
             LocalDateTime.of(LocalDate.of(2023, 6, randomDays.random()), LocalTime.now()),
             it.toBigDecimal(),
             category = "FOOD",
-            currency = Currency("USD","US")
+            currency = Currency("USD", "US")
         )
     }
 }
 
-fun List<Transaction>.getWeeklyTransaction():List<WeeklyTransactions>{
+fun List<Transaction>.getWeeklyTransaction(): List<WeeklyTransactions> {
+
     val firstDayOfWeek = getFirstDayOfWeek()
     val lastDayOFWeek = getLastDayOfWeek()
+    val filter = this@getWeeklyTransaction.filter { transactions ->
+        transactions.createdAt.toLocalDate().isBetweenDates(firstDayOfWeek, lastDayOFWeek)
+    }
+    if (filter.isEmpty()){
+        return emptyList()
+    }
     return buildList<WeeklyTransactions> {
         DayOfWeek.values().forEach {
-            add(WeeklyTransactions(it,0f))
+            add(WeeklyTransactions(it, 0f))
         }
-        this@getWeeklyTransaction.filter {transactions->
-            transactions.createdAt.toLocalDate().isBetweenDates(firstDayOfWeek,lastDayOFWeek)
-        }.onEach {
+        filter.onEach {
             val getDays = it.createdAt.dayOfWeek
             val getCurrentDay = find { it.nameOfDay == getDays }
-            if (getCurrentDay != null ){
+            if (getCurrentDay != null) {
                 val getIndex = indexOfFirst { it.nameOfDay == getCurrentDay.nameOfDay }
                 val getElement = get(getIndex)
                 getElement.apply {
@@ -51,32 +57,27 @@ fun List<Transaction>.getWeeklyTransaction():List<WeeklyTransactions>{
                 }
             }
         }
-    }.sortedWith(comparator = compareBy { it.nameOfDay.sortIndex()})
+    }.sortedWith(comparator = compareBy { it.nameOfDay.sortIndex() })
 }
 
-fun List<Transaction>.getMonthlyTransactions(transactionType: TransactionType = TransactionType.EXPENSE):List<MonthlyTransaction>{
+fun List<Transaction>.getMonthlyTransactions(transactionType: TransactionType = TransactionType.EXPENSE): List<MonthlyTransaction> {
     val currentDate = LocalDateTime.now()
-    if (isEmpty()){
+    if (isEmpty()) {
         return emptyList()
     }
-    return buildList {
-        Month.values().forEach {
-            add(MonthlyTransaction(it,0f, Currency("USD","US")))
-        }
-        this@getMonthlyTransactions.filter {transactions->
-            transactions.createdAt.year == currentDate.year && transactions.transactionType == transactionType
-        }.forEach {transactoin->
-            val getIndex = indexOfFirst { it.monthOfYear == transactoin.createdAt.month }
-            get(getIndex).apply {
-                amount += transactoin.amount.toFloat()
-                currency = transactoin.currency
-            }
-
-        }
+    val filter = this@getMonthlyTransactions.filter { transactions ->
+        transactions.createdAt.year == currentDate.year && transactions.transactionType == transactionType
     }
+    val set = Month.entries.toTypedArray().associateWith { month ->
+        val getAmountMonth = filter.filter { it.createdAt.month == month }
+        getAmountMonth.sumOf { it.amount }
+    }
+    Log.d("TransactionUtil", "getMonthlyTransactions: $set")
+    return set.map { MonthlyTransaction(it.key, it.value.toFloat(), Currency.DEFAULT_CURRENCY) }
 }
-fun DayOfWeek.sortIndex():Int{
-    return when(this){
+
+fun DayOfWeek.sortIndex(): Int {
+    return when (this) {
         DayOfWeek.MONDAY -> 3
         DayOfWeek.TUESDAY -> 4
         DayOfWeek.WEDNESDAY -> 5
@@ -86,8 +87,9 @@ fun DayOfWeek.sortIndex():Int{
         DayOfWeek.SUNDAY -> 2
     }
 }
-fun Month.sortIndex():Int{
-    return when(this){
+
+fun Month.sortIndex(): Int {
+    return when (this) {
         Month.JANUARY -> 0
         Month.FEBRUARY -> 1
         Month.MARCH -> 2
@@ -102,32 +104,35 @@ fun Month.sortIndex():Int{
         Month.DECEMBER -> 11
     }
 }
-private fun getFirstDayOfWeek():LocalDate{
+
+private fun getFirstDayOfWeek(): LocalDate {
     var currentDay = LocalDate.now()
-    when(currentDay.dayOfWeek!!){
-        DayOfWeek.MONDAY -> currentDay=currentDay.minusDays(2)
-        DayOfWeek.TUESDAY -> currentDay=currentDay.minusDays(3)
-        DayOfWeek.WEDNESDAY -> currentDay=currentDay.minusDays(4)
-        DayOfWeek.THURSDAY -> currentDay=currentDay.minusDays(5)
-        DayOfWeek.FRIDAY -> currentDay=currentDay.minusDays(6)
+    when (currentDay.dayOfWeek!!) {
+        DayOfWeek.MONDAY -> currentDay = currentDay.minusDays(2)
+        DayOfWeek.TUESDAY -> currentDay = currentDay.minusDays(3)
+        DayOfWeek.WEDNESDAY -> currentDay = currentDay.minusDays(4)
+        DayOfWeek.THURSDAY -> currentDay = currentDay.minusDays(5)
+        DayOfWeek.FRIDAY -> currentDay = currentDay.minusDays(6)
         DayOfWeek.SATURDAY -> Unit
-        DayOfWeek.SUNDAY -> currentDay=currentDay.minusDays(1)
+        DayOfWeek.SUNDAY -> currentDay = currentDay.minusDays(1)
     }
     return currentDay
 }
-private fun getLastDayOfWeek():LocalDate{
+
+private fun getLastDayOfWeek(): LocalDate {
     var currentDay = LocalDate.now()
-    when(currentDay.dayOfWeek!!){
-        DayOfWeek.MONDAY -> currentDay=currentDay.plusDays(4)
-        DayOfWeek.TUESDAY -> currentDay=currentDay.plusDays(3)
-        DayOfWeek.WEDNESDAY -> currentDay=currentDay.plusDays(2)
-        DayOfWeek.THURSDAY -> currentDay=currentDay.plusDays(1)
+    when (currentDay.dayOfWeek!!) {
+        DayOfWeek.MONDAY -> currentDay = currentDay.plusDays(4)
+        DayOfWeek.TUESDAY -> currentDay = currentDay.plusDays(3)
+        DayOfWeek.WEDNESDAY -> currentDay = currentDay.plusDays(2)
+        DayOfWeek.THURSDAY -> currentDay = currentDay.plusDays(1)
         DayOfWeek.FRIDAY -> Unit
-        DayOfWeek.SATURDAY -> currentDay=currentDay.plusDays(6)
-        DayOfWeek.SUNDAY -> currentDay=currentDay.plusDays(5)
+        DayOfWeek.SATURDAY -> currentDay = currentDay.plusDays(6)
+        DayOfWeek.SUNDAY -> currentDay = currentDay.plusDays(5)
     }
     return currentDay
 }
+
 fun generateTransactionsEntity(): List<TransactionEntity> {
     return (0..5).map {
 
