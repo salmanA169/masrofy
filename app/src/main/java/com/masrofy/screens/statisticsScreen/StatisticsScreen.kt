@@ -78,7 +78,7 @@ fun StatisticScreen(
 
         ) {
             var selectedIndex by remember {
-                mutableStateOf(0)
+                mutableIntStateOf(0)
             }
             TabRow(selectedTabIndex = selectedIndex) {
                 StatisticType.values().forEachIndexed { index, item ->
