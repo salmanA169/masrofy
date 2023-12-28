@@ -39,8 +39,8 @@ android {
         applicationId "com.masrofy"
         minSdk 28
         targetSdk 34
-        versionCode 12
-        versionName "4.0.0"
+        versionCode 13
+        versionName "4.0.1"
 
             kapt {
                 arguments {
@@ -61,6 +61,10 @@ android {
     }
     kapt {
         correctErrorTypes true
+    }
+    sourceSets {
+        androidTest.assets.srcDirs +=
+                files("$projectDir/schemas".toString())
     }
     buildTypes {
         release {
@@ -140,7 +144,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
 
     testImplementation "androidx.room:room-testing:$room_version"
-
+    androidTestImplementation "androidx.room:room-testing:2.6.0"
     // hilt
     implementation "com.google.dagger:hilt-android:2.48.1"
     kapt "com.google.dagger:hilt-compiler:2.48.1"

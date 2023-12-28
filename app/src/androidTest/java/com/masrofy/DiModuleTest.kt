@@ -8,22 +8,13 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.masrofy.data.database.MasrofyDatabase
 import com.masrofy.data.database.RoomCallback
-import com.masrofy.utils.Constants
-import com.masrofy.utils.datastore
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineExceptionHandler
-import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.createTestCoroutineScope
 import javax.inject.Singleton
 
 @Module
@@ -45,7 +36,7 @@ object DiModule {
 
     @Provides
     @Singleton
-    fun provideDatastore(@ApplicationContext context: Context) :DataStore<Preferences>{
+    fun provideDatastore(@ApplicationContext context: Context): DataStore<Preferences> {
         println("init data store ")
         return PreferenceDataStoreFactory.create(
             scope = TestScope(UnconfinedTestDispatcher()),

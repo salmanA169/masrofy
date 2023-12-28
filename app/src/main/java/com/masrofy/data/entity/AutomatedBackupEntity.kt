@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.masrofy.screens.settings.backups.drive_backup.PeriodSchedule
 import java.time.LocalDateTime
 
-@Entity
+@Entity()
 data class AutomatedBackupEntity(
     @PrimaryKey
     val id:String,

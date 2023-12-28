@@ -18,6 +18,22 @@
           <timeTargetWasSelectedWithDropDown value="2023-12-26T19:09:00.634048500Z" />
         </State>
       </entry>
+      <entry key="testMigration5To6()">
+        <State>
+          <targetSelectedWithDropDown>
+            <Target>
+              <type value="QUICK_BOOT_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="VIRTUAL_DEVICE_PATH" />
+                  <value value="C:\Users\kd\.android\avd\Pixel_7_Pro_API_33.avd" />
+                </Key>
+              </deviceKey>
+            </Target>
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2023-12-28T20:47:30.554385200Z" />
+        </State>
+      </entry>
     </value>
   </component>
 </project>

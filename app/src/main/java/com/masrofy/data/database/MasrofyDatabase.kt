@@ -4,6 +4,7 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.DeleteColumn
 import androidx.room.RenameColumn
+import androidx.room.RenameTable
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
@@ -30,7 +31,7 @@ import com.masrofy.data.entity.TransactionEntity
             from = 3,
             to = 4,
             MasrofyDatabase.Migration3To4RenameColumn::class
-        ),AutoMigration(from = 5 , to = 6)
+        ),AutoMigration(from = 5 , to = 6,MasrofyDatabase.Migration5To6::class)
     ],
     exportSchema = true
 )
@@ -48,6 +49,9 @@ abstract class MasrofyDatabase : RoomDatabase() {
     @DeleteColumn("AccountEntity", columnName = "countryCode")
     class Migration3To4RenameColumn() : AutoMigrationSpec
 
+
+    @RenameTable(fromTableName = "AutomatedBackupEntity" , toTableName = "AutomatedBackup")
+    class Migration5To6():AutoMigrationSpec
 }
 
 
