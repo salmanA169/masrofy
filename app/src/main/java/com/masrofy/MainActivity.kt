@@ -60,11 +60,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         viewModel.checkCategories()
         viewModel.checkOnboarding()
-        installSplashScreen().apply { 
-            this.setKeepOnScreenCondition{
-                !viewModel.isReady
-            }
-        }
+        installSplashScreen()
         val permissionLauncher = registerForActivityResult(
              ActivityResultContracts.RequestMultiplePermissions(),
         ){

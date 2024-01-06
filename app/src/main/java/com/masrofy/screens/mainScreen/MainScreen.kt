@@ -68,6 +68,7 @@ import com.masrofy.MainActivity
 import com.masrofy.R
 import com.masrofy.Screens
 import com.masrofy.component.AdmobCompose
+import com.masrofy.component.loading
 import com.masrofy.model.BalanceManager
 import com.masrofy.model.ColorTransactions
 import com.masrofy.model.Transaction
@@ -249,12 +250,14 @@ fun PreviewTransactionsd() {
 fun Transactions(
     modifier: Modifier = Modifier,
     transactions: List<Transaction>,
-    onEvent: (MainScreenEventUI) -> Unit
+    onEvent: (MainScreenEventUI) -> Unit = {},
+    progressMainScreen: ProgressMainScreen = ProgressMainScreen.LOADING
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .loading(progressMainScreen == ProgressMainScreen.LOADING)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -339,7 +342,8 @@ fun NoTransactionsImage(modifier: Modifier = Modifier) {
 fun OverviewScreens(
     modifier: Modifier = Modifier,
     overViews: List<OverviewInterface<*>> = listOf(),
-    onEvent: (MainScreenEventUI) -> Unit = {}
+    onEvent: (MainScreenEventUI) -> Unit = {},
+    progressMainScreen: ProgressMainScreen
 ) {
     val pagerState = rememberPagerState() { overViews.size }
 
@@ -349,7 +353,7 @@ fun OverviewScreens(
             .background(
                 SurfaceColor.surfaces.surfaceContainerHigh,
                 RoundedCornerShape(6.dp)
-            )
+            ).loading(progressMainScreen == ProgressMainScreen.LOADING)
     ) {
         HorizontalPager(
             state = pagerState, modifier = Modifier
@@ -534,7 +538,7 @@ fun MainScreen(
             currentExpense = mainState.balance.totalExpense
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Transactions(transactions = mainState.transactions, onEvent = onEvent)
+        Transactions(transactions = mainState.transactions, onEvent = onEvent, progressMainScreen = mainState.progressMainScreen)
         Spacer(modifier = Modifier.height(16.dp))
         OverviewScreens(
             overViews = listOf(
@@ -554,7 +558,7 @@ fun MainScreen(
                     onEventUiChange = onEvent
                 }
             ),
-            onEvent = onEvent
+            progressMainScreen = mainState.progressMainScreen
         )
         Spacer(modifier = Modifier.height(16.dp))
 //        AdmobCompose()

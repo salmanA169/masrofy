@@ -17,6 +17,7 @@ import com.masrofy.utils.formatAsDisplayNormalize
 import com.masrofy.utils.getMonthlyTransactions
 import com.masrofy.utils.getWeeklyTransaction
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,7 +36,6 @@ sealed class MainScreenEventUI {
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
@@ -123,9 +123,11 @@ class MainViewModel @Inject constructor(
                         monthlyTransactions = toTransactions.getMonthlyTransactions(
                             currentTransactionTypeMonthly
                         ),
-                        currency = accountCurrency
+                        currency = accountCurrency,
+                        progressMainScreen = ProgressMainScreen.DONE
                     )
                 }
+
             }
         }
     }

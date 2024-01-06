@@ -41,7 +41,6 @@ class MainViewModel @Inject constructor(
     private val _showOnboarding = MutableStateFlow<MainEffect?>(null)
     val showOnboarding = _showOnboarding.asStateFlow()
 
-    var isReady = false
     val isDarkMode = dataStore.getDarkModeFlow()
     private fun checkIfDefaultAccount() {
         viewModelScope.launch(dispatcherProvider.io) {
@@ -109,8 +108,6 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
-            delay(1000)
-            isReady = true
         }
     }
 

@@ -15,6 +15,7 @@ import java.time.LocalDate
 
 @Immutable
 data class MainScreenState(
+    val progressMainScreen: ProgressMainScreen= ProgressMainScreen.LOADING,
     val balance:BalanceManager = BalanceManager(),
     val transactions : List<Transaction> = listOf(),
     val month :String = "",
@@ -23,3 +24,6 @@ data class MainScreenState(
     val currency:Currency = Currency("USD","US")
 )
 
+enum class ProgressMainScreen{
+    LOADING,DONE
+}
