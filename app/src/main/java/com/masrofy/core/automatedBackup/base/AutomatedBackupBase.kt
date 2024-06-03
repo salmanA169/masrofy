@@ -116,8 +116,8 @@ class AutomatedBackupManager @Inject constructor(
 
     private  fun checkIfCanBackup(periodSchedule: PeriodSchedule,lastBackup:LocalDateTime,currentDateTime: LocalDateTime):Boolean{
         return when(periodSchedule){
-            PeriodSchedule.DALLY -> lastBackup.until(currentDateTime,ChronoUnit.DAYS) > 1
-            PeriodSchedule.WEEKLY -> lastBackup.until(currentDateTime,ChronoUnit.DAYS) > 7
+            PeriodSchedule.DALLY -> lastBackup.until(currentDateTime,ChronoUnit.DAYS) >= 1
+            PeriodSchedule.WEEKLY -> lastBackup.until(currentDateTime,ChronoUnit.DAYS) >= 7
         }
     }
     override suspend fun backup(abstractBackupData: AbstractBackupData) {

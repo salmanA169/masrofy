@@ -55,7 +55,6 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        Log.d("MainViewModel", "called init: called")
         checkIfDefaultAccount()
     }
 

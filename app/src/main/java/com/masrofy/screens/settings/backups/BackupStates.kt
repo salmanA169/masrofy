@@ -16,8 +16,8 @@ data class BackupStates(
 
     @Composable
     fun getLabel(): String {
-        return if (isGoogleDriveAuthenticated) stringResource(id = R.string.on) else stringResource(
-            id = R.string.off
+        return if (isGoogleDriveAuthenticated) stringResource(id = com.masrofy.R.string.on) else stringResource(
+            id = com.masrofy.R.string.off
         )
     }
 

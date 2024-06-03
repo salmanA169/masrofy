@@ -1,6 +1,7 @@
 package com.masrofy.repository
 
 import com.masrofy.data.entity.TransactionEntity
+import com.masrofy.model.Account
 import com.masrofy.model.TransactionCategory
 import com.masrofy.model.TransactionType
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +41,18 @@ class FakeRepository:TransactionRepository {
     }
 
     override suspend fun getTransactionById(id: Int): TransactionEntity {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAccount(): List<Account> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAccountFlow(): Flow<List<Account>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun upsertAccount(account: Account) {
         TODO("Not yet implemented")
     }
 }

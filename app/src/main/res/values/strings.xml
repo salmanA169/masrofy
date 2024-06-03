@@ -57,5 +57,7 @@
     <string name="backup_device">Backup/Restore on device</string>
     <string name="export_email">Export backup files to e-mail</string>
     <string name="google_drive_backup">Google Drive Backup</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
 
 </resources>

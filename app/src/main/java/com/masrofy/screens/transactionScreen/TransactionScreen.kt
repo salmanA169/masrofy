@@ -545,7 +545,9 @@ fun TransactionType(
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     selectedBorderColor = if (selectedType == TransactionType.EXPENSE) Orange else it.getColor(),
-                    selectedBorderWidth = 1.dp
+                    selectedBorderWidth = 1.dp,
+                    enabled = true,
+                    selected = selectedType == it
                 ),
             )
         }
